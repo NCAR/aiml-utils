@@ -1,0 +1,571 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>2. Data Loaders for ML Pipelines &#8212; AIML Blog</title>
+    
+  <link rel="stylesheet" href="_static/css/index.73d71520a4ca3b99cfee5594769eaaae.css">
+
+    
+  <link rel="stylesheet"
+    href="_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    
+      
+  <link rel="stylesheet"
+    href="_static/vendor/open-sans_all/1.44.1/index.css">
+  <link rel="stylesheet"
+    href="_static/vendor/lato_latin-ext/1.44.1/index.css">
+
+    
+    <link rel="stylesheet" href="_static/sphinx-book-theme.2d2078699c18a0efb88233928e1cf6ed.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css" />
+    <link rel="stylesheet" type="text/css" href="_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    
+  <link rel="preload" as="script" href="_static/js/index.3da636dd464baa7582d2.js">
+
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="_static/togglebutton.js"></script>
+    <script src="_static/clipboard.min.js"></script>
+    <script src="_static/copybutton.js"></script>
+    <script >var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="_static/sphinx-book-theme.be0a4a0c39cd630af62a2fcf693f3f06.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["\\(", "\\)"]], "displayMath": [["\\[", "\\]"]], "processRefs": false, "processEnvironments": false}})</script>
+    <script async="async" src="https://unpkg.com/thebelab@latest/lib/index.js"></script>
+    <script >
+        const thebe_selector = ".thebe"
+        const thebe_selector_input = "pre"
+        const thebe_selector_output = ".output"
+    </script>
+    <script async="async" src="_static/sphinx-thebe.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="en" />
+
+
+
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+<div class="col-12 col-md-3 bd-sidebar site-navigation show" id="site-navigation">
+    
+        <div class="navbar-brand-box">
+<a class="navbar-brand text-wrap" href="index.html">
+  
+  <img src="_static/NCAR-contemp-logo-blue.png" class="logo" alt="logo">
+  
+  
+  <h1 class="site-logo" id="site-title">AIML Blog</h1>
+  
+</a>
+</div>
+
+<form class="bd-search d-flex align-items-center" action="search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search this book..." aria-label="Search this book..." autocomplete="off" >
+</form>
+
+<nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <ul class="nav sidenav_l1">
+ <li class="toctree-l1">
+  <a class="reference internal" href="landing-page.html">
+   Welcome to the Analytics and Integrative Machine Learning (AIML) Blog
+  </a>
+ </li>
+</ul>
+<ul class="nav sidenav_l1">
+ <li class="toctree-l1">
+  <a class="reference internal" href="generators.html">
+   1. Methods, iterables, and generators for reading files
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="generators.html#data-loaders-for-ml-pipelines">
+   2. Data Loaders for ML Pipelines
+  </a>
+ </li>
+</ul>
+
+</nav>
+
+ <!-- To handle the deprecated key -->
+
+<div class="navbar_extra_footer">
+  Powered by <a href="https://jupyterbook.org">Jupyter Book</a>
+</div>
+
+</div>
+
+
+          
+
+
+          
+<main class="col py-md-3 pl-md-4 bd-content overflow-auto" role="main">
+    
+    <div class="row topbar fixed-top container-xl">
+    <div class="col-12 col-md-3 bd-topbar-whitespace site-navigation show">
+    </div>
+    <div class="col pl-2 topbar-main">
+        
+        <button id="navbar-toggler" class="navbar-toggler ml-0" type="button" data-toggle="collapse"
+            data-toggle="tooltip" data-placement="bottom" data-target=".site-navigation" aria-controls="navbar-menu"
+            aria-expanded="true" aria-label="Toggle navigation" aria-controls="site-navigation"
+            title="Toggle navigation" data-toggle="tooltip" data-placement="left">
+            <i class="fas fa-bars"></i>
+            <i class="fas fa-arrow-left"></i>
+            <i class="fas fa-arrow-up"></i>
+        </button>
+        
+        <div class="dropdown-buttons-trigger">
+    <button id="dropdown-buttons-trigger" class="btn btn-secondary topbarbtn" aria-label="Download this page"><i
+            class="fas fa-download"></i></button>
+
+    
+    <div class="dropdown-buttons">
+        <!-- ipynb file if we had a myst markdown file -->
+        
+        <!-- Download raw file -->
+        <a class="dropdown-buttons" href="_sources/data_loaders.ipynb"><button type="button"
+                class="btn btn-secondary topbarbtn" title="Download source file" data-toggle="tooltip"
+                data-placement="left">.ipynb</button></a>
+        <!-- Download PDF via print -->
+        <button type="button" id="download-print" class="btn btn-secondary topbarbtn" title="Print to PDF"
+            onClick="window.print()" data-toggle="tooltip" data-placement="left">.pdf</button>
+    </div>
+    
+</div>
+        <!-- Source interaction buttons -->
+
+
+        <!-- Full screen (wrap in <a> to have style consistency -->
+        <a class="full-screen-button"><button type="button" class="btn btn-secondary topbarbtn" data-toggle="tooltip"
+                data-placement="bottom" onclick="toggleFullScreen()" aria-label="Fullscreen mode"
+                title="Fullscreen mode"><i
+                    class="fas fa-expand"></i></button></a>
+
+        <!-- Launch buttons -->
+
+<div class="dropdown-buttons-trigger">
+    <button id="dropdown-buttons-trigger" class="btn btn-secondary topbarbtn"
+        aria-label="Launch interactive content"><i class="fas fa-rocket"></i></button>
+    <div class="dropdown-buttons">
+        
+        <a class="binder-button" href="https://mybinder.org/v2/gh/executablebooks/jupyter-book/master?urlpath=tree/data_loaders.ipynb"><button type="button"
+                class="btn btn-secondary topbarbtn" title="Launch Binder" data-toggle="tooltip"
+                data-placement="left"><img class="binder-button-logo"
+                    src="_static/images/logo_binder.svg"
+                    alt="Interact on binder">Binder</button></a>
+        
+        
+        
+        
+    </div>
+</div>
+
+    </div>
+
+    <!-- Table of contents -->
+    <div class="d-none d-md-block col-md-2 bd-toc show">
+        
+        <div class="tocsection onthispage pt-5 pb-3">
+            <i class="fas fa-list"></i> Contents
+        </div>
+        <nav id="bd-toc-nav">
+            <ul class="nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#the-dataset-reader">
+   The Dataset Reader
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#the-iterator">
+   The Iterator
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#torch">
+     Torch
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#keras">
+     Keras
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#tensorflow">
+     Tensorflow
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+        </nav>
+        
+    </div>
+</div>
+    <div id="main-content" class="row">
+        <div class="col-12 col-md-9 pl-md-3 pr-md-0">
+        
+              <div>
+                
+  <div class="section" id="data-loaders-for-ml-pipelines">
+<h1>2. Data Loaders for ML Pipelines<a class="headerlink" href="#data-loaders-for-ml-pipelines" title="Permalink to this headline">¶</a></h1>
+<p>In part 1 of this blog, we looked at python methods, generators, and iterators for lazy data reading.</p>
+<p>In this blog post, we will combine these tools and build something a little more involved: Effecient data objects for preparation and data ingestion into ML models!</p>
+<p>Let’s look at the holodec data (as of Oct 12, 2020), which contains large hologram images and numerical data accompaning each image.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">holodecml.data</span> <span class="kn">import</span> <span class="o">*</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">load_raw_datasets</span><span class="p">(</span><span class="n">path_data</span><span class="p">,</span> <span class="n">num_particles</span><span class="p">,</span> <span class="n">split</span><span class="p">,</span> <span class="n">output_cols</span><span class="p">,</span> <span class="n">subset</span><span class="p">):</span>
+    <span class="n">ds</span> <span class="o">=</span> <span class="n">open_dataset</span><span class="p">(</span><span class="n">path_data</span><span class="p">,</span> <span class="n">num_particles</span><span class="p">,</span> <span class="n">split</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">subset</span><span class="p">:</span>
+        <span class="n">ix</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">subset</span> <span class="o">*</span> <span class="n">ds</span><span class="p">[</span><span class="s1">&#39;image&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">inputs</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="s1">&#39;image&#39;</span><span class="p">][:</span><span class="n">ix</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="n">output_cols</span><span class="p">]</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="n">outputs</span><span class="p">[</span><span class="n">outputs</span><span class="p">[</span><span class="s2">&quot;hid&quot;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">ix</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">inputs</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="n">output_cols</span><span class="p">]</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span>    
+    <span class="n">ds</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">path_data</span> <span class="o">=</span> <span class="s2">&quot;/glade/p/cisl/aiml/ai4ess_hackathon/holodec/&quot;</span>
+<span class="n">num_particles</span> <span class="o">=</span> <span class="s2">&quot;multi&quot;</span>
+<span class="n">split</span> <span class="o">=</span> <span class="s1">&#39;train&#39;</span>
+<span class="n">subset</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">output_cols</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="s2">&quot;hid&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span> <span class="o">=</span> <span class="n">load_raw_datasets</span><span class="p">(</span><span class="n">path_data</span><span class="p">,</span> <span class="n">num_particles</span><span class="p">,</span> <span class="n">split</span><span class="p">,</span> <span class="n">output_cols</span><span class="p">,</span> <span class="n">subset</span><span class="p">)</span>
+<span class="n">t1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">t1</span><span class="o">-</span><span class="n">t0</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>This file is pretty large, not large enough to cause memory overflow but its a big one!</p>
+<p>We will first write a lazy reader that returns the same things as the above method, but one row at a time. Then we will utilize special Iterable objects from the torch, tensorflow, and keras libraries that will enable multiprocessing with multiple workers, batching, and other transformations.</p>
+<div class="section" id="the-dataset-reader">
+<h2>The Dataset Reader<a class="headerlink" href="#the-dataset-reader" title="Permalink to this headline">¶</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+<span class="kn">from</span> <span class="nn">tensorflow.keras.utils</span> <span class="kn">import</span> <span class="n">Sequence</span>
+<span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">DataLoader</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>The torch.utils.data.Dataset and tensorflow.keras.utils.Sequence objects are nearly identical to each other in that both require a custom Reader to contain at minumum the <strong>len</strong> and <strong>getitem</strong> (thunder) methods:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">HologramReader</span><span class="p">(</span><span class="n">Dataset</span><span class="p">):</span> <span class="c1"># Sequence</span>
+    
+    <span class="s1">&#39;Generates data for Keras/Tensorflow/Torch environments&#39;</span>
+    
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+                 <span class="n">path_data</span><span class="p">,</span> 
+                 <span class="n">num_particles</span><span class="p">,</span> 
+                 <span class="n">split</span><span class="p">,</span> 
+                 <span class="n">output_cols</span><span class="p">,</span> 
+                 <span class="n">subset</span><span class="p">,</span> 
+                 <span class="n">maxnum_particles</span> <span class="o">=</span> <span class="mi">100</span><span class="p">):</span>
+        
+        <span class="s1">&#39;Initialization&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ds</span> <span class="o">=</span> <span class="n">open_dataset</span><span class="p">(</span><span class="n">path_data</span><span class="p">,</span> <span class="n">num_particles</span><span class="p">,</span> <span class="n">split</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">output_cols</span> <span class="k">if</span> <span class="n">x</span> <span class="o">!=</span> <span class="s1">&#39;hid&#39;</span><span class="p">]</span>        
+        <span class="bp">self</span><span class="o">.</span><span class="n">hologram_numbers</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">hologram_number</span><span class="o">.</span><span class="n">values</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">maxnum_particles</span> <span class="o">=</span> <span class="n">maxnum_particles</span>
+        
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s1">&#39;Denotes the number of batches per epoch&#39;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hologram_numbers</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="s1">&#39;Return one row of data&#39;</span>
+        
+        <span class="c1"># Select one &quot;row&quot; from the dataset</span>
+        <span class="n">hologram</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hologram_numbers</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+
+        <span class="n">x_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">][</span><span class="n">hologram</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">y_out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">maxnum_particles</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxnum_particles</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_particles</span><span class="p">,</span> 
+            <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_cols</span><span class="p">)</span>
+        <span class="p">))</span>
+        <span class="n">particles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="s2">&quot;hid&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">hologram</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">l</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">particles</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">m</span><span class="p">,</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_cols</span><span class="p">):</span>
+                <span class="n">y_out</span><span class="p">[</span><span class="n">l</span><span class="p">,</span> <span class="n">m</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">p</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">x_out</span><span class="p">,</span> <span class="n">y_out</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_reader</span> <span class="o">=</span> <span class="n">HologramReader</span><span class="p">(</span><span class="n">path_data</span><span class="p">,</span> <span class="n">num_particles</span><span class="p">,</span> <span class="n">split</span><span class="p">,</span> <span class="n">output_cols</span><span class="p">,</span> <span class="n">subset</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>The method <strong>getitem</strong> is used to select whichever hologram we want (take the one labeled 0):</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">data_reader</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Make a quick plot:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="the-iterator">
+<h2>The Iterator<a class="headerlink" href="#the-iterator" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="torch">
+<h3>Torch<a class="headerlink" href="#torch" title="Permalink to this headline">¶</a></h3>
+<p>For the torch/keras Reader, we wrap a torch DataLoader object around it to enable iterative batching as well as multiprocessing capabilities (among other options). As noted, the DataLoader object requires that the Reader class contains the <strong>len</strong> and <strong>getitem</strong> thunder methods:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_iterator</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span>
+    <span class="n">data_reader</span><span class="p">,</span>
+    <span class="n">num_workers</span> <span class="o">=</span> <span class="mi">8</span><span class="p">,</span>
+    <span class="n">batch_size</span> <span class="o">=</span> <span class="mi">32</span><span class="p">,</span>
+    <span class="n">shuffle</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="ow">in</span> <span class="n">data_iterator</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="k">break</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>The DataLoader object will take care of creating independent workers that each will load the Reader and put the row data onto a queue. The first few calls to data_iterator will be slow as the workers have to be initialized before queues start to fill up.</p>
+</div>
+<div class="section" id="keras">
+<h3>Keras<a class="headerlink" href="#keras" title="Permalink to this headline">¶</a></h3>
+<p>When using Keras, all we have to do is swap HologramReader(Dataset) for HologramReader(Sequence) and make no other changes. We could just skip the inheritance and specify the output type (torch tensor versus numpy tensor) upon return.</p>
+<p>In older Keras versions, the Reader would be fed into the Model.fit_generator method, which allowed one to toggle the number of workers. The important bit about the Sequence object is that it is thread-safe, meaning the workers spawned will not duplicate data chunks (this isn’t a major problem when shuffling the data).</p>
+<p>The torch DataLoader came with shuffle capability (by initializing a random order using the <strong>len</strong> method), whereas in the Sequence object, shuffle functionality (and whatever else you want) can be enabled by adding a method typically called “on_epoch_end” that will shuffle after some number of data points have been returned.</p>
+</div>
+<div class="section" id="tensorflow">
+<h3>Tensorflow<a class="headerlink" href="#tensorflow" title="Permalink to this headline">¶</a></h3>
+<p>But, since the Sequence object was recently deprecated in favor of Tensorflow’s data objects, we will proceed by setting up one of those. We only have to make a few adjustments to the above Readers:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">TFHologramReader</span><span class="p">:</span> 
+    
+    <span class="s1">&#39;Generates data for Keras/Tensorflow/Torch environments&#39;</span>
+    
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
+                 <span class="n">path_data</span><span class="p">,</span> 
+                 <span class="n">num_particles</span><span class="p">,</span> 
+                 <span class="n">split</span><span class="p">,</span> 
+                 <span class="n">output_cols</span><span class="p">,</span> 
+                 <span class="n">subset</span><span class="p">,</span> 
+                 <span class="n">maxnum_particles</span> <span class="o">=</span> <span class="mi">100</span><span class="p">):</span>
+        
+        <span class="s1">&#39;Initialization&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ds</span> <span class="o">=</span> <span class="n">open_dataset</span><span class="p">(</span><span class="n">path_data</span><span class="p">,</span> <span class="n">num_particles</span><span class="p">,</span> <span class="n">split</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">output_cols</span> <span class="k">if</span> <span class="n">x</span> <span class="o">!=</span> <span class="s1">&#39;hid&#39;</span><span class="p">]</span>        
+        <span class="bp">self</span><span class="o">.</span><span class="n">hologram_numbers</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">hologram_number</span><span class="o">.</span><span class="n">values</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">maxnum_particles</span> <span class="o">=</span> <span class="n">maxnum_particles</span>
+    
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s1">&#39;Return one row of data&#39;</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">hologram</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hologram_numbers</span><span class="p">):</span>
+            <span class="c1"># Select one &quot;row&quot; from the dataset</span>
+            <span class="n">x_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">][</span><span class="n">hologram</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+            <span class="n">y_out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">maxnum_particles</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxnum_particles</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_particles</span><span class="p">,</span> 
+                <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_cols</span><span class="p">)</span>
+            <span class="p">))</span>
+            <span class="n">particles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="s2">&quot;hid&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">hologram</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">l</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">particles</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">m</span><span class="p">,</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_cols</span><span class="p">):</span>
+                    <span class="n">y_out</span><span class="p">[</span><span class="n">l</span><span class="p">,</span> <span class="n">m</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">p</span><span class="p">]</span>
+
+            <span class="k">yield</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">x_out</span><span class="p">),</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">y_out</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Note that this Reader’s <strong>call</strong> is a generator, whereas before we used a method.</p>
+<p>Calling and using the reader is the same as before. First, initialize an instance by setting the input variables:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tf_data_generator</span> <span class="o">=</span> <span class="n">TFHologramReader</span><span class="p">(</span>
+    <span class="n">path_data</span><span class="p">,</span> <span class="n">num_particles</span><span class="p">,</span> <span class="n">split</span><span class="p">,</span> <span class="n">output_cols</span><span class="p">,</span> <span class="n">subset</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Then we wrap Tensorflow’s Dataset object around the generator, using the from_generator method within the Dataset object, and setting the tensor types explictly:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tf_data_iterator</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Dataset</span><span class="o">.</span><span class="n">from_generator</span><span class="p">(</span>
+    <span class="n">tf_data_generator</span><span class="p">,</span> 
+    <span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">dtypes</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">dtypes</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Setting the batch size can be done by</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tf_data_iterator</span> <span class="o">=</span> <span class="n">tf_data_iterator</span><span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Shuffling is a little more complex. Since a generator is in play, a memory buffer of size buffer_size will be created and rows put into it. Then, batches are selected from it and returned. Note that there will be a delay in the begining as the buffer has to fill up:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tf_data_iterator</span> <span class="o">=</span> <span class="n">tf_data_iterator</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">buffer_size</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>To get true random sampling, the buffer size would need to be the size of the data set.</p>
+<p>In practice, one should shuffle the hologram numbers list in the TFReader upon initialization since they are available, similar to what needed to be done when using the keras Sequence object. For the sake of illustration we use tensorflows method for shuffling.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="ow">in</span> <span class="n">tf_data_iterator</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="k">break</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>The number of workers can be set when training the model through the .fit() super-class (which contains an machinery for rolling out the Reader and feeding the batches it into the model):</p>
+<p>Note that we could use any of these approaches with either ML language, though the torch and tensorflow versions are superior to the now-deparecated Sequence. The later is true in the case of running with one worker at a time. Enabling multiprocessing on your own with Tensorflow stuff is tricky! You need to “shard” the data into chunks first, then each chunk is shipped off to a worker. The Torch iterator object does all of this more, under the hood.</p>
+<p>These special iterator objects contain many other features not covered here, so be sure to check out the documentation!</p>
+<p>Tensorflow Dataset: https://www.tensorflow.org/api_docs/python/tf/data/Dataset</p>
+<p>Torch Dataset: https://pytorch.org/docs/stable/data.html</p>
+</div>
+</div>
+</div>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            kernelName: "python3",
+            path: "./."
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+              </div>
+              
+        </div>
+    </div>
+    
+    
+    <div class='prev-next-bottom'>
+        
+
+    </div>
+    <footer class="footer mt-5 mt-md-0">
+    <div class="container">
+      <p>
+        
+          By The Jupyter Book community<br/>
+        
+            &copy; Copyright 2020.<br/>
+      </p>
+    </div>
+  </footer>
+</main>
+
+
+      </div>
+    </div>
+
+    
+  <script src="_static/js/index.3da636dd464baa7582d2.js"></script>
+
+
+    
+  </body>
+</html>

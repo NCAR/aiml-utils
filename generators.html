@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>1. Methods, iterables, and generators for reading files &#8212; AIML</title>
+    <title>1. Methods, iterables, and generators for reading files &#8212; Analytics and Integrative Machine Learning</title>
     
   <link rel="stylesheet" href="_static/css/index.73d71520a4ca3b99cfee5594769eaaae.css">
 
@@ -79,7 +79,7 @@
   <img src="_static/NCAR-contemp-logo-blue.png" class="logo" alt="logo">
   
   
-  <h1 class="site-logo" id="site-title">AIML</h1>
+  <h1 class="site-logo" id="site-title">Analytics and Integrative Machine Learning</h1>
   
 </a>
 </div>
@@ -276,9 +276,7 @@
                 
   <div class="section" id="methods-iterables-and-generators-for-reading-files">
 <h1>1. Methods, iterables, and generators for reading files<a class="headerlink" href="#methods-iterables-and-generators-for-reading-files" title="Permalink to this headline">¶</a></h1>
-<p>We all need to open, close, and save data to files using Python.</p>
-<p>Loading a file typically involves readling the lines in the file, and possibly doing some processing on each line.</p>
-<p>The file <span class="math notranslate nohighlight">\(\textbf{test_data.txt}\)</span> contains 1,000,000 rows (lines) and 3 columns separated by the empty space <span class="math notranslate nohighlight">\(&quot; &quot;\)</span>.</p>
+<p>We all need to open, close, and save data to files using Python. Loading a file always involves reading the lines in the file, and possibly doing some processing on each line. An example file <span class="math notranslate nohighlight">\(\textbf{test_data.txt}\)</span> contains 1,000,000 rows (lines) and 3 columns separated by an empty space.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">time</span> 
@@ -288,7 +286,7 @@
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fn</span> <span class="o">=</span> <span class="s2">&quot;/glade/work/schreck/repos/aiml-utils/blog/notebook/generators/test_data.txt&quot;</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fn</span> <span class="o">=</span> <span class="s2">&quot;generators/test_data.txt&quot;</span>
 </pre></div>
 </div>
 </div>
@@ -314,14 +312,15 @@
 </div>
 </div>
 </div>
-<p>The entire file was read into memory with the .readlines() call, before any line processing was performed (readlines processes file bit-stream in bytes, and breaks for a line whenenver the “new line” character is seen (“\n”)).</p>
-<p>This won’t be a problem when the file is relatively small, let’s say up to a gigabyte. However, the method cannot load files that are too large! When the file is too large to load into memory, python will throw the <strong>MemoryError</strong> exception and your program will terminate <em>with error</em>.</p>
-<p>Even when we can load large files (sometimes hundreds of gigs), the read operations can take a very long time. We frequently encounter large datafiles at NCAR!</p>
-<p>What can we do? Reading and processing one line at a time would solve this problem. This is called “lazy” reading. In theory, we could even process an infinitely large file, if we read it lazily.</p>
-<p>Enter the python generator – it lets us be lazy while increasing productivity :D The python generator class is built on top of the Iterator class (but I will cover them in reverse below).</p>
+<p>The entire file was read into memory with the .readlines() call, before any line processing was performed.</p>
+<p>Reading files like this shouldn’t be a problem for file sizes up to ~1G. But sometimes we have no choice and have to work with large files (sometimes hundreds of gigs). As a result the readlines operation can take a very long time. Furthermore, if the file is too large to load into memory, python will throw the <strong>MemoryError</strong> exception and your program will terminate <em>with error</em>.</p>
+<p>We frequently encounter large datafiles at NCAR. What can we do about it?</p>
+<p>Reading and processing one line at a time would solve this problem. We could even process an “infinitely” large file, which means any file that’s too large to load fully into memory.</p>
+<p>This kind of file reading is called <strong>lazy</strong> reading.</p>
 </div>
 <div class="section" id="the-python-generator">
 <h2>The Python Generator<a class="headerlink" href="#the-python-generator" title="Permalink to this headline">¶</a></h2>
+<p>There is a special tool in the python toolbox that easily enables lazy reading called a generator. The generator object is built on top of python’s Iterator object class, but I will cover them in reverse below.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">generator_loader</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
@@ -332,12 +331,13 @@
 </div>
 </div>
 </div>
-<p>We’ve replaced return with something new named <span class="math notranslate nohighlight">\(\color{green}{\textbf{yield}}\)</span>. It looks similar to the method_loader!</p>
+<p>We’ve replaced the return with something new named <span class="math notranslate nohighlight">\(\color{green}{\textbf{yield}}\)</span>. This chunk of code looks similar to the method_loader!</p>
+<p>Test it.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">processed_line</span> <span class="ow">in</span> <span class="n">generator_loader</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">processed_line</span><span class="p">)</span>
-    <span class="k">break</span>
+    <span class="k">break</span> <span class="c1"># Stop early, I don&#39;t need to print 1,000,000 lines!</span>
 </pre></div>
 </div>
 </div>
@@ -347,10 +347,9 @@
 </div>
 </div>
 </div>
-<p>Does the same thing, but in the method version the entire file was loaded and put into a list, before we could loop over it. In the generator version, only one line at a time was read into memory then returned (through <span class="math notranslate nohighlight">\(\color{green}{\textbf{yield}}\)</span>) until reaching EOF.</p>
-<p>In other words, <span class="math notranslate nohighlight">\(\color{green}{\textbf{yield}}\)</span> returned more than once, whereas <span class="math notranslate nohighlight">\(\color{green}{\textbf{return}}\)</span> in a traditional method signals the end (in terms of memory usage, as it is freed).</p>
-<p>In our example, the generator allocated memory until it was out of lines to return (through <span class="math notranslate nohighlight">\(\color{green}{\textbf{yield}}\)</span>), whereas the method allocated memory for the entire file which was released upon <span class="math notranslate nohighlight">\(\color{green}{\textbf{return}}\)</span>.</p>
-<p>Generators work nicely with serialized data … you may have <strong><em>dumped</em></strong> data using the pickle library before. The pickle library allows you to do that for an either entire file all in one go, or line-by-line, as the example below illustrates:</p>
+<p>It behaves similarly when in use as compared to the method variant presented above. The big difference is that the generator version is more memory efficient because, through <span class="math notranslate nohighlight">\(\color{green}{\textbf{yield}}\)</span>, lines are read into memory one at a time, returned, released, …, until reaching the end of the file (EOF).</p>
+<p>That is to say <span class="math notranslate nohighlight">\(\color{green}{\textbf{yield}}\)</span> returns more than once, whereas <span class="math notranslate nohighlight">\(\color{green}{\textbf{return}}\)</span> in a method signals the end (in terms of memory usage, as it is freed and the method is exited).</p>
+<p>Generators work nicely with serialized data … you may have <strong><em>dumped</em></strong> data using the pickle library before. The pickle library allows you to do that for the entire file, all in one go, or line-by-line as the example below illustrates:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pickle</span>
@@ -360,7 +359,7 @@
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fn_pkl</span> <span class="o">=</span> <span class="s2">&quot;/glade/work/schreck/repos/aiml-utils/blog/notebook/generators/test_data.pkl&quot;</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fn_pkl</span> <span class="o">=</span> <span class="s2">&quot;generators/test_data.pkl&quot;</span>
 </pre></div>
 </div>
 </div>
@@ -370,7 +369,7 @@
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">write_to_pickle</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">fn</span><span class="p">):</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fid</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
-            <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">fid</span><span class="p">)</span> 
+            <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">fid</span><span class="p">)</span> <span class="c1"># Iteration over .dump</span>
 </pre></div>
 </div>
 </div>
@@ -378,25 +377,26 @@
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">write_to_pickle</span><span class="p">(</span>
-    <span class="n">method_loader</span><span class="p">(</span><span class="n">fn</span><span class="p">)[:</span><span class="mi">1000</span><span class="p">],</span> <span class="c1"># For illustration, just take 1000 points </span>
+    <span class="n">method_loader</span><span class="p">(</span><span class="n">fn</span><span class="p">),</span>
     <span class="n">fn_pkl</span>
 <span class="p">)</span>
 </pre></div>
 </div>
 </div>
 </div>
-<p>For the sake of example, I will assume that we do not know how many lines are in our serialized data dump.</p>
+<p>From here will assume that we do not know how many lines are in our serialized data dump:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">load_from_pickle</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fid</span><span class="p">:</span>
-        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span> <span class="c1"># We do not necessarily know how many lines are in fn</span>
-            <span class="k">yield</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fid</span><span class="p">)</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span> <span class="c1"># Keep looping with while.</span>
+            <span class="k">yield</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fid</span><span class="p">)</span> <span class="c1"># Iteration over .load</span>
 </pre></div>
 </div>
 </div>
 </div>
-<p>where the <span class="math notranslate nohighlight">\(\color{green}{\textbf{while True}}\)</span> clause gets replaced a fixed-length for loop. Test it!</p>
+<p>where the <span class="math notranslate nohighlight">\(\color{green}{\textbf{while True}}\)</span> clause will keep looping over the call to load pickled data until we reach the end of the file.</p>
+<p>Test it!</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">load_from_pickle</span><span class="p">(</span><span class="n">fn_pkl</span><span class="p">):</span>
@@ -407,14 +407,14 @@
 <div class="cell_output docutils container">
 <div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
 <span class="ne">EOFError</span><span class="g g-Whitespace">                                  </span>Traceback (most recent call last)
-<span class="o">&lt;</span><span class="n">ipython</span><span class="o">-</span><span class="nb">input</span><span class="o">-</span><span class="mi">14</span><span class="o">-</span><span class="mi">2</span><span class="n">de8c1965edf</span><span class="o">&gt;</span> <span class="ow">in</span> <span class="o">&lt;</span><span class="n">module</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">ipython</span><span class="o">-</span><span class="nb">input</span><span class="o">-</span><span class="mi">23</span><span class="o">-</span><span class="mi">2</span><span class="n">de8c1965edf</span><span class="o">&gt;</span> <span class="ow">in</span> <span class="o">&lt;</span><span class="n">module</span><span class="o">&gt;</span>
 <span class="ne">----&gt; </span><span class="mi">1</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">load_from_pickle</span><span class="p">(</span><span class="n">fn_pkl</span><span class="p">):</span>
 <span class="g g-Whitespace">      </span><span class="mi">2</span>     <span class="k">continue</span>
 
-<span class="nn">&lt;ipython-input-13-df64a86dfc94&gt;</span> in <span class="ni">load_from_pickle</span><span class="nt">(fn)</span>
+<span class="nn">&lt;ipython-input-22-45015fa1bf7e&gt;</span> in <span class="ni">load_from_pickle</span><span class="nt">(fn)</span>
 <span class="g g-Whitespace">      </span><span class="mi">2</span>     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fid</span><span class="p">:</span>
-<span class="g g-Whitespace">      </span><span class="mi">3</span>         <span class="k">while</span> <span class="kc">True</span><span class="p">:</span> <span class="c1"># We do not necessarily know how many lines are in fn</span>
-<span class="ne">----&gt; </span><span class="mi">4</span>             <span class="k">yield</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fid</span><span class="p">)</span>
+<span class="g g-Whitespace">      </span><span class="mi">3</span>         <span class="k">while</span> <span class="kc">True</span><span class="p">:</span> <span class="c1"># Keep looping with while.</span>
+<span class="ne">----&gt; </span><span class="mi">4</span>             <span class="k">yield</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fid</span><span class="p">)</span> <span class="c1"># Iteration over .load</span>
 
 <span class="ne">EOFError</span>: Ran out of input
 </pre></div>
@@ -422,8 +422,8 @@
 </div>
 </div>
 <p>It failed!</p>
-<p>Even when we are unsure of how many lines are in the file, we must still have a signal that can be used to stop the geneartor from trying to return the next line when it does not exist.</p>
-<p>Note that the <em>exception</em> python threw was an <span class="math notranslate nohighlight">\(\color{red}{\textbf{EOFError}}\)</span> exception when the generator tried to yield on a line that did not exist. We can catch that and use it to signal the end to the while looper:</p>
+<p>There must still be a signal that can be used to stop the geneartor from yielding the next line when it does not exist.</p>
+<p>Note that the <em>exception</em> python threw was an <span class="math notranslate nohighlight">\(\color{red}{\textbf{EOFError}}\)</span> exception. We can catch that and use it to exit the generator:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">load_from_pickle</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
@@ -437,7 +437,7 @@
 </div>
 </div>
 </div>
-<p>The generator, read_from_pickle, now allows us to iterate over the saved data with a generator until we reach the <span class="math notranslate nohighlight">\(\color{red}{\textbf{EOFError}}\)</span> exception, even when that file is effectively inifite in size (e.g., larger than the amount of memory in the computer).</p>
+<p>Now it will run without error:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">load_from_pickle</span><span class="p">(</span><span class="n">fn_pkl</span><span class="p">):</span>
@@ -448,7 +448,7 @@
 </div>
 </div>
 </div>
-<p>But this is rather clunky, now we have to engage in <em>exception handling</em>. You might be wondering  what good are python generators at helping us to simplify memory usage, this kind of coding is making it more complex.</p>
+<p>This is rather clunky! Now we have to do <em>exception handling</em> (gasp). You might be wondering what good are python generators at helping us to simplify memory usage when this style of coding makes the workflow more complex. We could have relied on python’s Iterator objects (covered next), to do lazy reading.</p>
 <p>Fortunatly, python developers also included a generalized version of yield, <span class="math notranslate nohighlight">\(\color{green}{\textbf{yield from}}\)</span> for these siuations.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -474,11 +474,11 @@
 </div>
 </div>
 </div>
-<p>In short, generators allow us to write simple code that helps to simplfy writing lazy methods, in this case for opening a large text file without opening more than one line at a time.</p>
+<p>In short, generators allow us to write simple code that helps to simplfy memory usage when working with large data files.</p>
 </div>
 <div class="section" id="the-python-iterable">
 <h2>The Python Iterable<a class="headerlink" href="#the-python-iterable" title="Permalink to this headline">¶</a></h2>
-<p>Before generators were introduced, one had to rely on the python <strong>Iterator</strong> class to produce lazy readers. Iterable classes are not difficult to write, but they have dependencies, in particular, they must contain the <span class="math notranslate nohighlight">\(\color{blue}{\textbf{__iter__}}\)</span> and <span class="math notranslate nohighlight">\(\color{blue}{\textbf{__next__}}\)</span> “thunder” methods.</p>
+<p>Before generators were introduced, one relied on a python <strong>Iterator</strong> object to produce lazy readers. Iterable classes are not too difficult to write, but they have dependencies, in particular, they must contain the <span class="math notranslate nohighlight">\(\color{blue}{\textbf{__iter__}}\)</span> and <span class="math notranslate nohighlight">\(\color{blue}{\textbf{__next__}}\)</span> “thunder” methods.</p>
 <p>A simple example with our serialized (pickled) data from above:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -494,12 +494,13 @@
     <span class="k">def</span> <span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fid</span><span class="p">)</span>
-        <span class="k">except</span><span class="p">:</span>
+        <span class="k">except</span> <span class="ne">EOFError</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">StopIteration</span>
 </pre></div>
 </div>
 </div>
 </div>
+<p>The thunder method <span class="math notranslate nohighlight">\(\color{blue}{\textbf{__iter__}}\)</span> returns the object itself (through self!), while <span class="math notranslate nohighlight">\(\color{blue}{\textbf{__next__}}\)</span> is used to return the result of the .load call on the opened file.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">rfpi</span> <span class="o">=</span> <span class="n">read_from_pickle_iterable</span><span class="p">(</span><span class="n">fn_pkl</span><span class="p">)</span>
@@ -507,34 +508,34 @@
 </div>
 </div>
 </div>
-<p>Using the Iterator’s <span class="math notranslate nohighlight">\(\color{blue}{\textbf{__next__}}\)</span> functionality, we can grab the lines from the file one-by-one without opening the entire file:</p>
+<p>Using the Iterator’s <span class="math notranslate nohighlight">\(\color{blue}{\textbf{__next__}}\)</span> functionality, we then grab the lines from the file one-by-one without opening the entire file:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-    <span class="nb">next</span><span class="p">(</span><span class="n">rfpi</span><span class="p">)</span>
+    <span class="nb">next</span><span class="p">(</span><span class="n">rfpi</span><span class="p">)</span> <span class="c1"># Use next like this</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
 <div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
 <span class="ne">EOFError</span><span class="g g-Whitespace">                                  </span>Traceback (most recent call last)
-<span class="nn">&lt;ipython-input-20-364693561395&gt;</span> in <span class="ni">__next__</span><span class="nt">(self)</span>
+<span class="nn">&lt;ipython-input-44-1e1bfab26979&gt;</span> in <span class="ni">__next__</span><span class="nt">(self)</span>
 <span class="g g-Whitespace">     </span><span class="mi">11</span>         <span class="k">try</span><span class="p">:</span>
 <span class="ne">---&gt; </span><span class="mi">12</span>             <span class="k">return</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fid</span><span class="p">)</span>
-<span class="g g-Whitespace">     </span><span class="mi">13</span>         <span class="k">except</span><span class="p">:</span>
+<span class="g g-Whitespace">     </span><span class="mi">13</span>         <span class="k">except</span> <span class="ne">EOFError</span><span class="p">:</span>
 
 <span class="ne">EOFError</span>: Ran out of input
 
 <span class="n">During</span> <span class="n">handling</span> <span class="n">of</span> <span class="n">the</span> <span class="n">above</span> <span class="n">exception</span><span class="p">,</span> <span class="n">another</span> <span class="n">exception</span> <span class="n">occurred</span><span class="p">:</span>
 
 <span class="ne">StopIteration</span><span class="g g-Whitespace">                             </span>Traceback (most recent call last)
-<span class="o">&lt;</span><span class="n">ipython</span><span class="o">-</span><span class="nb">input</span><span class="o">-</span><span class="mi">22</span><span class="o">-</span><span class="mi">4</span><span class="n">c99682bbbdf</span><span class="o">&gt;</span> <span class="ow">in</span> <span class="o">&lt;</span><span class="n">module</span><span class="o">&gt;</span>
+<span class="o">&lt;</span><span class="n">ipython</span><span class="o">-</span><span class="nb">input</span><span class="o">-</span><span class="mi">51</span><span class="o">-</span><span class="n">d7c5bd59b55e</span><span class="o">&gt;</span> <span class="ow">in</span> <span class="o">&lt;</span><span class="n">module</span><span class="o">&gt;</span>
 <span class="g g-Whitespace">      </span><span class="mi">1</span> <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-<span class="ne">----&gt; </span><span class="mi">2</span>     <span class="nb">next</span><span class="p">(</span><span class="n">rfpi</span><span class="p">)</span>
+<span class="ne">----&gt; </span><span class="mi">2</span>     <span class="nb">next</span><span class="p">(</span><span class="n">rfpi</span><span class="p">)</span> <span class="c1"># Use next like this</span>
 
-<span class="nn">&lt;ipython-input-20-364693561395&gt;</span> in <span class="ni">__next__</span><span class="nt">(self)</span>
+<span class="nn">&lt;ipython-input-44-1e1bfab26979&gt;</span> in <span class="ni">__next__</span><span class="nt">(self)</span>
 <span class="g g-Whitespace">     </span><span class="mi">12</span>             <span class="k">return</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fid</span><span class="p">)</span>
-<span class="g g-Whitespace">     </span><span class="mi">13</span>         <span class="k">except</span><span class="p">:</span>
+<span class="g g-Whitespace">     </span><span class="mi">13</span>         <span class="k">except</span> <span class="ne">EOFError</span><span class="p">:</span>
 <span class="ne">---&gt; </span><span class="mi">14</span>             <span class="k">raise</span> <span class="ne">StopIteration</span>
 
 <span class="ne">StopIteration</span>: 
@@ -542,7 +543,7 @@
 </div>
 </div>
 </div>
-<p>which dies as intended through the <span class="math notranslate nohighlight">\(\color{green}{\textbf{raise}}\)</span> clause, in particular, throwing the StopIteration exception. When the Iterator is rolled out in a loop in this example, it will stop without error upon encountering the <span class="math notranslate nohighlight">\(\color{red}{\textbf{StopException}}\)</span>:</p>
+<p>which dies as intended when the <span class="math notranslate nohighlight">\(\color{red}{\textbf{EOFError}}\)</span> caught and the <span class="math notranslate nohighlight">\(\color{red}{\textbf{StopException}}\)</span> exception was thrown using the <span class="math notranslate nohighlight">\(\color{green}{\textbf{raise}}\)</span> clause. When the iterator object is rolled out in a loop (or by list(), etc) it will exit without error:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">read_from_pickle_iterable</span><span class="p">(</span><span class="n">fn_pkl</span><span class="p">):</span>
@@ -554,19 +555,19 @@
 </div>
 <div class="section" id="why-even-have-generators-when-there-are-already-iterators">
 <h2>Why even have generators when there are already iterators?<a class="headerlink" href="#why-even-have-generators-when-there-are-already-iterators" title="Permalink to this headline">¶</a></h2>
-<p>The answer is because generators are more compact and easier to write as you do not have to explicitly sub-class them with the <span class="math notranslate nohighlight">\(\color{blue}{\textbf{__iter__}}\)</span> and <span class="math notranslate nohighlight">\(\color{blue}{\textbf{__next__}}\)</span>, as that’s taken care of under the hood with the generator class. But the converse is not true: iterables do not have the yield capability.</p>
+<p>The answer is because generators are more compact and easier to write, as you do not have to explicitly sub-class them with the <span class="math notranslate nohighlight">\(\color{blue}{\textbf{__iter__}}\)</span> and <span class="math notranslate nohighlight">\(\color{blue}{\textbf{__next__}}\)</span>. That’s taken care of under-the-hood with the generator class. But the converse is not true: iterables do not have the yield capability.</p>
 </div>
 <div class="section" id="when-should-i-use-a-generator-rather-than-a-method">
 <h2>When should I use a generator rather than a method?<a class="headerlink" href="#when-should-i-use-a-generator-rather-than-a-method" title="Permalink to this headline">¶</a></h2>
-<p>There are lots of scenerios, in addition to data loading! Note that in the first method example above, a list was returned. Do you need all elements of the list, all at the same time? If the answer is no, then you want to use a generator if that file is large in size!</p>
+<p>There are lots of scenerios, in addition to data loading! Note that in the first method example above, a list was returned. Do you need all elements of the list, all at the same time? If the answer is no, then you want to try to use a generator if that file is large in size!</p>
 <p>With generators one tries to balance the time spent performing operations with/on the data with memory utilization. Using them will often be determined by how your program is designed to run and utilize resources. If you are presented with a significant memory bottleneck, generators are very often the way to go. However if your program does not have said memory issue, using a generator might result in the program running significantly slower.</p>
-<p>As you use generators more and more in your work-flow, you will learn to apply them when they are functionally needed and when to avoid them when they do not offer any benefit over using methods.</p>
+<p>As you use generators more and more in your work-flow, you will learn to apply them when they are needed and when to avoid them when they do not offer any benefit over using methods.</p>
 </div>
 </div>
 <div class="section" id="data-loaders-for-ml-pipelines">
 <h1>2. Data Loaders for ML Pipelines<a class="headerlink" href="#data-loaders-for-ml-pipelines" title="Permalink to this headline">¶</a></h1>
 <p>Next, let us combine methods, generators and iterators and build something a little more involved – how about effecient data objects for preparation and data ingestion into ML models?</p>
-<p>Let’s look at the holodec data (as of Oct 12, 2020), which contains large hologram images and numerical data accompaning each image. The holodec data is saved as netCDF format, which by default only supports lazy reading!</p>
+<p>We will look at the holodec data (as of Oct 12, 2020), which contains large hologram images and numerical data accompaning each image. The holodec data is saved as netCDF format – by default the data type only supports lazy reading!</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">holodecml.data</span> <span class="kn">import</span> <span class="o">*</span>
@@ -593,6 +594,7 @@
 </div>
 </div>
 </div>
+<p>For most data files, there is nothing wrong with this method – its compact, easy to read, and does what you want it to do. As we have seen with the file loading example above, methods quickly become memory inefficient once files become large in size.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">path_data</span> <span class="o">=</span> <span class="s2">&quot;/glade/p/cisl/aiml/ai4ess_hackathon/holodec/&quot;</span>
@@ -614,8 +616,8 @@
 </div>
 </div>
 </div>
-<p>This file is pretty large, not large enough to cause a memory overflow, but its a big one!</p>
-<p>We will first write a lazy reader that returns the same things as the above method, but one row at a time. Then we will utilize special Iterable objects from the torch, tensorflow, and keras libraries that will enable multiprocessing with multiple workers, batching, and other transformations.</p>
+<p>This file is pretty large, not large enough to cause a memory overflow, but it still takes about 5 minuites to load.</p>
+<p>Let us first write a lazy reader that returns the same thing data as the above method, but one row at a time. Then we will utilize special iterable objects from the Torch, Tensorflow, and Keras libraries that will enable multiprocessing with multiple simultanous workers for creating batches as well as other transformations.</p>
 <div class="section" id="the-dataset-reader">
 <h2>The Dataset Reader<a class="headerlink" href="#the-dataset-reader" title="Permalink to this headline">¶</a></h2>
 <div class="cell docutils container">
@@ -627,7 +629,7 @@
 </div>
 </div>
 </div>
-<p>The torch.utils.data.Dataset and tensorflow.keras.utils.Sequence objects are nearly identical to each other in that both require a custom Reader to contain at minumum the <span class="math notranslate nohighlight">\(\color{blue}{\textbf{__len__}}\)</span> and <span class="math notranslate nohighlight">\(\color{blue}{\textbf{__getitem__}}\)</span> (thunder) methods:</p>
+<p>Torch.utils.data.Dataset and tensorflow.keras.utils.Sequence objects both require a custom “Reader” class to contain the <span class="math notranslate nohighlight">\(\color{blue}{\textbf{__len__}}\)</span> and <span class="math notranslate nohighlight">\(\color{blue}{\textbf{__getitem__}}\)</span> thunder methods:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">HologramReader</span><span class="p">(</span><span class="n">Dataset</span><span class="p">):</span> <span class="c1"># Sequence</span>
@@ -700,7 +702,7 @@
 </div>
 </div>
 </div>
-<p>(Make a quick plot)</p>
+<p>Make a quick plot:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
@@ -718,7 +720,7 @@
 <div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.image.AxesImage at 0x2ac3cfa7f550&gt;
 </pre></div>
 </div>
-<img alt="_images/generators_68_1.png" src="_images/generators_68_1.png" />
+<img alt="_images/generators_69_1.png" src="_images/generators_69_1.png" />
 </div>
 </div>
 </div>
@@ -726,7 +728,7 @@
 <h2>The Iterator<a class="headerlink" href="#the-iterator" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="torch">
 <h3>Torch<a class="headerlink" href="#torch" title="Permalink to this headline">¶</a></h3>
-<p>For the torch/keras Reader, we wrap a torch DataLoader object around it to enable iterative batching as well as multiprocessing capabilities (among other options). As noted, the DataLoader object requires that the Reader class contains the <span class="math notranslate nohighlight">\(\color{blue}{\textbf{__len__}}\)</span> and <span class="math notranslate nohighlight">\(\color{blue}{\textbf{__getitem__}}\)</span> thunder methods:</p>
+<p>To make the the torch/keras Reader class iterable, we can wrap a torch DataLoader object around it which will enable batching, multiprocessing capabilities, and other options. As noted, the DataLoader object requires that the Reader class contains the <span class="math notranslate nohighlight">\(\color{blue}{\textbf{__len__}}\)</span> and <span class="math notranslate nohighlight">\(\color{blue}{\textbf{__getitem__}}\)</span> thunder methods:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_iterator</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span>
@@ -753,13 +755,14 @@
 </div>
 </div>
 </div>
-<p>The DataLoader object will take care of creating independent workers that each will load the Reader and put the row data onto a queue. The first few calls to data_iterator will be slow as the workers have to be initialized before queues start to fill up.</p>
+<p>The DataLoader object will take care of creating independent workers that each will load the Reader and put the row data onto a queue where the data is sent back to a Manager that feeds the model. The first few calls to data_iterator will be slow as the workers have to be initialized before they can start putting data onto a queue.</p>
+<p>In a future blog post we will write our own multiprocessing worker class, but lets appreciate how easy the big three libraries have made it for us to get to this point.</p>
 </div>
 <div class="section" id="keras">
 <h3>Keras<a class="headerlink" href="#keras" title="Permalink to this headline">¶</a></h3>
-<p>When using Keras, all we have to do is swap <span class="math notranslate nohighlight">\(\color{black}{\textbf{HologramReader(Dataset)}}\)</span> for <span class="math notranslate nohighlight">\(\color{black}{\textbf{HologramReader(Sequence)}}\)</span> and make no other changes. We could just skip the inheritance and specify the output type (torch tensor versus numpy tensor) upon return.</p>
-<p>In older Keras versions, the Reader would be fed into the Model.fit_generator method, which allowed one to toggle the number of workers. The important bit about the Sequence object is that it is thread-safe, meaning the workers spawned will not duplicate data chunks (this isn’t a major problem when shuffling the data).</p>
-<p>The torch DataLoader came with shuffle capability (by initializing a random order using the <span class="math notranslate nohighlight">\(\color{blue}{\textbf{__len__}}\)</span> method), whereas in the Sequence object, shuffle functionality (and whatever else you want) can be enabled by adding a method typically called “on_epoch_end” that will shuffle after some number of data points have been returned.</p>
+<p>When training a model with Keras, all we have to do is swap <span class="math notranslate nohighlight">\(\color{black}{\textbf{HologramReader(Dataset)}}\)</span> for <span class="math notranslate nohighlight">\(\color{black}{\textbf{HologramReader(Sequence)}}\)</span> and make no other changes. We also could have skipped using the inheritance approach and specify the output type (torch tensor versus numpy tensor) upon return.</p>
+<p>In older Keras versions, the Reader would be fed into the Model.fit_generator method, which allowed one to toggle the number of workers and queue size. The important bit about the Sequence object is that it is thread-safe, meaning the workers spawned will not duplicate data chunks (this isn’t necessarily always a problem but depends on the type of data being used).</p>
+<p>The torch DataLoader came with shuffle capability (by initializing a random order using the <span class="math notranslate nohighlight">\(\color{blue}{\textbf{__len__}}\)</span> method), whereas in the Sequence object, shuffle functionality (and whatever else you want) can be enabled by adding a method typically called <span class="math notranslate nohighlight">\(\color{blue}{\textbf{on_epoch_end}}\)</span> that will shuffle after some number of data points have been returned.</p>
 </div>
 <div class="section" id="tensorflow">
 <h3>Tensorflow<a class="headerlink" href="#tensorflow" title="Permalink to this headline">¶</a></h3>
@@ -814,7 +817,7 @@
 </div>
 </div>
 </div>
-<p>Then we wrap Tensorflow’s Dataset object around the generator, using the from_generator method within the Dataset object, and setting the tensor types explictly:</p>
+<p>Then we wrap Tensorflow’s Dataset object around the generator, using the <span class="math notranslate nohighlight">\(\color{blue}{\textbf{from_generator}}\)</span> method within the Dataset object, and setting the tensor types explictly:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tf_data_iterator</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Dataset</span><span class="o">.</span><span class="n">from_generator</span><span class="p">(</span>
@@ -858,10 +861,10 @@
 </div>
 </div>
 <p>The number of workers can be set when training the model through the .fit() super-class (which contains an machinery for rolling out the Reader and feeding the batches it into the model):</p>
-<p>Note that we could use any of these approaches with either ML language, though the torch and tensorflow versions are superior to the now-deparecated Sequence. The later is true in the case of running with one worker at a time. Enabling multiprocessing with Tensorflow stuff is rather tricky!</p>
-<p>These special iterator objects contain many other features not covered here, so be sure to check out the documentation!</p>
-<p>Tensorflow Dataset: https://www.tensorflow.org/api_docs/python/tf/data/Dataset</p>
-<p>Torch Dataset: https://pytorch.org/docs/stable/data.html</p>
+<p>Note that we could use any of these approaches with either ML language, though the torch and tensorflow versions are superior to the now-deparecated Sequence. Enabling multiprocessing with Tensorflow Data objects is rather tricky though, we just let the Keras methods handle that here. We will cover that another time!</p>
+<p>Note that these special iterator objects contain many other features not covered here, so be sure to check out the documentation!</p>
+<p>Tensorflow Dataset: <a class="reference external" href="https://www.tensorflow.org/api_docs/python/tf/data/Dataset">https://www.tensorflow.org/api_docs/python/tf/data/Dataset</a></p>
+<p>Torch Dataset: <a class="reference external" href="https://pytorch.org/docs/stable/data.html">https://pytorch.org/docs/stable/data.html</a></p>
 </div>
 </div>
 </div>
@@ -901,7 +904,7 @@
     <div class="container">
       <p>
         
-          By Drs. John Schreck and David John Gagne<br/>
+          By AIML @ NCAR<br/>
         
             &copy; Copyright 2020.<br/>
       </p>

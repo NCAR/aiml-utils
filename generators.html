@@ -761,12 +761,12 @@
 <div class="section" id="keras">
 <h3>Keras<a class="headerlink" href="#keras" title="Permalink to this headline">¶</a></h3>
 <p>When training a model with Keras, all we have to do is swap <span class="math notranslate nohighlight">\(\color{black}{\textbf{HologramReader(Dataset)}}\)</span> for <span class="math notranslate nohighlight">\(\color{black}{\textbf{HologramReader(Sequence)}}\)</span> and make no other changes. We also could have skipped using the inheritance approach and specify the output type (torch tensor versus numpy tensor) upon return.</p>
-<p>In older Keras versions, the Reader would be fed into the Model.fit_generator method, which allowed one to toggle the number of workers and queue size. The important bit about the Sequence object is that it is thread-safe, meaning the workers spawned will not duplicate data chunks (this isn’t necessarily always a problem but depends on the type of data being used).</p>
+<p>In older Keras versions, the Reader would be fed into the Model.fit_generator method, which allowed one to toggle the number of workers and queue size. Now that functionality has been added to the Model.fit method while Model.fit_generator has been depcrecated. The important bit about the Sequence object is that it is thread-safe, meaning the workers spawned will not duplicate data chunks (this isn’t necessarily always a problem but depends on the type of data being used).</p>
 <p>The torch DataLoader came with shuffle capability (by initializing a random order using the <span class="math notranslate nohighlight">\(\color{blue}{\textbf{__len__}}\)</span> method), whereas in the Sequence object, shuffle functionality (and whatever else you want) can be enabled by adding a method typically called <span class="math notranslate nohighlight">\(\color{blue}{\textbf{on_epoch_end}}\)</span> that will shuffle after some number of data points have been returned.</p>
 </div>
 <div class="section" id="tensorflow">
 <h3>Tensorflow<a class="headerlink" href="#tensorflow" title="Permalink to this headline">¶</a></h3>
-<p>But, since the Sequence object was recently deprecated in favor of Tensorflow’s data objects, we will proceed by setting up one of those. We only have to make a few adjustments to the above Readers:</p>
+<p>Tensorflow also has its own library of data objects. We only have to make a few adjustments to the above Readers to use the tf variant where the call will be a generator and not a method:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">TFHologramReader</span><span class="p">:</span> 
@@ -836,7 +836,7 @@
 </div>
 </div>
 </div>
-<p>Shuffling is a little more complex. Since a generator is in play, a memory buffer of size buffer_size will be created and rows put into it. Then, batches are selected from it and returned. Note that there will be a delay in the begining as the buffer has to fill up:</p>
+<p>Shuffling is a little more complex. Since a generator is used and there is not len thunder method, a memory buffer of size buffer_size will be created and rows put into it. Then, batches are selected from it and returned. Note that there could be a delay in the begining as the buffer has to fill up:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tf_data_iterator</span> <span class="o">=</span> <span class="n">tf_data_iterator</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">buffer_size</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
@@ -845,7 +845,7 @@
 </div>
 </div>
 <p>To get true random sampling, the buffer size would need to be the size of the data set.</p>
-<p>In practice, one should shuffle the hologram numbers list in the TFReader upon initialization since they are available, similar to what needed to be done when using the keras Sequence object. For the sake of illustration we use tensorflows method for shuffling.</p>
+<p>In torch and Keras examples, we were able to shuffle the hologram numbers list in the TFReader upon initialization since they are available, so we could get true random samples. We could easily build in true shuffling into the reader since we know how many holograms are in the dataset (for example, by adding an on_epoch_end method that shuffles the hologram numbers after the generator yields a fixed number of data points). We get the same output as before but now with tensorflow tensors:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="ow">in</span> <span class="n">tf_data_iterator</span><span class="p">:</span>
@@ -860,7 +860,20 @@
 </div>
 </div>
 </div>
-<p>The number of workers can be set when training the model through the .fit() super-class (which contains an machinery for rolling out the Reader and feeding the batches it into the model):</p>
+<p>The number of workers can be set when training the model through the Model.fit in newer versions of Keras as:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+    <span class="n">tf_data_iterator</span><span class="p">,</span>
+    <span class="o">...</span><span class="p">,</span>
+    <span class="n">max_queue_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> 
+    <span class="n">workers</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> 
+    <span class="n">use_multiprocessing</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
 <p>Note that we could use any of these approaches with either ML language, though the torch and tensorflow versions are supported while Sequence has been deprecated. Enabling multiprocessing with Tensorflow Data objects is rather tricky though, we just let the Keras methods handle that here. We will cover that another time!</p>
 <p>Note that these special iterator objects contain many other features not covered here, so be sure to check out the documentation!</p>
 <p>Tensorflow Dataset: <a class="reference external" href="https://www.tensorflow.org/api_docs/python/tf/data/Dataset">https://www.tensorflow.org/api_docs/python/tf/data/Dataset</a></p>

@@ -279,14 +279,14 @@
 <p>We all need to open, close, and save data to files using Python. Loading a file always involves reading the lines in the file, and possibly doing some processing on each line. An example file <span class="math notranslate nohighlight">\(\textbf{test_data.txt}\)</span> contains 1,000,000 rows (lines) and 3 columns separated by an empty space.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">time</span> 
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">time</span>
 </pre></div>
 </div>
 </div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fn</span> <span class="o">=</span> <span class="s2">&quot;generators/test_data.txt&quot;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fn</span> <span class="o">=</span> <span class="s2">&quot;generators/test_data.txt&quot;</span>
 </pre></div>
 </div>
 </div>
@@ -295,7 +295,7 @@
 <h2>The Python Method<a class="headerlink" href="#the-python-method" title="Permalink to this headline">¶</a></h2>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">method_loader</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">method_loader</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span> <span class="k">as</span> <span class="n">fid</span><span class="p">:</span>
         <span class="n">lines</span> <span class="o">=</span> <span class="n">fid</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span> <span class="c1"># Read in lines until reaching EOF</span>
         <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">]</span> <span class="c1"># Process each line</span>
@@ -306,7 +306,7 @@
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">processed_line</span> <span class="ow">in</span> <span class="n">method_loader</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">processed_line</span> <span class="ow">in</span> <span class="n">method_loader</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
     <span class="k">break</span>
 </pre></div>
 </div>
@@ -323,7 +323,7 @@
 <p>There is a special tool in the python toolbox that easily enables lazy reading called a generator. The generator object is built on top of python’s Iterator object class, but I will cover them in reverse below.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">generator_loader</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">generator_loader</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fid</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">fid</span><span class="p">:</span>
             <span class="k">yield</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
@@ -335,7 +335,7 @@
 <p>Test it.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">processed_line</span> <span class="ow">in</span> <span class="n">generator_loader</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">processed_line</span> <span class="ow">in</span> <span class="n">generator_loader</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">processed_line</span><span class="p">)</span>
     <span class="k">break</span> <span class="c1"># Stop early, I don&#39;t need to print 1,000,000 lines!</span>
 </pre></div>
@@ -352,21 +352,21 @@
 <p>Generators work nicely with serialized data … you may have <strong><em>dumped</em></strong> data using the pickle library before. The pickle library allows you to do that for the entire file, all in one go, or line-by-line as the example below illustrates:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pickle</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pickle</span>
 </pre></div>
 </div>
 </div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fn_pkl</span> <span class="o">=</span> <span class="s2">&quot;generators/test_data.pkl&quot;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fn_pkl</span> <span class="o">=</span> <span class="s2">&quot;generators/test_data.pkl&quot;</span>
 </pre></div>
 </div>
 </div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">write_to_pickle</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">fn</span><span class="p">):</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">write_to_pickle</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">fn</span><span class="p">):</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fid</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
             <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">fid</span><span class="p">)</span> <span class="c1"># Iteration over .dump</span>
@@ -376,7 +376,7 @@
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">write_to_pickle</span><span class="p">(</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">write_to_pickle</span><span class="p">(</span>
     <span class="n">method_loader</span><span class="p">(</span><span class="n">fn</span><span class="p">),</span>
     <span class="n">fn_pkl</span>
 <span class="p">)</span>
@@ -387,7 +387,7 @@
 <p>From here will assume that we do not know how many lines are in our serialized data dump:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">load_from_pickle</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">load_from_pickle</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fid</span><span class="p">:</span>
         <span class="k">while</span> <span class="kc">True</span><span class="p">:</span> <span class="c1"># Keep looping with while.</span>
             <span class="k">yield</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fid</span><span class="p">)</span> <span class="c1"># Iteration over .load</span>
@@ -399,7 +399,7 @@
 <p>Test it!</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">load_from_pickle</span><span class="p">(</span><span class="n">fn_pkl</span><span class="p">):</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">load_from_pickle</span><span class="p">(</span><span class="n">fn_pkl</span><span class="p">):</span>
     <span class="k">continue</span>
 </pre></div>
 </div>
@@ -426,7 +426,7 @@
 <p>Note that the <em>exception</em> python threw was an <span class="math notranslate nohighlight">\(\color{red}{\textbf{EOFError}}\)</span> exception. We can catch that and use it to exit the generator:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">load_from_pickle</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">load_from_pickle</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fid</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">while</span> <span class="kc">True</span><span class="p">:</span> <span class="c1"># We do not necessarily know how many lines are in fn</span>
@@ -440,7 +440,7 @@
 <p>Now it will run without error:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">load_from_pickle</span><span class="p">(</span><span class="n">fn_pkl</span><span class="p">):</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">load_from_pickle</span><span class="p">(</span><span class="n">fn_pkl</span><span class="p">):</span>
     <span class="k">continue</span>
     
 <span class="c1"># Finishes without error</span>
@@ -452,7 +452,7 @@
 <p>Fortunatly, python developers also included a generalized version of yield, <span class="math notranslate nohighlight">\(\color{green}{\textbf{yield from}}\)</span> for these siuations.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">load_from_pickle</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">load_from_pickle</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fid</span><span class="p">:</span>
         <span class="k">yield from</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fid</span><span class="p">)</span>
 </pre></div>
@@ -461,7 +461,7 @@
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">load_from_pickle</span><span class="p">(</span><span class="n">fn_pkl</span><span class="p">):</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">load_from_pickle</span><span class="p">(</span><span class="n">fn_pkl</span><span class="p">):</span>
     <span class="k">continue</span>
 </pre></div>
 </div>
@@ -469,7 +469,7 @@
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Finishes without error. </span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Finishes without error. </span>
 </pre></div>
 </div>
 </div>
@@ -482,7 +482,7 @@
 <p>A simple example with our serialized (pickled) data from above:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">read_from_pickle_iterable</span><span class="p">:</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">read_from_pickle_iterable</span><span class="p">:</span>
     
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fn</span> <span class="o">=</span> <span class="n">fn</span>
@@ -503,7 +503,7 @@
 <p>The thunder method <span class="math notranslate nohighlight">\(\color{blue}{\textbf{__iter__}}\)</span> returns the object itself (through self!), while <span class="math notranslate nohighlight">\(\color{blue}{\textbf{__next__}}\)</span> is used to return the result of the .load call on the opened file.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">rfpi</span> <span class="o">=</span> <span class="n">read_from_pickle_iterable</span><span class="p">(</span><span class="n">fn_pkl</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">rfpi</span> <span class="o">=</span> <span class="n">read_from_pickle_iterable</span><span class="p">(</span><span class="n">fn_pkl</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -511,7 +511,7 @@
 <p>Using the Iterator’s <span class="math notranslate nohighlight">\(\color{blue}{\textbf{__next__}}\)</span> functionality, we then grab the lines from the file one-by-one without opening the entire file:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
     <span class="nb">next</span><span class="p">(</span><span class="n">rfpi</span><span class="p">)</span> <span class="c1"># Use next like this</span>
 </pre></div>
 </div>
@@ -546,7 +546,7 @@
 <p>which dies as intended when the <span class="math notranslate nohighlight">\(\color{red}{\textbf{EOFError}}\)</span> caught and the <span class="math notranslate nohighlight">\(\color{red}{\textbf{StopException}}\)</span> exception was thrown using the <span class="math notranslate nohighlight">\(\color{green}{\textbf{raise}}\)</span> clause. When the iterator object is rolled out in a loop (or by list(), etc) it will exit without error:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">read_from_pickle_iterable</span><span class="p">(</span><span class="n">fn_pkl</span><span class="p">):</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">read_from_pickle_iterable</span><span class="p">(</span><span class="n">fn_pkl</span><span class="p">):</span>
     <span class="k">continue</span>
 </pre></div>
 </div>
@@ -570,7 +570,7 @@
 <p>We will look at the holodec data (as of Oct 12, 2020), which contains large hologram images and numerical data accompaning each image. The holodec data is saved as netCDF format – by default the data type only supports lazy reading!</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">holodecml.data</span> <span class="kn">import</span> <span class="o">*</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">holodecml.data</span> <span class="kn">import</span> <span class="o">*</span>
 </pre></div>
 </div>
 </div>
@@ -578,7 +578,7 @@
 <p>The main method to load the data is reproduced here (which calls other methods, not shown)</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">load_raw_datasets</span><span class="p">(</span><span class="n">path_data</span><span class="p">,</span> <span class="n">num_particles</span><span class="p">,</span> <span class="n">split</span><span class="p">,</span> <span class="n">output_cols</span><span class="p">,</span> <span class="n">subset</span><span class="p">):</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">load_raw_datasets</span><span class="p">(</span><span class="n">path_data</span><span class="p">,</span> <span class="n">num_particles</span><span class="p">,</span> <span class="n">split</span><span class="p">,</span> <span class="n">output_cols</span><span class="p">,</span> <span class="n">subset</span><span class="p">):</span>
     <span class="n">ds</span> <span class="o">=</span> <span class="n">open_dataset</span><span class="p">(</span><span class="n">path_data</span><span class="p">,</span> <span class="n">num_particles</span><span class="p">,</span> <span class="n">split</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">subset</span><span class="p">:</span>
         <span class="n">ix</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">subset</span> <span class="o">*</span> <span class="n">ds</span><span class="p">[</span><span class="s1">&#39;image&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
@@ -597,7 +597,7 @@
 <p>For most data files, there is nothing wrong with this method – its compact, easy to read, and does what you want it to do. As we have seen with the file loading example above, methods quickly become memory inefficient once files become large in size.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">path_data</span> <span class="o">=</span> <span class="s2">&quot;/glade/p/cisl/aiml/ai4ess_hackathon/holodec/&quot;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">path_data</span> <span class="o">=</span> <span class="s2">&quot;/glade/p/cisl/aiml/ai4ess_hackathon/holodec/&quot;</span>
 <span class="n">num_particles</span> <span class="o">=</span> <span class="s2">&quot;multi&quot;</span>
 <span class="n">split</span> <span class="o">=</span> <span class="s1">&#39;train&#39;</span>
 <span class="n">subset</span> <span class="o">=</span> <span class="kc">False</span>
@@ -608,7 +608,7 @@
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 <span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span> <span class="o">=</span> <span class="n">load_raw_datasets</span><span class="p">(</span><span class="n">path_data</span><span class="p">,</span> <span class="n">num_particles</span><span class="p">,</span> <span class="n">split</span><span class="p">,</span> <span class="n">output_cols</span><span class="p">,</span> <span class="n">subset</span><span class="p">)</span>
 <span class="n">t1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">t1</span><span class="o">-</span><span class="n">t0</span><span class="p">)</span>
@@ -622,7 +622,7 @@
 <h2>The Dataset Reader<a class="headerlink" href="#the-dataset-reader" title="Permalink to this headline">¶</a></h2>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
 <span class="kn">from</span> <span class="nn">tensorflow.keras.utils</span> <span class="kn">import</span> <span class="n">Sequence</span>
 <span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">DataLoader</span>
 </pre></div>
@@ -632,7 +632,7 @@
 <p>Torch.utils.data.Dataset and tensorflow.keras.utils.Sequence objects both require a custom “Reader” class to contain the <span class="math notranslate nohighlight">\(\color{blue}{\textbf{__len__}}\)</span> and <span class="math notranslate nohighlight">\(\color{blue}{\textbf{__getitem__}}\)</span> thunder methods:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">HologramReader</span><span class="p">(</span><span class="n">Dataset</span><span class="p">):</span> <span class="c1"># Sequence</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">HologramReader</span><span class="p">(</span><span class="n">Dataset</span><span class="p">):</span> <span class="c1"># Sequence</span>
     
     <span class="s1">&#39;Generates data for Keras/Tensorflow/Torch environments&#39;</span>
     
@@ -677,7 +677,7 @@
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_reader</span> <span class="o">=</span> <span class="n">HologramReader</span><span class="p">(</span><span class="n">path_data</span><span class="p">,</span> <span class="n">num_particles</span><span class="p">,</span> <span class="n">split</span><span class="p">,</span> <span class="n">output_cols</span><span class="p">,</span> <span class="n">subset</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">data_reader</span> <span class="o">=</span> <span class="n">HologramReader</span><span class="p">(</span><span class="n">path_data</span><span class="p">,</span> <span class="n">num_particles</span><span class="p">,</span> <span class="n">split</span><span class="p">,</span> <span class="n">output_cols</span><span class="p">,</span> <span class="n">subset</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -685,14 +685,14 @@
 <p>The method <span class="math notranslate nohighlight">\(\color{blue}{\textbf{__getitem__}}\)</span> is used to select whichever hologram we want (take the one labeled 0):</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">data_reader</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">data_reader</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -705,14 +705,14 @@
 <p>Make a quick plot:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 </pre></div>
 </div>
 </div>
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -731,7 +731,7 @@
 <p>To make the the torch/keras Reader class iterable, we can wrap a torch DataLoader object around it which will enable batching, multiprocessing capabilities, and other options. As noted, the DataLoader object requires that the Reader class contains the <span class="math notranslate nohighlight">\(\color{blue}{\textbf{__len__}}\)</span> and <span class="math notranslate nohighlight">\(\color{blue}{\textbf{__getitem__}}\)</span> thunder methods:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_iterator</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">data_iterator</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span>
     <span class="n">data_reader</span><span class="p">,</span>
     <span class="n">num_workers</span> <span class="o">=</span> <span class="mi">8</span><span class="p">,</span>
     <span class="n">batch_size</span> <span class="o">=</span> <span class="mi">32</span><span class="p">,</span>
@@ -743,7 +743,7 @@
 </div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="ow">in</span> <span class="n">data_iterator</span><span class="p">:</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="ow">in</span> <span class="n">data_iterator</span><span class="p">:</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
     <span class="k">break</span>
 </pre></div>
@@ -769,7 +769,7 @@
 <p>But, since the Sequence object was recently deprecated in favor of Tensorflow’s data objects, we will proceed by setting up one of those. We only have to make a few adjustments to the above Readers:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">TFHologramReader</span><span class="p">:</span> 
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">TFHologramReader</span><span class="p">:</span> 
     
     <span class="s1">&#39;Generates data for Keras/Tensorflow/Torch environments&#39;</span>
     
@@ -810,7 +810,7 @@
 <p>Calling and using the reader is the same as before. First, initialize an instance by setting the input variables:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tf_data_generator</span> <span class="o">=</span> <span class="n">TFHologramReader</span><span class="p">(</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tf_data_generator</span> <span class="o">=</span> <span class="n">TFHologramReader</span><span class="p">(</span>
     <span class="n">path_data</span><span class="p">,</span> <span class="n">num_particles</span><span class="p">,</span> <span class="n">split</span><span class="p">,</span> <span class="n">output_cols</span><span class="p">,</span> <span class="n">subset</span>
 <span class="p">)</span>
 </pre></div>
@@ -820,7 +820,7 @@
 <p>Then we wrap Tensorflow’s Dataset object around the generator, using the <span class="math notranslate nohighlight">\(\color{blue}{\textbf{from_generator}}\)</span> method within the Dataset object, and setting the tensor types explictly:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tf_data_iterator</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Dataset</span><span class="o">.</span><span class="n">from_generator</span><span class="p">(</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tf_data_iterator</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Dataset</span><span class="o">.</span><span class="n">from_generator</span><span class="p">(</span>
     <span class="n">tf_data_generator</span><span class="p">,</span> 
     <span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">dtypes</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">dtypes</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
 <span class="p">)</span>
@@ -831,7 +831,7 @@
 <p>Setting the batch size can be done by</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tf_data_iterator</span> <span class="o">=</span> <span class="n">tf_data_iterator</span><span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tf_data_iterator</span> <span class="o">=</span> <span class="n">tf_data_iterator</span><span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -839,7 +839,7 @@
 <p>Shuffling is a little more complex. Since a generator is in play, a memory buffer of size buffer_size will be created and rows put into it. Then, batches are selected from it and returned. Note that there will be a delay in the begining as the buffer has to fill up:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tf_data_iterator</span> <span class="o">=</span> <span class="n">tf_data_iterator</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">buffer_size</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tf_data_iterator</span> <span class="o">=</span> <span class="n">tf_data_iterator</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">buffer_size</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -848,7 +848,7 @@
 <p>In practice, one should shuffle the hologram numbers list in the TFReader upon initialization since they are available, similar to what needed to be done when using the keras Sequence object. For the sake of illustration we use tensorflows method for shuffling.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="ow">in</span> <span class="n">tf_data_iterator</span><span class="p">:</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="ow">in</span> <span class="n">tf_data_iterator</span><span class="p">:</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
     <span class="k">break</span>
 </pre></div>

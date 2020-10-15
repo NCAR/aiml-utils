@@ -845,7 +845,7 @@
 </div>
 </div>
 <p>To get true random sampling, the buffer size would need to be the size of the data set.</p>
-<p>In torch and Keras examples, we were able to shuffle the hologram numbers list in the TFReader upon initialization since they are available, so we could get true random samples. We could easily build in true shuffling into the reader since we know how many holograms are in the dataset (for example, by adding an on_epoch_end method that shuffles the hologram numbers after the generator yields a fixed number of data points). We get the same output as before but now with tensorflow tensors:</p>
+<p>In torch and Keras examples, we explicitly specified the total number of holograms that could be queried from the dataset, which allowed for easily performing true random sampling. We could just as easily build this into the tf reader as well, for example, by adding an on_epoch_end method that shuffles the hologram numbers after the generator yields a fixed number of data points. We get the same output as before but now with tensorflow tensors:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="ow">in</span> <span class="n">tf_data_iterator</span><span class="p">:</span>

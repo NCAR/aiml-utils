@@ -2,3 +2,5 @@ blog/site/_build/*
 .ipynb_checkpoints/*
 */.ipynb_checkpoints/*
 */*/.ipynb_checkpoints/*
+blog/NCAR_UCAR_LIVERY/*
+blog/.DS_Store

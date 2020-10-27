@@ -104,11 +104,6 @@
   </a>
  </li>
  <li class="toctree-l1">
-  <a class="reference internal" href="generators.html#data-loaders-for-ml-pipelines">
-   2. Data Loaders for ML Pipelines
-  </a>
- </li>
- <li class="toctree-l1">
   <a class="reference internal" href="data_loaders.html">
    2. Data Loaders for ML Pipelines
   </a>
@@ -116,11 +111,6 @@
  <li class="toctree-l1 current active">
   <a class="current reference internal" href="#">
    3. Callbacks: Utilities for interacting with ML training
-  </a>
- </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="#pytorch">
-   pyTorch
   </a>
  </li>
 </ul>
@@ -212,53 +202,46 @@
         </div>
         <nav id="bd-toc-nav">
             <ul class="nav section-nav flex-column">
- <li class="toc-h1 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#">
-   3. Callbacks: Utilities for interacting with ML training
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#keras-callbacks-documentation">
+   Keras callbacks (documentation)
   </a>
   <ul class="nav section-nav flex-column">
-   <li class="toc-h2 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#keras-callbacks-documentation">
-     Keras callbacks (documentation)
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#i-early-stopping-documentation">
+     (i) Early Stopping (documentation)
     </a>
-    <ul class="nav section-nav flex-column">
-     <li class="toc-h3 nav-item toc-entry">
-      <a class="reference internal nav-link" href="#i-early-stopping-documentation">
-       (i) Early Stopping (documentation)
-      </a>
-     </li>
-     <li class="toc-h3 nav-item toc-entry">
-      <a class="reference internal nav-link" href="#ii-modelcheckpoint-documentation">
-       (ii) ModelCheckpoint (documentation)
-      </a>
-     </li>
-     <li class="toc-h3 nav-item toc-entry">
-      <a class="reference internal nav-link" href="#iii-csvlogger-documentation">
-       (iii) CSVLogger (documentation)
-      </a>
-     </li>
-     <li class="toc-h3 nav-item toc-entry">
-      <a class="reference internal nav-link" href="#iv-learningratescheduler-documentation-and-reducelronplateau-documentation">
-       (iv) LearningRateScheduler (documentation) and ReduceLROnPlateau (documentation)
-      </a>
-     </li>
-     <li class="toc-h3 nav-item toc-entry">
-      <a class="reference internal nav-link" href="#v-custom-callbacks-documentation">
-       (v) Custom callbacks (documentation)
-      </a>
-     </li>
-    </ul>
    </li>
-   <li class="toc-h2 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#using-callbacks-when-training">
-     Using Callbacks when training
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#ii-modelcheckpoint-documentation">
+     (ii) ModelCheckpoint (documentation)
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#iii-csvlogger-documentation">
+     (iii) CSVLogger (documentation)
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#iv-learningratescheduler-documentation-and-reducelronplateau-documentation">
+     (iv) LearningRateScheduler (documentation) and ReduceLROnPlateau (documentation)
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#v-custom-callbacks-documentation">
+     (v) Custom callbacks (documentation)
     </a>
    </li>
   </ul>
  </li>
- <li class="toc-h1 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#pytorch">
-   pyTorch
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#using-callbacks-when-training">
+   Using Callbacks when training
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#pytorch-callbacks">
+   pyTorch callbacks
   </a>
  </li>
 </ul>
@@ -488,9 +471,8 @@
 </div>
 <p>And thats it! In some cases the callbacks will print information to the screen (you can control that output typically via the verbose argument).</p>
 </div>
-</div>
-<div class="section" id="pytorch">
-<h1>pyTorch<a class="headerlink" href="#pytorch" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="pytorch-callbacks">
+<h2>pyTorch callbacks<a class="headerlink" href="#pytorch-callbacks" title="Permalink to this headline">¶</a></h2>
 <p>Callbacks can also be implemented with the (py)Torch library. Unless you are using a custom library thats build on Torch, one has to train the model at a lower level as compared to Keras, where training was taken care of with the Model.fit method.</p>
 <p>I will cover how to write custom Trainer objects in detail in a future post, but in general to train a model we will minimally require a method to train the model for one epoch, and a method to validate (or test) the model. For example,</p>
 <div class="cell docutils container">
@@ -549,6 +531,7 @@
 </div>
 <p>Note that you should only call the scheduler after updating the optimizer. That’s it!</p>
 <p>Email any questions / mistakes / whatever to John Schreck, schreck&#64;ucar.edu</p>
+</div>
 </div>
 
     <script type="text/x-thebe-config">

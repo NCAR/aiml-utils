@@ -1,2 +1,4 @@
 - file: home
 - file: generators.ipynb
+- file: data_loaders.ipynb
+- file: callbacks.ipynb

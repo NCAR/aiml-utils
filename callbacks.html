@@ -1,0 +1,607 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>3. Callbacks: Utilities for interacting with ML training &#8212; Analytics and Integrative Machine Learning</title>
+    
+  <link rel="stylesheet" href="_static/css/index.73d71520a4ca3b99cfee5594769eaaae.css">
+
+    
+  <link rel="stylesheet"
+    href="_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    
+      
+  <link rel="stylesheet"
+    href="_static/vendor/open-sans_all/1.44.1/index.css">
+  <link rel="stylesheet"
+    href="_static/vendor/lato_latin-ext/1.44.1/index.css">
+
+    
+    <link rel="stylesheet" href="_static/sphinx-book-theme.2d2078699c18a0efb88233928e1cf6ed.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css" />
+    <link rel="stylesheet" type="text/css" href="_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    
+  <link rel="preload" as="script" href="_static/js/index.3da636dd464baa7582d2.js">
+
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="_static/togglebutton.js"></script>
+    <script src="_static/clipboard.min.js"></script>
+    <script src="_static/copybutton.js"></script>
+    <script >var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="_static/sphinx-book-theme.be0a4a0c39cd630af62a2fcf693f3f06.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["\\(", "\\)"]], "displayMath": [["\\[", "\\]"]], "processRefs": false, "processEnvironments": false}})</script>
+    <script async="async" src="https://unpkg.com/thebelab@latest/lib/index.js"></script>
+    <script >
+        const thebe_selector = ".thebe"
+        const thebe_selector_input = "pre"
+        const thebe_selector_output = ".output"
+    </script>
+    <script async="async" src="_static/sphinx-thebe.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="2. Data Loaders for ML Pipelines" href="data_loaders.html" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="en" />
+
+
+
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+<div class="col-12 col-md-3 bd-sidebar site-navigation show" id="site-navigation">
+    
+        <div class="navbar-brand-box">
+<a class="navbar-brand text-wrap" href="index.html">
+  
+  <img src="_static/NCAR-contemp-logo-blue.png" class="logo" alt="logo">
+  
+  
+  <h1 class="site-logo" id="site-title">Analytics and Integrative Machine Learning</h1>
+  
+</a>
+</div>
+
+<form class="bd-search d-flex align-items-center" action="search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search this book..." aria-label="Search this book..." autocomplete="off" >
+</form>
+
+<nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <ul class="nav sidenav_l1">
+ <li class="toctree-l1">
+  <a class="reference internal" href="home.html">
+   Introduction
+  </a>
+ </li>
+</ul>
+<ul class="current nav sidenav_l1">
+ <li class="toctree-l1">
+  <a class="reference internal" href="generators.html">
+   1. Methods, iterables, and generators for reading files
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="generators.html#data-loaders-for-ml-pipelines">
+   2. Data Loaders for ML Pipelines
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="data_loaders.html">
+   2. Data Loaders for ML Pipelines
+  </a>
+ </li>
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   3. Callbacks: Utilities for interacting with ML training
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="#pytorch">
+   pyTorch
+  </a>
+ </li>
+</ul>
+
+</nav>
+
+ <!-- To handle the deprecated key -->
+
+<div class="navbar_extra_footer">
+  Powered by <a href="https://jupyterbook.org">Jupyter Book</a>
+</div>
+
+</div>
+
+
+          
+
+
+          
+<main class="col py-md-3 pl-md-4 bd-content overflow-auto" role="main">
+    
+    <div class="row topbar fixed-top container-xl">
+    <div class="col-12 col-md-3 bd-topbar-whitespace site-navigation show">
+    </div>
+    <div class="col pl-2 topbar-main">
+        
+        <button id="navbar-toggler" class="navbar-toggler ml-0" type="button" data-toggle="collapse"
+            data-toggle="tooltip" data-placement="bottom" data-target=".site-navigation" aria-controls="navbar-menu"
+            aria-expanded="true" aria-label="Toggle navigation" aria-controls="site-navigation"
+            title="Toggle navigation" data-toggle="tooltip" data-placement="left">
+            <i class="fas fa-bars"></i>
+            <i class="fas fa-arrow-left"></i>
+            <i class="fas fa-arrow-up"></i>
+        </button>
+        
+        <div class="dropdown-buttons-trigger">
+    <button id="dropdown-buttons-trigger" class="btn btn-secondary topbarbtn" aria-label="Download this page"><i
+            class="fas fa-download"></i></button>
+
+    
+    <div class="dropdown-buttons">
+        <!-- ipynb file if we had a myst markdown file -->
+        
+        <!-- Download raw file -->
+        <a class="dropdown-buttons" href="_sources/callbacks.ipynb"><button type="button"
+                class="btn btn-secondary topbarbtn" title="Download source file" data-toggle="tooltip"
+                data-placement="left">.ipynb</button></a>
+        <!-- Download PDF via print -->
+        <button type="button" id="download-print" class="btn btn-secondary topbarbtn" title="Print to PDF"
+            onClick="window.print()" data-toggle="tooltip" data-placement="left">.pdf</button>
+    </div>
+    
+</div>
+        <!-- Source interaction buttons -->
+
+
+        <!-- Full screen (wrap in <a> to have style consistency -->
+        <a class="full-screen-button"><button type="button" class="btn btn-secondary topbarbtn" data-toggle="tooltip"
+                data-placement="bottom" onclick="toggleFullScreen()" aria-label="Fullscreen mode"
+                title="Fullscreen mode"><i
+                    class="fas fa-expand"></i></button></a>
+
+        <!-- Launch buttons -->
+
+<div class="dropdown-buttons-trigger">
+    <button id="dropdown-buttons-trigger" class="btn btn-secondary topbarbtn"
+        aria-label="Launch interactive content"><i class="fas fa-rocket"></i></button>
+    <div class="dropdown-buttons">
+        
+        <a class="binder-button" href="https://mybinder.org/v2/gh/executablebooks/jupyter-book/master?urlpath=tree/callbacks.ipynb"><button type="button"
+                class="btn btn-secondary topbarbtn" title="Launch Binder" data-toggle="tooltip"
+                data-placement="left"><img class="binder-button-logo"
+                    src="_static/images/logo_binder.svg"
+                    alt="Interact on binder">Binder</button></a>
+        
+        
+        
+        
+    </div>
+</div>
+
+    </div>
+
+    <!-- Table of contents -->
+    <div class="d-none d-md-block col-md-2 bd-toc show">
+        
+        <div class="tocsection onthispage pt-5 pb-3">
+            <i class="fas fa-list"></i> Contents
+        </div>
+        <nav id="bd-toc-nav">
+            <ul class="nav section-nav flex-column">
+ <li class="toc-h1 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#">
+   3. Callbacks: Utilities for interacting with ML training
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#keras-callbacks-documentation">
+     Keras callbacks (documentation)
+    </a>
+    <ul class="nav section-nav flex-column">
+     <li class="toc-h3 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#i-early-stopping-documentation">
+       (i) Early Stopping (documentation)
+      </a>
+     </li>
+     <li class="toc-h3 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#ii-modelcheckpoint-documentation">
+       (ii) ModelCheckpoint (documentation)
+      </a>
+     </li>
+     <li class="toc-h3 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#iii-csvlogger-documentation">
+       (iii) CSVLogger (documentation)
+      </a>
+     </li>
+     <li class="toc-h3 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#iv-learningratescheduler-documentation-and-reducelronplateau-documentation">
+       (iv) LearningRateScheduler (documentation) and ReduceLROnPlateau (documentation)
+      </a>
+     </li>
+     <li class="toc-h3 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#v-custom-callbacks-documentation">
+       (v) Custom callbacks (documentation)
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toc-h2 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#using-callbacks-when-training">
+     Using Callbacks when training
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h1 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#pytorch">
+   pyTorch
+  </a>
+ </li>
+</ul>
+
+        </nav>
+        
+    </div>
+</div>
+    <div id="main-content" class="row">
+        <div class="col-12 col-md-9 pl-md-3 pr-md-0">
+        
+              <div>
+                
+  <div class="section" id="callbacks-utilities-for-interacting-with-ml-training">
+<h1>3. Callbacks: Utilities for interacting with ML training<a class="headerlink" href="#callbacks-utilities-for-interacting-with-ml-training" title="Permalink to this headline">¶</a></h1>
+<p>This blog aims to address one of the most common issues in machine learning: how to adjust training parameters on the fly when a performance metric is not looking so good. For example, a model may be stopped early (current epoch &lt; max epochs) when a performance metric is not looking so good.</p>
+<p>Sometimes this problem is easy to solve, for example the objective that monitors the training progress (e.g. the loss, accuracy, etc) stops improving, and that may get worse as training continues. In attacking this problem we will learn how to incorporate “callbacks,” which will allow us to do lots of things including “early stopping”.</p>
+<p>We can achieve this by specifying some condition(s), and use them as a means for toggling the training. This could mean stopping training early, annealing the learning rate, or something else.</p>
+<div class="section" id="keras-callbacks-documentation">
+<h2>Keras callbacks <a class="reference external" href="https://www.tensorflow.org/api_docs/python/tf/keras/callbacks">(documentation)</a><a class="headerlink" href="#keras-callbacks-documentation" title="Permalink to this headline">¶</a></h2>
+<p>Fortunatly, keras/tensorflow and torch have got you covered. The Model.fit() method in the Keras library admits a “callback” argument that allows you to feed into the training protocal a list of callback rules. I’ll cover four examples below then show you how to write a custom callback. Visit the callbacks documentation page to see more options.</p>
+<div class="section" id="i-early-stopping-documentation">
+<h3>(i) Early Stopping <a class="reference external" href="https://www.tensorflow.org/api_docs/python/tf/keras/callbacks/EarlyStopping">(documentation)</a><a class="headerlink" href="#i-early-stopping-documentation" title="Permalink to this headline">¶</a></h3>
+<p>As the name implies, this callback will stop the training early, which means stop at some epoch when some metric stops improving.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">tensorflow.python.keras.callbacks</span> <span class="kn">import</span> <span class="n">EarlyStopping</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">early_stopping</span> <span class="o">=</span> <span class="n">EarlyStopping</span><span class="p">(</span>
+    <span class="n">monitor</span><span class="o">=</span><span class="s1">&#39;val_loss&#39;</span><span class="p">,</span> 
+    <span class="n">patience</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+    <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;max&#39;</span><span class="p">,</span>
+    <span class="n">min_delta</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> 
+    <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">baseline</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+    <span class="n">restore_best_weights</span><span class="o">=</span><span class="kc">False</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>I’ve written out all of the possible arguments in this example. I frequently adjust the <span class="math notranslate nohighlight">\(\color{red}{\text{monitor}}\)</span>, <span class="math notranslate nohighlight">\(\color{red}{\text{patience}}\)</span>, and <span class="math notranslate nohighlight">\(\color{red}{\text{mode}}\)</span> options in my work flows. <span class="math notranslate nohighlight">\(\color{red}{\text{Monitor}}\)</span> is the metric that captures the progress of the training, <span class="math notranslate nohighlight">\(\color{red}{\text{patience}}\)</span> is the number of epochs with no improvement after which training will be stopped, and <span class="math notranslate nohighlight">\(\color{red}{\text{mode}}\)</span> is whether the monitor quantity should be maximimzed or minimized.</p>
+<p>You still need to specifiy the number of epochs to train the model. When used with EarlyStopping the number you choose becomes the maximum number of epochs the model will get trained. In practice you want EarlyStopping to do the stopping, so pick a good number for the maximum number of epochs you are willing to work with! For example, if epochs = 40 but the loss is still improving, set the number of epochs to be a much larger number so that the training will continue on until no more progress is made after some number of epochs (<span class="math notranslate nohighlight">\(\color{red}{\text{patience}}\)</span>).</p>
+</div>
+<div class="section" id="ii-modelcheckpoint-documentation">
+<h3>(ii) ModelCheckpoint <a class="reference external" href="https://www.tensorflow.org/api_docs/python/tf/keras/callbacks/ModelCheckpoint">(documentation)</a><a class="headerlink" href="#ii-modelcheckpoint-documentation" title="Permalink to this headline">¶</a></h3>
+<p>This callback enables one to save the model weights as training progresses.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">tensorflow.python.keras.callbacks</span> <span class="kn">import</span> <span class="n">ModelCheckpoint</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model_checkpoint</span> <span class="o">=</span> <span class="n">ModelCheckpoint</span><span class="p">(</span>
+    <span class="n">filepath</span><span class="p">,</span> 
+    <span class="n">monitor</span><span class="o">=</span><span class="s1">&#39;val_loss&#39;</span><span class="p">,</span> 
+    <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> 
+    <span class="n">save_best_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">save_weights_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
+    <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> 
+    <span class="n">save_freq</span><span class="o">=</span><span class="s1">&#39;epoch&#39;</span><span class="p">,</span> 
+    <span class="n">options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+    <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Most of the arguments should be pretty straight-forward. As always visit the documentation page for full descriptions and some example use-cases. The <span class="math notranslate nohighlight">\(\color{red}{\text{filepath}}\)</span> argument must be specified (where the model weights will be saved), <span class="math notranslate nohighlight">\(\color{red}{\text{monitor}}\)</span>, which will be used to determine the best model weights, and the boolean arguments <span class="math notranslate nohighlight">\(\color{red}{\text{save_best_only}}\)</span> and <span class="math notranslate nohighlight">\(\color{red}{\text{save_weights_only}}\)</span>, which are helpful options for specifying how and when to save the weights.</p>
+</div>
+<div class="section" id="iii-csvlogger-documentation">
+<h3>(iii) CSVLogger <a class="reference external" href="https://www.tensorflow.org/api_docs/python/tf/keras/callbacks/CSVLogger">(documentation)</a><a class="headerlink" href="#iii-csvlogger-documentation" title="Permalink to this headline">¶</a></h3>
+<p>Save the training metrics and other miscellaneous details you are monitoring to <span class="math notranslate nohighlight">\(\color{red}{\text{filename}}\)</span> after every epoch. The metrics are initialized when Model.compile is called, which accepts a list of metrics that you chose (for example, metrics = <span class="math notranslate nohighlight">\([\text{loss},~\text{val_loss},~\text{val_accuracy},~\dots]\)</span>). They are typically what gets printed to the screen from the progress bar when Model.fit gets called.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">tensorflow.python.keras.callbacks</span> <span class="kn">import</span> <span class="n">CSVLogger</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">csv_logger</span> <span class="o">=</span> <span class="n">CSVLogger</span><span class="p">(</span>
+    <span class="n">filename</span><span class="p">,</span> 
+    <span class="n">separator</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> 
+    <span class="n">append</span><span class="o">=</span><span class="kc">False</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Use the <span class="math notranslate nohighlight">\(\color{red}{\text{append}}\)</span> argument when restarting training (e.g. set to True, otherwise False). You can save other things to the logger as well, such as the learning rate, using custom callbacks, which are discussed below.</p>
+</div>
+<div class="section" id="iv-learningratescheduler-documentation-and-reducelronplateau-documentation">
+<h3>(iv) LearningRateScheduler <a class="reference external" href="https://www.tensorflow.org/api_docs/python/tf/keras/callbacks/LearningRateScheduler">(documentation)</a> and ReduceLROnPlateau <a class="reference external" href="https://www.tensorflow.org/api_docs/python/tf/keras/callbacks/ReduceLROnPlateau">(documentation)</a><a class="headerlink" href="#iv-learningratescheduler-documentation-and-reducelronplateau-documentation" title="Permalink to this headline">¶</a></h3>
+<p>The learning rate value can be adjusted while the model is training using the LearningRateScheduler callback, which allows us to specify how it should change. Additionally, the callback ReduceLROnPlateau is show-cased. In my experience this callback is very often a better choice to my custom specifications.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">tensorflow.python.keras.callbacks</span> <span class="kn">import</span> <span class="n">ReduceLROnPlateau</span><span class="p">,</span> <span class="n">LearningRateScheduler</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">math</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Let us assume that we would like the learning rate to decay exponentially with epochs:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">CustomScheduler</span><span class="p">:</span>
+    
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">decay_constant</span> <span class="o">=</span> <span class="mi">10</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decay</span> <span class="o">=</span> <span class="n">decay_constant</span>
+        
+    <span class="k">def</span> <span class="nf">scheduler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epoch</span><span class="p">,</span> <span class="n">lr</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">lr</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">epoch</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">decay</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">myScheduler</span> <span class="o">=</span> <span class="n">CustomScheduler</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">initial_lr</span> <span class="o">=</span> <span class="mf">0.001</span>
+<span class="n">epochs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">))</span>
+<span class="n">learning_rate</span> <span class="o">=</span> <span class="p">[</span><span class="n">myScheduler</span><span class="o">.</span><span class="n">scheduler</span><span class="p">(</span><span class="n">epoch</span><span class="p">,</span> <span class="n">initial_lr</span><span class="p">)</span> <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="n">epochs</span><span class="p">]</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">epochs</span><span class="p">,</span> <span class="n">learning_rate</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;epochs&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;learning rate&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Text(0, 0.5, &#39;learning rate&#39;)
+</pre></div>
+</div>
+<img alt="_images/callbacks_23_1.svg" src="_images/callbacks_23_1.svg" /></div>
+</div>
+<p>Now the custom rule can be turned into a Callbacks object using LearningRateScheduler:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">callback</span> <span class="o">=</span> <span class="n">LearningRateScheduler</span><span class="p">(</span><span class="n">myScheduler</span><span class="o">.</span><span class="n">scheduler</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>And thats it! I purposefully created CustomScheduler as a class (rather than a method), so that I could insert custom parameters, in this case the exponential decay constant. Ok, next let’s take a look at ReduceLROnPlateau.</p>
+<p>As its name suggests, the learning rate is changed by a factor anytime the quantity being measured reaches a performance benchmark high-water mark, that then regresses or fails to improve further (the metric has plateued).</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lr_annealer</span> <span class="o">=</span> <span class="n">ReduceLROnPlateau</span><span class="p">(</span>
+    <span class="n">monitor</span><span class="o">=</span><span class="s1">&#39;val_loss&#39;</span><span class="p">,</span> 
+    <span class="n">factor</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> 
+    <span class="n">patience</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> 
+    <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> 
+    <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span>
+    <span class="n">min_delta</span><span class="o">=</span><span class="mf">0.0001</span><span class="p">,</span> 
+    <span class="n">cooldown</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> 
+    <span class="n">min_lr</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> 
+    <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="v-custom-callbacks-documentation">
+<h3>(v) Custom callbacks <a class="reference external" href="https://www.tensorflow.org/guide/keras/custom_callback">(documentation)</a><a class="headerlink" href="#v-custom-callbacks-documentation" title="Permalink to this headline">¶</a></h3>
+<p>We only know the learning rate dependency on epochs if the relationship is explicitly defined, as is the case an exponential annealing protocol. However, when using ReduceLROnPlateau (and in general) it can be convenient to track the learning rate as training progresses, by printing it to the screen during training, and by saving it to the CSVLogger filename if that callback has also been used. To do this, we will write a custom callback.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">tensorflow.python.keras</span> <span class="kn">import</span> <span class="n">backend</span> <span class="k">as</span> <span class="n">K</span>
+<span class="kn">from</span> <span class="nn">tensorflow.python.keras.callbacks</span> <span class="kn">import</span> <span class="n">Callback</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">LearningRateTracker</span><span class="p">(</span><span class="n">Callback</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">on_epoch_end</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epoch</span><span class="p">,</span> <span class="n">logs</span> <span class="o">=</span> <span class="p">{}):</span>
+        <span class="n">logs</span> <span class="o">=</span> <span class="n">logs</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="n">logs</span><span class="p">[</span><span class="s1">&#39;lr&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">K</span><span class="o">.</span><span class="n">get_value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">lr</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="using-callbacks-when-training">
+<h2>Using Callbacks when training<a class="headerlink" href="#using-callbacks-when-training" title="Permalink to this headline">¶</a></h2>
+<p>In Keras, models are trained when enacting the Model.fit call, which is where we insert our callbacks. First make a list of our Keras.callbacks objects defined earlier,</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">callbacks</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">early_stopping</span><span class="p">,</span> <span class="n">model_checkpoint</span><span class="p">,</span> <span class="n">csv_logger</span><span class="p">,</span> <span class="n">lr_annealer</span><span class="p">,</span> <span class="n">custom_callback</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Then this list is simply inserted as an extra argument to the call to Model.fit like so:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+    <span class="n">x_data</span><span class="p">,</span> <span class="n">y_data</span><span class="p">,</span>
+    <span class="n">callbacks</span> <span class="o">=</span> <span class="n">callbacks</span><span class="p">,</span>
+    <span class="o">...</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>And thats it! In some cases the callbacks will print information to the screen (you can control that output typically via the verbose argument).</p>
+</div>
+</div>
+<div class="section" id="pytorch">
+<h1>pyTorch<a class="headerlink" href="#pytorch" title="Permalink to this headline">¶</a></h1>
+<p>Callbacks can also be implemented with the (py)Torch library. Unless you are using a custom library thats build on Torch, one has to train the model at a lower level as compared to Keras, where training was taken care of with the Model.fit method.</p>
+<p>I will cover how to write custom Trainer objects in detail in a future post, but in general to train a model we will minimally require a method to train the model for one epoch, and a method to validate (or test) the model. For example,</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Trainer</span><span class="p">:</span>
+    
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epochs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">epochs</span> <span class="o">=</span> <span class="n">epochs</span>
+        
+    <span class="k">def</span> <span class="nf">train_one_epoch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epoch</span><span class="p">):</span>
+        <span class="c1"># Loop over data and estimate epoch loss</span>
+        <span class="k">return</span> <span class="n">loss</span>
+    
+    <span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">epoch</span><span class="p">):</span>
+        <span class="c1"># Run the model in predict mode and predict on a validation holdout set</span>
+        <span class="k">return</span> <span class="n">test_loss</span>
+    
+    <span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="n">epochs</span><span class="p">:</span>
+            <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_one_epoch</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span>
+            <span class="n">test_loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">test</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>The Trainer.train class method loops over the total number of epochs and trains and tests the model at each epoch.</p>
+<p>Let’s insert a call to anneal the learning rate on plateau into the custom Trainer object:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">torch.optim.lr_scheduler</span> <span class="kn">import</span> <span class="n">ReduceLROnPlateau</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">scheduler</span> <span class="o">=</span> <span class="n">ReduceLROnPlateau</span><span class="p">(</span><span class="o">**</span><span class="n">config</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Trainer</span><span class="p">:</span>
+    
+    <span class="o">...</span>
+    
+    <span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="n">epochs</span><span class="p">:</span>
+            <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_one_epoch</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span>
+            <span class="n">test_loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">test</span><span class="p">(</span><span class="n">epoch</span><span class="p">)</span>
+            <span class="n">scheduler</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Note that you should only call the scheduler after updating the optimizer. That’s it!</p>
+<p>Email any questions / mistakes / whatever to John Schreck, schreck&#64;ucar.edu</p>
+</div>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "Python 3.8.6 64-bit"
+        },
+        kernelOptions: {
+            kernelName: "Python 3.8.6 64-bit",
+            path: "./."
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'Python 3.8.6 64-bit'</script>
+
+              </div>
+              
+        </div>
+    </div>
+    
+    
+    <div class='prev-next-bottom'>
+        
+    <a class='left-prev' id="prev-link" href="data_loaders.html" title="previous page">2. Data Loaders for ML Pipelines</a>
+
+    </div>
+    <footer class="footer mt-5 mt-md-0">
+    <div class="container">
+      <p>
+        
+          By AIML @ NCAR<br/>
+        
+            &copy; Copyright 2020.<br/>
+      </p>
+    </div>
+  </footer>
+</main>
+
+
+      </div>
+    </div>
+
+    
+  <script src="_static/js/index.3da636dd464baa7582d2.js"></script>
+
+
+    
+  </body>
+</html>

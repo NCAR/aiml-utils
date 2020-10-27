@@ -57,6 +57,7 @@
     <script async="async" src="_static/sphinx-thebe.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="2. Data Loaders for ML Pipelines" href="data_loaders.html" />
     <link rel="prev" title="Introduction" href="home.html" />
 
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -104,8 +105,18 @@
   </a>
  </li>
  <li class="toctree-l1">
-  <a class="reference internal" href="#data-loaders-for-ml-pipelines">
+  <a class="reference internal" href="data_loaders.html">
    2. Data Loaders for ML Pipelines
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="callbacks.html">
+   3. Callbacks: Utilities for interacting with ML training
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="callbacks.html#pytorch">
+   pyTorch
   </a>
  </li>
 </ul>
@@ -197,71 +208,30 @@
         </div>
         <nav id="bd-toc-nav">
             <ul class="nav section-nav flex-column">
- <li class="toc-h1 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#">
-   1. Methods, iterables, and generators for reading files
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#the-python-method">
+   The Python Method
   </a>
-  <ul class="nav section-nav flex-column">
-   <li class="toc-h2 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#the-python-method">
-     The Python Method
-    </a>
-   </li>
-   <li class="toc-h2 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#the-python-generator">
-     The Python Generator
-    </a>
-   </li>
-   <li class="toc-h2 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#the-python-iterable">
-     The Python Iterable
-    </a>
-   </li>
-   <li class="toc-h2 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#why-even-have-generators-when-there-are-already-iterators">
-     Why even have generators when there are already iterators?
-    </a>
-   </li>
-   <li class="toc-h2 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#when-should-i-use-a-generator-rather-than-a-method">
-     When should I use a generator rather than a method?
-    </a>
-   </li>
-  </ul>
  </li>
- <li class="toc-h1 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#data-loaders-for-ml-pipelines">
-   2. Data Loaders for ML Pipelines
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#the-python-generator">
+   The Python Generator
   </a>
-  <ul class="nav section-nav flex-column">
-   <li class="toc-h2 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#the-dataset-reader">
-     The Dataset Reader
-    </a>
-   </li>
-   <li class="toc-h2 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#the-iterator">
-     The Iterator
-    </a>
-    <ul class="nav section-nav flex-column">
-     <li class="toc-h3 nav-item toc-entry">
-      <a class="reference internal nav-link" href="#torch">
-       Torch
-      </a>
-     </li>
-     <li class="toc-h3 nav-item toc-entry">
-      <a class="reference internal nav-link" href="#keras">
-       Keras
-      </a>
-     </li>
-     <li class="toc-h3 nav-item toc-entry">
-      <a class="reference internal nav-link" href="#tensorflow">
-       Tensorflow
-      </a>
-     </li>
-    </ul>
-   </li>
-  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#the-python-iterable">
+   The Python Iterable
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#why-even-have-generators-when-there-are-already-iterators">
+   Why even have generators when there are already iterators?
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#when-should-i-use-a-generator-rather-than-a-method">
+   When should I use a generator rather than a method?
+  </a>
  </li>
 </ul>
 
@@ -562,324 +532,7 @@
 <p>There are lots of scenerios, in addition to data loading! Note that in the first method example above, a list was returned. Do you need all elements of the list, all at the same time? If the answer is no, then you want to try to use a generator if that file is large in size!</p>
 <p>With generators one tries to balance the time spent performing operations with/on the data with memory utilization. Using them will often be determined by how your program is designed to run and utilize resources. If you are presented with a significant memory bottleneck, generators are very often the way to go. However if your program does not have said memory issue, using a generator might result in the program running significantly slower.</p>
 <p>As you use generators more and more in your work-flow, you will learn to apply them when they are needed and when to avoid them when they do not offer any benefit over using methods.</p>
-</div>
-</div>
-<div class="section" id="data-loaders-for-ml-pipelines">
-<h1>2. Data Loaders for ML Pipelines<a class="headerlink" href="#data-loaders-for-ml-pipelines" title="Permalink to this headline">¶</a></h1>
-<p>Next, let us combine methods, generators and iterators and build something a little more involved – how about effecient data objects for preparation and data ingestion into ML models?</p>
-<p>We will look at the holodec data (as of Oct 12, 2020), which contains large hologram images and numerical data accompaning each image. The holodec data is saved as netCDF format – by default the data type only supports lazy reading!</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">holodecml.data</span> <span class="kn">import</span> <span class="o">*</span>
-</pre></div>
-</div>
-</div>
-</div>
-<p>The main method to load the data is reproduced here (which calls other methods, not shown)</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">load_raw_datasets</span><span class="p">(</span><span class="n">path_data</span><span class="p">,</span> <span class="n">num_particles</span><span class="p">,</span> <span class="n">split</span><span class="p">,</span> <span class="n">output_cols</span><span class="p">,</span> <span class="n">subset</span><span class="p">):</span>
-    <span class="n">ds</span> <span class="o">=</span> <span class="n">open_dataset</span><span class="p">(</span><span class="n">path_data</span><span class="p">,</span> <span class="n">num_particles</span><span class="p">,</span> <span class="n">split</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">subset</span><span class="p">:</span>
-        <span class="n">ix</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">subset</span> <span class="o">*</span> <span class="n">ds</span><span class="p">[</span><span class="s1">&#39;image&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-        <span class="n">inputs</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="s1">&#39;image&#39;</span><span class="p">][:</span><span class="n">ix</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
-        <span class="n">outputs</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="n">output_cols</span><span class="p">]</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span>
-        <span class="n">outputs</span> <span class="o">=</span> <span class="n">outputs</span><span class="p">[</span><span class="n">outputs</span><span class="p">[</span><span class="s2">&quot;hid&quot;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">ix</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">inputs</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
-        <span class="n">outputs</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="n">output_cols</span><span class="p">]</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span>    
-    <span class="n">ds</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-    <span class="k">return</span> <span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span>
-</pre></div>
-</div>
-</div>
-</div>
-<p>For most data files, there is nothing wrong with this method – its compact, easy to read, and does what you want it to do. As we have seen with the file loading example above, methods quickly become memory inefficient once files become large in size.</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">path_data</span> <span class="o">=</span> <span class="s2">&quot;/glade/p/cisl/aiml/ai4ess_hackathon/holodec/&quot;</span>
-<span class="n">num_particles</span> <span class="o">=</span> <span class="s2">&quot;multi&quot;</span>
-<span class="n">split</span> <span class="o">=</span> <span class="s1">&#39;train&#39;</span>
-<span class="n">subset</span> <span class="o">=</span> <span class="kc">False</span>
-<span class="n">output_cols</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="s2">&quot;d&quot;</span><span class="p">,</span> <span class="s2">&quot;hid&quot;</span><span class="p">]</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-<span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span> <span class="o">=</span> <span class="n">load_raw_datasets</span><span class="p">(</span><span class="n">path_data</span><span class="p">,</span> <span class="n">num_particles</span><span class="p">,</span> <span class="n">split</span><span class="p">,</span> <span class="n">output_cols</span><span class="p">,</span> <span class="n">subset</span><span class="p">)</span>
-<span class="n">t1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">t1</span><span class="o">-</span><span class="n">t0</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-<p>This file is pretty large, not large enough to cause a memory overflow, but it still takes about 5 minuites to load.</p>
-<p>Let us first write a lazy reader that returns the same thing data as the above method, but one row at a time. Then we will utilize special iterable objects from the Torch, Tensorflow, and Keras libraries that will enable multiprocessing with multiple simultanous workers for creating batches as well as other transformations.</p>
-<div class="section" id="the-dataset-reader">
-<h2>The Dataset Reader<a class="headerlink" href="#the-dataset-reader" title="Permalink to this headline">¶</a></h2>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
-<span class="kn">from</span> <span class="nn">tensorflow.keras.utils</span> <span class="kn">import</span> <span class="n">Sequence</span>
-<span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">DataLoader</span>
-</pre></div>
-</div>
-</div>
-</div>
-<p>Torch.utils.data.Dataset and tensorflow.keras.utils.Sequence objects both require a custom “Reader” class to contain the <span class="math notranslate nohighlight">\(\color{blue}{\textbf{__len__}}\)</span> and <span class="math notranslate nohighlight">\(\color{blue}{\textbf{__getitem__}}\)</span> thunder methods:</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">HologramReader</span><span class="p">(</span><span class="n">Dataset</span><span class="p">):</span> <span class="c1"># Sequence</span>
-    
-    <span class="s1">&#39;Generates data for Keras/Tensorflow/Torch environments&#39;</span>
-    
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
-                 <span class="n">path_data</span><span class="p">,</span> 
-                 <span class="n">num_particles</span><span class="p">,</span> 
-                 <span class="n">split</span><span class="p">,</span> 
-                 <span class="n">output_cols</span><span class="p">,</span> 
-                 <span class="n">subset</span><span class="p">,</span> 
-                 <span class="n">maxnum_particles</span> <span class="o">=</span> <span class="mi">100</span><span class="p">):</span>
-        
-        <span class="s1">&#39;Initialization&#39;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ds</span> <span class="o">=</span> <span class="n">open_dataset</span><span class="p">(</span><span class="n">path_data</span><span class="p">,</span> <span class="n">num_particles</span><span class="p">,</span> <span class="n">split</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">output_cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">output_cols</span> <span class="k">if</span> <span class="n">x</span> <span class="o">!=</span> <span class="s1">&#39;hid&#39;</span><span class="p">]</span>        
-        <span class="bp">self</span><span class="o">.</span><span class="n">hologram_numbers</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">hologram_number</span><span class="o">.</span><span class="n">values</span><span class="p">)))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">maxnum_particles</span> <span class="o">=</span> <span class="n">maxnum_particles</span>
-        
-    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="s1">&#39;Denotes the number of batches per epoch&#39;</span>
-        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hologram_numbers</span><span class="p">)</span>
-    
-    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
-        <span class="s1">&#39;Return one row of data&#39;</span>
-        
-        <span class="c1"># Select one &quot;row&quot; from the dataset</span>
-        <span class="n">hologram</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hologram_numbers</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
-
-        <span class="n">x_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">][</span><span class="n">hologram</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
-        <span class="n">y_out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">maxnum_particles</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxnum_particles</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_particles</span><span class="p">,</span> 
-            <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_cols</span><span class="p">)</span>
-        <span class="p">))</span>
-        <span class="n">particles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="s2">&quot;hid&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">hologram</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">for</span> <span class="n">l</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">particles</span><span class="p">):</span>
-            <span class="k">for</span> <span class="n">m</span><span class="p">,</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_cols</span><span class="p">):</span>
-                <span class="n">y_out</span><span class="p">[</span><span class="n">l</span><span class="p">,</span> <span class="n">m</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">p</span><span class="p">]</span>
-
-        <span class="k">return</span> <span class="n">x_out</span><span class="p">,</span> <span class="n">y_out</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_reader</span> <span class="o">=</span> <span class="n">HologramReader</span><span class="p">(</span><span class="n">path_data</span><span class="p">,</span> <span class="n">num_particles</span><span class="p">,</span> <span class="n">split</span><span class="p">,</span> <span class="n">output_cols</span><span class="p">,</span> <span class="n">subset</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-<p>The method <span class="math notranslate nohighlight">\(\color{blue}{\textbf{__getitem__}}\)</span> is used to select whichever hologram we want (take the one labeled 0):</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">data_reader</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(600, 400) (100, 4)
-</pre></div>
-</div>
-</div>
-</div>
-<p>Make a quick plot:</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;matplotlib.image.AxesImage at 0x2ac3cfa7f550&gt;
-</pre></div>
-</div>
-<img alt="_images/generators_69_1.png" src="_images/generators_69_1.png" />
-</div>
-</div>
-</div>
-<div class="section" id="the-iterator">
-<h2>The Iterator<a class="headerlink" href="#the-iterator" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="torch">
-<h3>Torch<a class="headerlink" href="#torch" title="Permalink to this headline">¶</a></h3>
-<p>To make the the torch/keras Reader class iterable, we can wrap a torch DataLoader object around it which will enable batching, multiprocessing capabilities, and other options. As noted, the DataLoader object requires that the Reader class contains the <span class="math notranslate nohighlight">\(\color{blue}{\textbf{__len__}}\)</span> and <span class="math notranslate nohighlight">\(\color{blue}{\textbf{__getitem__}}\)</span> thunder methods:</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_iterator</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span>
-    <span class="n">data_reader</span><span class="p">,</span>
-    <span class="n">num_workers</span> <span class="o">=</span> <span class="mi">8</span><span class="p">,</span>
-    <span class="n">batch_size</span> <span class="o">=</span> <span class="mi">32</span><span class="p">,</span>
-    <span class="n">shuffle</span> <span class="o">=</span> <span class="kc">True</span>
-<span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="ow">in</span> <span class="n">data_iterator</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-    <span class="k">break</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>torch.Size([32, 600, 400]) torch.Size([32, 100, 4])
-</pre></div>
-</div>
-</div>
-</div>
-<p>The DataLoader object will take care of creating independent workers that each will load the Reader and put the row data onto a queue where the data is sent back to a Manager that feeds the model. The first few calls to data_iterator will be slow as the workers have to be initialized before they can start putting data onto a queue.</p>
-<p>In a future blog post we will write our own multiprocessing worker class, but lets appreciate how easy the big three libraries have made it for us to get to this point.</p>
-</div>
-<div class="section" id="keras">
-<h3>Keras<a class="headerlink" href="#keras" title="Permalink to this headline">¶</a></h3>
-<p>When training a model with Keras, all we have to do is swap <span class="math notranslate nohighlight">\(\color{black}{\textbf{HologramReader(Dataset)}}\)</span> for <span class="math notranslate nohighlight">\(\color{black}{\textbf{HologramReader(Sequence)}}\)</span> and make no other changes. We also could have skipped using the inheritance approach and specify the output type (torch tensor versus numpy tensor) upon return.</p>
-<p>In older Keras versions, the Reader would be fed into the Model.fit_generator method, which allowed one to toggle the number of workers and queue size. Now that functionality has been added to the Model.fit method while Model.fit_generator has been depcrecated. The important bit about the Sequence object is that it is thread-safe, meaning the workers spawned will not duplicate data chunks (this isn’t necessarily always a problem but depends on the type of data being used).</p>
-<p>The torch DataLoader came with shuffle capability (by initializing a random order using the <span class="math notranslate nohighlight">\(\color{blue}{\textbf{__len__}}\)</span> method), whereas in the Sequence object, shuffle functionality (and whatever else you want) can be enabled by adding a method typically called <span class="math notranslate nohighlight">\(\color{blue}{\textbf{on_epoch_end}}\)</span> that will shuffle after some number of data points have been returned.</p>
-</div>
-<div class="section" id="tensorflow">
-<h3>Tensorflow<a class="headerlink" href="#tensorflow" title="Permalink to this headline">¶</a></h3>
-<p>Tensorflow also has its own library of data objects. We only have to make a few adjustments to the above Readers to use the tf variant where the call will be a generator and not a method:</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">TFHologramReader</span><span class="p">:</span> 
-    
-    <span class="s1">&#39;Generates data for Keras/Tensorflow/Torch environments&#39;</span>
-    
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> 
-                 <span class="n">path_data</span><span class="p">,</span> 
-                 <span class="n">num_particles</span><span class="p">,</span> 
-                 <span class="n">split</span><span class="p">,</span> 
-                 <span class="n">output_cols</span><span class="p">,</span> 
-                 <span class="n">subset</span><span class="p">,</span> 
-                 <span class="n">maxnum_particles</span> <span class="o">=</span> <span class="mi">100</span><span class="p">):</span>
-        
-        <span class="s1">&#39;Initialization&#39;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ds</span> <span class="o">=</span> <span class="n">open_dataset</span><span class="p">(</span><span class="n">path_data</span><span class="p">,</span> <span class="n">num_particles</span><span class="p">,</span> <span class="n">split</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">output_cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">output_cols</span> <span class="k">if</span> <span class="n">x</span> <span class="o">!=</span> <span class="s1">&#39;hid&#39;</span><span class="p">]</span>        
-        <span class="bp">self</span><span class="o">.</span><span class="n">hologram_numbers</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="o">.</span><span class="n">hologram_number</span><span class="o">.</span><span class="n">values</span><span class="p">)))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">maxnum_particles</span> <span class="o">=</span> <span class="n">maxnum_particles</span>
-    
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="s1">&#39;Return one row of data&#39;</span>
-        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">hologram</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hologram_numbers</span><span class="p">):</span>
-            <span class="c1"># Select one &quot;row&quot; from the dataset</span>
-            <span class="n">x_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="s2">&quot;image&quot;</span><span class="p">][</span><span class="n">hologram</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
-            <span class="n">y_out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">maxnum_particles</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxnum_particles</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_particles</span><span class="p">,</span> 
-                <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_cols</span><span class="p">)</span>
-            <span class="p">))</span>
-            <span class="n">particles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="s2">&quot;hid&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">hologram</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="k">for</span> <span class="n">l</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">particles</span><span class="p">):</span>
-                <span class="k">for</span> <span class="n">m</span><span class="p">,</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_cols</span><span class="p">):</span>
-                    <span class="n">y_out</span><span class="p">[</span><span class="n">l</span><span class="p">,</span> <span class="n">m</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ds</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">p</span><span class="p">]</span>
-
-            <span class="k">yield</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">x_out</span><span class="p">),</span> <span class="n">tf</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">y_out</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-<p>Note that this Reader’s <span class="math notranslate nohighlight">\(\color{blue}{\textbf{__call__}}\)</span> is a generator, whereas before we used a method.</p>
-<p>Calling and using the reader is the same as before. First, initialize an instance by setting the input variables:</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tf_data_generator</span> <span class="o">=</span> <span class="n">TFHologramReader</span><span class="p">(</span>
-    <span class="n">path_data</span><span class="p">,</span> <span class="n">num_particles</span><span class="p">,</span> <span class="n">split</span><span class="p">,</span> <span class="n">output_cols</span><span class="p">,</span> <span class="n">subset</span>
-<span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-<p>Then we wrap Tensorflow’s Dataset object around the generator, using the <span class="math notranslate nohighlight">\(\color{blue}{\textbf{from_generator}}\)</span> method within the Dataset object, and setting the tensor types explictly:</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tf_data_iterator</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Dataset</span><span class="o">.</span><span class="n">from_generator</span><span class="p">(</span>
-    <span class="n">tf_data_generator</span><span class="p">,</span> 
-    <span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">dtypes</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">dtypes</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
-<span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-<p>Setting the batch size can be done by</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tf_data_iterator</span> <span class="o">=</span> <span class="n">tf_data_iterator</span><span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-<p>Shuffling is a little more complex. Since a generator is used and there is not len thunder method, a memory buffer of size buffer_size will be created and rows put into it. Then, batches are selected from it and returned. Note that there could be a delay in the begining as the buffer has to fill up:</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tf_data_iterator</span> <span class="o">=</span> <span class="n">tf_data_iterator</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">buffer_size</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-<p>To get true random sampling, the buffer size would need to be the size of the data set.</p>
-<p>In torch and Keras examples, we explicitly specified the total number of holograms that could be queried from the dataset, which allowed for easily performing true random sampling. We could just as easily build this into the tf reader as well, for example, by adding an on_epoch_end method that shuffles the hologram numbers after the generator yields a fixed number of data points. We get the same output as before but now with tensorflow tensors:</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="ow">in</span> <span class="n">tf_data_iterator</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-    <span class="k">break</span>
-</pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(32, 600, 400) (32, 100, 4)
-</pre></div>
-</div>
-</div>
-</div>
-<p>The number of workers can be set when training the model through the Model.fit in newer versions of Keras as:</p>
-<div class="cell docutils container">
-<div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
-    <span class="n">tf_data_iterator</span><span class="p">,</span>
-    <span class="o">...</span><span class="p">,</span>
-    <span class="n">max_queue_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> 
-    <span class="n">workers</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> 
-    <span class="n">use_multiprocessing</span><span class="o">=</span><span class="kc">True</span>
-<span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-<p>Note that we could use any of these approaches with either ML language, though the torch and tensorflow versions are supported while Sequence has been deprecated. Enabling multiprocessing with Tensorflow Data objects is rather tricky though, we just let the Keras methods handle that here. We will cover that another time!</p>
-<p>Note that these special iterator objects contain many other features not covered here, so be sure to check out the documentation!</p>
-<p>Tensorflow Dataset: <a class="reference external" href="https://www.tensorflow.org/api_docs/python/tf/data/Dataset">https://www.tensorflow.org/api_docs/python/tf/data/Dataset</a></p>
-<p>Torch Dataset: <a class="reference external" href="https://pytorch.org/docs/stable/data.html">https://pytorch.org/docs/stable/data.html</a></p>
 <p>Feel free to email me (John Schreck, schreck&#64;ucar.edu) with any questions / mistakes / whatever!</p>
-</div>
 </div>
 </div>
 
@@ -912,6 +565,7 @@
     <div class='prev-next-bottom'>
         
     <a class='left-prev' id="prev-link" href="home.html" title="previous page">Introduction</a>
+    <a class='right-next' id="next-link" href="data_loaders.html" title="next page">2. Data Loaders for ML Pipelines</a>
 
     </div>
     <footer class="footer mt-5 mt-md-0">

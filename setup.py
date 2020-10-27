@@ -36,7 +36,7 @@ with open("requirements.txt") as f:
     
 
 setup(
-    name='holodecml',
+    name='aimlutils',
     version=find_version("./", "__version__.py"),
     author='AIML',
     description=('This repository contains various pieces of code that is shared across different AIML projects, as well as notebooks for blogs'),
@@ -50,7 +50,7 @@ setup(
     ],
     keywords="",
     install_requires=required_libraries,
-    packages=find_packages(exclude=['aimlutils']),
+    packages=find_packages(exclude=['aimlutils/tests']),
 #    test_suite='tests',
     zip_safe=False,
 )

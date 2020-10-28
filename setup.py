@@ -1,7 +1,7 @@
 '''
-    Setup file for the necessary packages to build and install holodecml.
+    Setup file for the necessary packages to build and install aimlutils.
     For ease, this can be installed from BitBucket via:
-    pip3 install git+https://[USER_NAME]@https://github.com/NCAR/holodec-ml/holodec-ml.git
+    pip3 install git+https://[USER_NAME]@https://github.com/NCAR/aiml-utils/aiml-utils.git
 
     It is recommeneded that you install this into a Python or Conda Virtual Environment.
 '''

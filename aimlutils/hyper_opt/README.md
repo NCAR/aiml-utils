@@ -1,0 +1,141 @@
+# Multi-gpu hyperparameter optimization with optuna
+
+### Usage: python optimize.py hyperparameters.yml model.yml
+
+
+There are three files that must be supplied to use the hyperparameter optimize script:
+
+* A custom objective function that performs the model training and returns the metric value to be optimized.
+
+* A configuration file specifying the hyperparameter optimization settings.
+
+* A model configuration file that contains the available hyperparameters that will get optimized.
+
+### Custom objective class
+The user must supply a custom Objective class that is composed with a **BaseObjective** class (base_objective.py), and contains a method named **train** that returns the value of the optimization metric in a dictionary. See the examples directory for both torch and Keras examples. Note that the objective class only needs to return the metric value (in dictionary form) and does not depend on the machine learning library used. For example, a simple user-supplied class must respect the following template: 
+
+from aimlutils.hyper_opt.base_objective import *
+
+class Objective(BaseObjective):
+
+    def __init__(self, study, config, metric = "val_loss", device = "cpu"):
+        
+        # Initialize the base class
+        
+        BaseObjective.__init__(self, study, config, metric, device)
+    
+    def train(self, trial, conf):
+        
+        # Make any custom edits to the model conf before using it to train a model.
+        conf = custom_updates(trial, conf)
+        
+        ... 
+
+        result = Model.fit(...)
+        
+        results_dictionary = {
+            val_loss: result["val_loss"],
+            loss: result["loss"],
+            ...
+            "val_accuracy": result["val_accuracy"]
+        }
+        return results_dictionary
+        
+The BaseObjective must be initialized using the input parameters to the Objective (they must match!). The metric used to toggle model performance must always be in the results dictionary, while other metrics that the user may want to track will also be stored and saved so long as they are included in the results dictionary. The base class will call the train method from its thunder **__call__** method, and finishes up by calling a save method that takes care of writing the metric(s) details to file. 
+
+Note that the first line in the train method states that any custom changes to the model configuration (conf) must be done here. If custom changes are required, the user must supply a method names **custom_updates** in addition to the Objective class (save both in the same script). See also the section **Custom configuration edits** below for more details. 
+
+### Hyperparameter optimizer configuration 
+There are three main fields, log, slurm, and optuna, and variable subfields within each field. The log field allows us to save a file for printing messages and warnings that are placed in areas throughout the package. The slurm field allows the user to specify how many GPU nodes should be used, and supports any slurm setting. The optuna field allows the user to configure the optimization procedure, including specifying which parameters will be used, as well as the performance metric. For example, consider the configuration settings:
+
+* log
+  + save_path: "path/to/data/log.txt"
+* slurm
+  + jobs: 20
+  + batch:
+    + account: "NAML0001"
+    + gres: "gpu:v100:1"
+    + mem: "128G"
+    + n: 8
+    + t: "12:00:00"
+    + J: "hyper_opt"
+    + o: "hyper_opt.out"
+    + e: "hyper_opt.err"
+* optuna
+  + name: "holodec_optimization.db"
+  + reload: 0
+  + objective: "examples/torch_objective.py"
+  + metric: "val_loss"
+  + direction: "minimize"
+  + n_trials: 500
+  + gpu: True
+  + save_path: 'test'
+  + sampler:
+    + type: "TPESampler"
+  + parameters:
+    + num_dense:
+      + type: "int"
+      + settings:
+        + name: "num_dense"
+        + low: 0
+        + high: 10
+    + dropout:
+      + type: "float"
+      + settings:
+        + name: "dr"
+        + low: 0.0
+        + high: 0.5
+    + **optimizer:learning_rate**:
+      + type: "loguniform"
+      + settings:
+        + name: "lr"
+        + low: 0.0000001
+        + high: 0.01
+
+The subfields within the optuna field have the following functionality:
+
+* name: ($\color{red}{string}$) The name of the study.
+* reload: ($\color{red}{bool}$) Whether to continue using a previous study (True) or to initialize a new study (False). If your initial number of workers do not reach the number of trials and you wish to resubmit, set to True.
+* objective: ($\color{red}{string}$) The path to the user-supplied objective class (it must be named objective.py)
+* metric: ($\color{red}{string}$) The metric to be used to determine the model performance. 
+* direction: ($\color{red}{string}$) Indicates which direction the metric must go to represent improvement (pick from maximimize or minimize)
+* n_trials: ($\color{red}{int}$) The number of trials in the study.
+* gpu: ($\color{red}{bool}$) Use the gpu or cpu.
+* save_path: ($\color{red}{string}$) Directory path where data will be saved. 
+* sampler
+  + type: ($\color{red}{string}$) Choose how optuna will do parameter estimation. The default choice both here and in optuna is the [Tree-structured Parzen Estimator Approach](https://towardsdatascience.com/a-conceptual-explanation-of-bayesian-model-based-hyperparameter-optimization-for-machine-learning-b8172278050f), [e.g. TPESampler](https://papers.nips.cc/paper/4443-algorithms-for-hyper-parameter-optimization.pdf). See the optuna documentation for the different options. For some samplers (e.g. GridSearch) additional fields may be included (e.g. search_space). 
+* parameters
+  + type: ($\color{red}{string}$) Option to select an optuna trial setting. See the [optuna Trial documentation](https://optuna.readthedocs.io/en/stable/reference/generated/optuna.trial.Trial.html?highlight=suggest#optuna.trial.Trial.suggest_uniform) for what is available. Currently, this package supports the available options from optuna: "categorical", "discrete_uniform", "float", "int", "loguniform", and "uniform".
+  + settings: This field allows you to specify any settings that accompany the optuna trial type. In the example above, the named num_dense parameter is stated to be an integer with values ranging from 0 to 10. To see all the available options, consolt the [optuna Trial documentation](https://optuna.readthedocs.io/en/stable/reference/generated/optuna.trial.Trial.html?highlight=suggest#optuna.trial.Trial.suggest_uniform)
+
+### Model configuration
+The model configuration file should be the one you have been using up to this point to train models. This package will take the suggested hyperparameters from an optuna trial and make changes to the model configuration. This can either be done automatically with this package, or the user may supply an additional method for making custom changes. For example, consider the (truncated) configuration for training a model to predict hologram properties with the holodec data:
+
+* model:
+  + image_channels: 1
+  + hidden_dims: [3, 94, 141, 471, 425, 1122]
+  + z_dim: 1277
+  + dense_hidden_dims: [1000]
+  + dense_dropouts: [0.0]
+  + tasks: ["x", "y", "z", "d", "binary"]
++ **optimizer**:
+  * type: "lookahead-diffgrad"
+  * **learning_rate**: 0.000631
+  * weight_decay: 0.0
++ trainer:
+  * start_epoch: 0
+  * epochs: 1
+  * clip: 1.0
+  * alpha: 1.0
+  * beta: 0.1
+  * path_save: "test"
+  
+The model configuration can be automatically updated using this package if the name of the parameter specified in the hyperparameters configuration, optuna.parameters can be used as a nested lookup key in the model configuration's nested dictionary. For example, observe in the hyperparameters configuration file that the named parameter **optimizer:learning_rate** contains a colon, that is downstream used to split the name into multiple keys that allow us to, starting from the top of the nested tree in the model configuration, work our way down until the field is located and the trial-suggested value is substituted in. In this example, the split keys are ["optimizer", "learning_rate"]. 
+
+This scheme will work in general as long as the named parameter in optuna.parameters uses : as the separator, and once split, the resulting list can be used to locate the relevant field in the model configuration.
+
+The user can also make custom rules for updating the model configuration file. This is covered in a section below.
+
+This class will be composed of a base class that will, among other things, save the progress of the optimization. 
+
+### Custom configuration edits

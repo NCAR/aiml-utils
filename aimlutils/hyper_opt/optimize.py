@@ -78,7 +78,6 @@ if __name__ == "__main__":
     for p, v in configuration_report(model_config):
         full_path = ".".join(p)
         logging.info(f"{full_path}: {v}")
-    raise
 
     # Set up new db entry if reload = 0 
     reload_study = bool(hyper_config["optuna"]["reload"])

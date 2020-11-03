@@ -1,4 +1,4 @@
-# Multi-gpu hyperparameter optimization with optuna
+# hyper_opt: A distributed multi-gpu hyperparameter optimization package build with optuna
 
 ### Usage: python optimize.py hyperparameters.yml model.yml
 
@@ -12,34 +12,34 @@ There are three files that must be supplied to use the hyperparameter optimize s
 * A model configuration file that contains the available hyperparameters that will get optimized.
 
 ### Custom objective class
-The user must supply a custom Objective class that is composed with a **BaseObjective** class (base_objective.py), and contains a method named **train** that returns the value of the optimization metric in a dictionary. See the examples directory for both torch and Keras examples. Note that the objective class only needs to return the metric value (in dictionary form) and does not depend on the machine learning library used. For example, a simple user-supplied class must respect the following template: 
+The user must supply a custom Objective class (objective.py) that is composed with a **BaseObjective** class (base_objective.py), and contains a method named **train** that returns the value of the optimization metric in a dictionary. See the examples directory for both torch and Keras examples. Note that the objective class only needs to return the metric value (in dictionary form) and does not depend on the machine learning library used. For example, a simple user-supplied class must respect the following template: 
 
-from aimlutils.hyper_opt.base_objective import *
+    from aimlutils.hyper_opt.base_objective import *
 
-class Objective(BaseObjective):
+    class Objective(BaseObjective):
 
-    def __init__(self, study, config, metric = "val_loss", device = "cpu"):
-        
-        # Initialize the base class
-        
-        BaseObjective.__init__(self, study, config, metric, device)
-    
-    def train(self, trial, conf):
-        
-        # Make any custom edits to the model conf before using it to train a model.
-        conf = custom_updates(trial, conf)
-        
-        ... 
+        def __init__(self, study, config, metric = "val_loss", device = "cpu"):
 
-        result = Model.fit(...)
-        
-        results_dictionary = {
-            val_loss: result["val_loss"],
-            loss: result["loss"],
-            ...
-            "val_accuracy": result["val_accuracy"]
-        }
-        return results_dictionary
+            # Initialize the base class
+
+            BaseObjective.__init__(self, study, config, metric, device)
+
+        def train(self, trial, conf):
+
+            # Make any custom edits to the model conf before using it to train a model.
+            conf = custom_updates(trial, conf)
+
+            ... 
+
+            result = Model.fit(...)
+
+            results_dictionary = {
+                "val_loss": result["val_loss"],
+                "loss": result["loss"],
+                ...
+                "val_accuracy": result["val_accuracy"]
+            }
+            return results_dictionary
         
 The BaseObjective must be initialized using the input parameters to the Objective (they must match!). The metric used to toggle model performance must always be in the results dictionary, while other metrics that the user may want to track will also be stored and saved so long as they are included in the results dictionary. The base class will call the train method from its thunder **__call__** method, and finishes up by calling a save method that takes care of writing the metric(s) details to file. 
 
@@ -130,12 +130,28 @@ The model configuration file should be the one you have been using up to this po
   * beta: 0.1
   * path_save: "test"
   
-The model configuration can be automatically updated using this package if the name of the parameter specified in the hyperparameters configuration, optuna.parameters can be used as a nested lookup key in the model configuration's nested dictionary. For example, observe in the hyperparameters configuration file that the named parameter **optimizer:learning_rate** contains a colon, that is downstream used to split the name into multiple keys that allow us to, starting from the top of the nested tree in the model configuration, work our way down until the field is located and the trial-suggested value is substituted in. In this example, the split keys are ["optimizer", "learning_rate"]. 
+The model configuration can be automatically updated using this package if the name of the parameter specified in the hyperparameter configuration, optuna.parameters can be used as a nested lookup key in the model configuration's nested dictionary. For example, observe in the hyperparameter configuration file that the named parameter **optimizer:learning_rate** contains a colon, that is downstream used to split the name into multiple keys that allow us to, starting from the top of the nested tree in the model configuration, work our way down until the field is located and the trial-suggested value is substituted in. In this example, the split keys are ["optimizer", "learning_rate"]. 
 
 This scheme will work in general as long as the named parameter in optuna.parameters uses : as the separator, and once split, the resulting list can be used to locate the relevant field in the model configuration.
 
-The user can also make custom rules for updating the model configuration file. This is covered in a section below.
-
-This class will be composed of a base class that will, among other things, save the progress of the optimization. 
 
 ### Custom configuration edits
+
+The user can also supply rules for updating the model configuration file, by including a method named **custom_updates**, which will make the desired changes to the configuration file with optuna trail parameter guesses.
+
+In the example configurations described above, the hyperparameter configuration contained an optuna.parameters field "num_dense," but this field is not present in the model configuration. There is however a dense_hiddden_dims field in the model configuration that contains a list of the layer sizes in the model (where the number of layers is the length of the list). In the example, just one layer speficied but we want to vary that number. To use the num_dense hyperparameter from the hyperparameter configuration file, we need to create the following custom method:
+
+    def custom_updates(trial, conf):
+    
+        # Get list of hyperparameters from the config
+        hyperparameters = conf["optuna"]["parameters"]
+    
+        # Now update some via custom rules
+        num_dense = trial.suggest_discrete_uniform(**hyperparameters["num_dense"]) 
+    
+        # Update the config based on optuna's suggestion
+        conf["model"]["dense_hidden_dims"] = [1000 for k in range(num_dense)]        
+        
+        return conf 
+        
+This custom method should be called first thing in the custom Objective.train method. You may have noticed that the configuration (named conf) contains both hyperparameter and model fields. This package will copy the hyperparameter fields to the model configuration for convenience, so that we can reduce the total number of class and method dependencies (which helps me keep the code generalized). This occurs in the run.py script.

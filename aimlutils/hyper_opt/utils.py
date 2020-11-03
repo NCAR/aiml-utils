@@ -52,7 +52,7 @@ def samplers(sampler):
     if _type == "TPESampler":
         return optuna.samplers.TPESampler()
     elif _type == "GridSampler":
-        if "search_space" in not sampler:
+        if "search_space" not in sampler:
             raise OSError("You must provide search_space options with the GridSampler.")
         else:
             return optuna.samplers.GridSampler(sampler["search_space"])

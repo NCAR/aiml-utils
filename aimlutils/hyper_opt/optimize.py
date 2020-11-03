@@ -18,6 +18,17 @@ def prepare_launch_script(hyper_config, model_config):
     slurm_options.append(f"python run.py {sys.argv[1]} {sys.argv[2]}")
     return slurm_options
 
+def configuration_report(my_dict, path=None):
+    if path is None:
+        path = []
+    for k,v in my_dict.items():
+        newpath = path + [k]
+        if isinstance(v, dict):
+            for u in configuration_report(v, newpath):
+                yield u
+        else:
+            yield newpath, v
+
 
 if __name__ == "__main__":
     
@@ -57,6 +68,17 @@ if __name__ == "__main__":
         fh.setLevel(logging.DEBUG)
         fh.setFormatter(formatter)
         root.addHandler(fh)
+        
+    # Print the configurations to the logger
+    logging.info("Current hyperparameter configuration settings:")
+    for p, v in configuration_report(hyper_config):
+        full_path = ".".join(p)
+        logging.info(f"{full_path}: {v}")
+    logging.info("Current model configuration settings:")
+    for p, v in configuration_report(model_config):
+        full_path = ".".join(p)
+        logging.info(f"{full_path}: {v}")
+    raise
 
     # Set up new db entry if reload = 0 
     reload_study = bool(hyper_config["optuna"]["reload"])
@@ -93,7 +115,7 @@ if __name__ == "__main__":
     launch_script = prepare_launch_script(hyper_config, model_config)
     
     # Save the configured script
-    script_path = os.path.split(hyper_config["log"]["save_path"])[0]
+    script_path = os.path.split(hyper_config["optuna"]["save_path"])[0]
     script_location = os.path.join(script_path, "launch.sh")
     with open(script_location, "w") as fid:
         for line in launch_script:
@@ -101,15 +123,21 @@ if __name__ == "__main__":
     
     # Launch the jobs
     job_ids = []
-    for worker in range(config["slurm"]["jobs"]):
+    name_condition = "J" in hyper_config["slurm"]["batch"]
+    slurm_job_name = hyper_config["slurm"]["batch"]["J"] if name_condition else "hyper_opt"
+    n_workers = hyper_config["slurm"]["jobs"]
+    for worker in range(n_workers):
         w = subprocess.Popen(
-            f"sbatch {script_location}", 
+            f"sbatch -J {slurm_job_name}_{worker} {script_location}", 
             shell=True,
             stdout = subprocess.PIPE,
             stderr = subprocess.PIPE
         ).communicate()
         job_ids.append(
-            w[0].strip("\n").split(" ")[-1]
+            w[0].decode("utf-8").strip("\n").split(" ")[-1]
+        )
+        logging.info(
+            f"Submitted batch job {worker + 1}/{n_workers} with id {job_ids[-1]}"
         )
         
     # Write the job ids to file for reference

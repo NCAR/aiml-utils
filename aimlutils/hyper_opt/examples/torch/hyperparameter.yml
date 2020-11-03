@@ -2,7 +2,7 @@ log:
   save_path: "test/log.txt"
 
 slurm:
-  jobs: 20
+  jobs: 1
   batch:
     account: "NAML0001"
     gres: "gpu:v100:1"
@@ -16,7 +16,7 @@ slurm:
 optuna:
   name: "holodec_optimization.db"
   reload: 0
-  objective: "examples/torch_objective.py"
+  objective: "/glade/work/schreck/repos/aiml-utils/aimlutils/hyper_opt/examples/torch/torch_objective.py"
   direction: "minimize"
   metric: "val_loss"
   n_trials: 500

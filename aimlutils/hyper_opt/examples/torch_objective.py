@@ -3,6 +3,7 @@ warnings.filterwarnings("ignore")
 
 import copy
 import optuna
+import logging
 import traceback
 
 from overrides import overrides
@@ -20,6 +21,9 @@ from torch import nn
 from torch.optim.lr_scheduler import *
 from torch.utils.data import Dataset, DataLoader
 from typing import List, Dict, Callable, Union, Any, TypeVar, Tuple
+
+
+logger = logging.getLogger(__name__)
 
 
 def custom_updates(trial, conf):
@@ -42,7 +46,7 @@ def custom_updates(trial, conf):
 
 class Objective(BaseObjective):
     
-    def __init__(self, study, config, metric = "val_loss", device = "cpu", verbose = False):
+    def __init__(self, study, config, metric = "val_loss", device = "cpu"):
         
         ###########################################################
         #
@@ -50,7 +54,7 @@ class Objective(BaseObjective):
         #
         ###########################################################
         
-        BaseObjective.__init__(self, study, config, metric, device, verbose)
+        BaseObjective.__init__(self, study, config, metric, device)
 
         if self.device != "cpu":
             torch.backends.cudnn.benchmark = True

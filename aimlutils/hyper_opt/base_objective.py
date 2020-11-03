@@ -21,13 +21,12 @@ def recursive_update(nested_keys, dictionary, update):
 
 class BaseObjective:
     
-    def __init__(self, study, config, metric = "val_loss", device = "cpu", verbose = False):
+    def __init__(self, study, config, metric = "val_loss", device = "cpu"):
         
         self.study = study
         self.config = config
         self.metric = metric
         self.device = f"cuda:{device}" if device != "cpu" else "cpu"
-        self.verbose = verbose
         
         self.results = defaultdict(list)
         save_path = config["optuna"]["save_path"]
@@ -35,20 +34,31 @@ class BaseObjective:
         while os.path.isfile(self.results_fn):
             rand_index = random.randint(0, 1e5)
             self.results_fn = os.path.join(save_path, f"hyper_opt_{rand_index}.csv")
+            
+        logger.info(f"Initialized an objective to be optimized with metric {metric}")
+        logger.info(f"Using device {device}")
+        logger.info(f"Saving study/trial results to local file {self.results_fn}")
     
     def update_config(self, trial):
+        
+        logger.info(
+            f"Attempting to automatically update the model configuration using optuna's suggested parameters"
+        )
         
         # Make a copy the config that we can edit
         conf = copy.deepcopy(self.config)
 
         # Update the fields that can be matched automatically (through the name field)
+        updated = []
         hyperparameters = conf["optuna"]["parameters"]
         for named_parameter, update in hyperparameters.items():
             if ":" in named_parameter:
                 recursive_update(
                     named_parameter.split(":"), 
                     conf,
-                    trial_suggest_loader(trial, update))        
+                    trial_suggest_loader(trial, update))
+                updated.append(named_parameter)
+        logger.info(f"Those that got updated automatically: {updated}")
         return conf
         
     def save(self, trial, results_dict):
@@ -76,6 +86,10 @@ class BaseObjective:
         # Save the df of results to disk
         pd.DataFrame.from_dict(self.results).to_csv(self.results_fn)
         
+        logger.info(
+            f"Saving trail {trial.number} results to local file {self.results_fn}"
+        )
+        
         return results_dict[self.metric]
     
     def __call__(self, trial):
@@ -84,10 +98,17 @@ class BaseObjective:
         conf = self.update_config(trial)
         
         # Train the model
+        logger.info(
+            f"Begining to train the model using the latest parameters from optuna"
+        )
+        
         try:
             result = self.train(trial, conf)
         
         except RuntimeError: # GPU memory overflow
+            logger.warning(
+                "Ran out of GPU memory, proceeding to prune the trial"
+            )
             raise optuna.TrialPruned()
         
         return result

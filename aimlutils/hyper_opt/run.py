@@ -37,18 +37,19 @@ else:
         f"Model config file {sys.argv[1]} does not exist"
     )
     
-verbose = False
+# Set up a logger
+root = logging.getLogger()
+root.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(levelname)s:%(name)s:%(message)s')
+
+# Stream output to stdout
+ch = logging.StreamHandler()
+ch.setLevel(logging.INFO)
+ch.setFormatter(formatter)
+root.addHandler(ch)
+
+# Stream output to file
 if "log" in hyper_config:
-    # Set up a logger
-    root = logging.getLogger()
-    root.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('%(levelname)s:%(name)s:%(message)s')
-    # Stream output to stdout
-    ch = logging.StreamHandler()
-    ch.setLevel(logging.INFO)
-    ch.setFormatter(formatter)
-    root.addHandler(ch)
-    # Stream output to file
     savepath = hyper_config["log"]["save_path"] if "save_path" in hyper_config["log"] else "log.txt"
     mode = "a+" if bool(hyper_config["optuna"]["reload"]) else "w"
     fh = logging.FileHandler(savepath,
@@ -57,7 +58,6 @@ if "log" in hyper_config:
     fh.setLevel(logging.DEBUG)
     fh.setFormatter(formatter)
     root.addHandler(fh)
-    verbose = True
     
 # Copy the optuna details to the model config
 model_config["optuna"] = hyper_config["optuna"] 
@@ -74,8 +74,7 @@ else:
     
 # Get the path to save all the data
 save_path = model_config["optuna"]["save_path"]
-if verbose:
-    logging.info(f"Saving optimization details to {save_path}")
+logging.info(f"Saving optimization details to {save_path}")
     
 # Set up the performance metric direction
 direction = str(model_config["optuna"]["direction"])
@@ -83,13 +82,11 @@ if direction not in ["maximize", "minimize"]:
     raise OSError(
         f"Optimizer direction {direction} not recognized. Choose from maximize or minimize"
     )
-if verbose:
-    logging.info(f"Direction of optimization {direction}")
+logging.info(f"Direction of optimization {direction}")
     
 # Grab the metric
 metric = str(model_config["optuna"]["metric"])
-if verbose:
-    logging.info(f"Using metric {metric}")
+logging.info(f"Using metric {metric}")
 
 # Get list of devices and initialize the Objective class
 if bool(model_config["optuna"]["gpu"]):
@@ -97,8 +94,7 @@ if bool(model_config["optuna"]["gpu"]):
     device = gpu_report[0][0]
 else:
     device = 'cpu'
-if verbose:
-    logging.info(f"Using device {device}")
+logging.info(f"Using device {device}")
 
 # Initialize the study object
 study_name = model_config["optuna"]["name"]
@@ -120,15 +116,14 @@ study = optuna.create_study(study_name=study_name,
                             storage=storage,
                             direction=direction,
                             load_if_exists=load_if_exists)
-if verbose:
-    logging.info(f"Loaded study {study_name} located at {storage}")
+logging.info(f"Loaded study {study_name} located at {storage}")
 
 # Initialize objective function
-objective = Objective(study, model_config, metric, device, verbose)
+objective = Objective(study, model_config, metric, device)
+
 # Optimize it
 study.optimize(objective, n_trials=int(model_config["optuna"]["n_trials"]))
-if verbose:
-    logging.info(f"Running optimization for {n_trials} trials")
+logging.info(f"Running optimization for {n_trials} trials")
 
 # Clean up the data files
 saved_results = glob.glob(os.path.join(save_path, "hyper_opt_*.csv"))
@@ -147,6 +142,5 @@ best_save_path = os.path.join(save_path, "best.csv")
 saved_results.to_csv(hyper_opt_save_path)
 best_parameters.to_csv(best_save_path)
 
-if verbose:
-    logging.info(f"Saved trial results to {hyper_opt_save_path}")
-    logging.info(f"Saved best results to {best_save_path}")
+logging.info(f"Saved trial results to {hyper_opt_save_path}")
+logging.info(f"Saved best results to {best_save_path}")

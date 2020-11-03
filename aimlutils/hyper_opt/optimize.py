@@ -35,16 +35,41 @@ if __name__ == "__main__":
             model_config = yaml.load(f, Loader=yaml.FullLoader)
     else:
         raise OSError(f"Model config file {sys.argv[1]} does not exist")
+        
+    # Set up a logger
+    root = logging.getLogger()
+    root.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(levelname)s:%(name)s:%(message)s')
     
+    # Stream output to stdout
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.INFO)
+    ch.setFormatter(formatter)
+    root.addHandler(ch)
+    
+    # Stream output to file
+    if "log" in hyper_config:
+        savepath = hyper_config["log"]["save_path"] if "save_path" in hyper_config["log"] else "log.txt"
+        mode = "a+" if bool(hyper_config["optuna"]["reload"]) else "w"
+        fh = logging.FileHandler(savepath,
+                                 mode=mode,
+                                 encoding='utf-8')
+        fh.setLevel(logging.DEBUG)
+        fh.setFormatter(formatter)
+        root.addHandler(fh)
+
     # Set up new db entry if reload = 0 
     reload_study = bool(hyper_config["optuna"]["reload"])
         
     if not reload_study:        
         name = hyper_config["optuna"]["name"]
-        storage =f"sqlite:///{name}"
+        path_to_study = os.path.join(hyper_config["optuna"]["save_path"], name)
+        storage =f"sqlite:///{path_to_study}"
         
-        if os.path.isfile(name):
-            os.remove(name)
+        if os.path.isfile(path_to_study):
+            message = f"WARNING: The study already exists at {path_to_study}."
+            message += f" You must delete {path_to_study} before proceeding."
+            raise OSError(message)
         
         direction = hyper_config["optuna"]["direction"]
         if direction not in ["maximize", "minimize"]:

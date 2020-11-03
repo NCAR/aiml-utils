@@ -1,4 +1,8 @@
 import optuna
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 supported_trials = [
@@ -10,12 +14,13 @@ supported_trials = [
     "uniform"
 ]
 
+
 def trial_suggest_loader(trial, config):
     _type = config["type"]
     if _type not in supported_trials:
-        raise OSError(
-            f"Type {_type} is not valid. Select from {supported_trials}"
-        )
+        message = f"Type {_type} is not valid. Select from {supported_trials}"
+        logger.warning(message)
+        raise OSError(message)
     if _type == "categorical":
         return trial.suggest_categorical(**config["settings"])
     elif _type == "discrete_uniform":
@@ -41,16 +46,16 @@ supported_samplers = [
 def samplers(sampler):
     _type = sampler["type"]
     if _type not in supported_samplers:
-        raise OSError(
-            f"Sampler {_type} is not valid. Select from {supported_samplers}"
-        )
+        message = f"Sampler {_type} is not valid. Select from {supported_samplers}"
+        logger.warning(message)
+        raise OSError(message)
     if _type == "TPESampler":
         return optuna.samplers.TPESampler()
     elif _type == "GridSampler":
-        if "search_space" in sampler:
-            return optuna.samplers.GridSampler(sampler["search_space"])
+        if "search_space" in not sampler:
+            raise OSError("You must provide search_space options with the GridSampler.")
         else:
-            return optuna.samplers.GridSampler()
+            return optuna.samplers.GridSampler(sampler["search_space"])
     elif _type == "RandomSampler":
         return optuna.samplers.RandomSampler()
     elif _type == "CmaEsSampler":

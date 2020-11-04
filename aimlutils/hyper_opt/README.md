@@ -1,9 +1,12 @@
 # hyper_opt: A distributed multi-gpu hyperparameter optimization package build with optuna
 
-### Usage: python optimize.py hyperparameters.yml model.yml
+### Usage
 
+python optimize.py hyperparameters.yml model_config.yml
 
-There are three files that must be supplied to use the hyperparameter optimize script:
+### Dependencies
+
+There are three files that must be supplied to use the optimize script:
 
 * A custom objective function that performs the model training and returns the metric value to be optimized.
 
@@ -12,7 +15,8 @@ There are three files that must be supplied to use the hyperparameter optimize s
 * A model configuration file that contains the available hyperparameters that will get optimized.
 
 ### Custom objective class
-The user must supply a custom Objective class (objective.py) that is composed with a **BaseObjective** class (base_objective.py), and contains a method named **train** that returns the value of the optimization metric in a dictionary. See the examples directory for both torch and Keras examples. Note that the objective class only needs to return the metric value (in dictionary form) and does not depend on the machine learning library used. For example, a simple user-supplied class must respect the following template: 
+
+The user must supply a custom **Objective** class (objective.py) that is composed with an internal **BaseObjective** class (base_objective.py), and contains a method named **train** that returns the value of the optimization metric in a dictionary. See the examples directory for both torch and Keras examples. Note that the objective class only needs to return the metric value (in dictionary form) and does not depend on the machine learning library used. For example, a simple Objective class template will have the following structure:
 
     from aimlutils.hyper_opt.base_objective import *
 
@@ -21,7 +25,6 @@ The user must supply a custom Objective class (objective.py) that is composed wi
         def __init__(self, study, config, metric = "val_loss", device = "cpu"):
 
             # Initialize the base class
-
             BaseObjective.__init__(self, study, config, metric, device)
 
         def train(self, trial, conf):
@@ -41,11 +44,12 @@ The user must supply a custom Objective class (objective.py) that is composed wi
             }
             return results_dictionary
         
-The BaseObjective must be initialized using the input parameters to the Objective (they must match!). The metric used to toggle model performance must always be in the results dictionary, while other metrics that the user may want to track will also be stored and saved so long as they are included in the results dictionary. The base class will call the train method from its thunder **__call__** method, and finishes up by calling a save method that takes care of writing the metric(s) details to file. 
+The BaseObjective must be initialized using the input parameters to the Objective (they must match!). The metric used to toggle model performance must always be in the results dictionary, while other metrics that the user may want to track will also be stored and saved so long as they are included in the results dictionary. The base class will call the train method from its thunder **__call__** method, and finishes up by calling a save method that takes care of writing the metric(s) details to file. Check out the script run.py to see how things are called.
 
-Note that the first line in the train method states that any custom changes to the model configuration (conf) must be done here. If custom changes are required, the user must supply a method names **custom_updates** in addition to the Objective class (save both in the same script). See also the section **Custom configuration edits** below for more details. 
+Note that the first line in the train method states that any custom changes to the model configuration (conf) must be done here. If custom changes are required, the user must supply a method named **custom_updates** in addition to the Objective class (save both in the same script). See also the section **Custom model configuration updates** below for more details. 
 
-### Hyperparameter optimizer configuration 
+### Hyperparameter optimizer configuration
+
 There are three main fields, log, slurm, and optuna, and variable subfields within each field. The log field allows us to save a file for printing messages and warnings that are placed in areas throughout the package. The slurm field allows the user to specify how many GPU nodes should be used, and supports any slurm setting. The optuna field allows the user to configure the optimization procedure, including specifying which parameters will be used, as well as the performance metric. For example, consider the configuration settings:
 
 * log
@@ -109,6 +113,7 @@ The subfields within the optuna field have the following functionality:
   + settings: This field allows you to specify any settings that accompany the optuna trial type. In the example above, the named num_dense parameter is stated to be an integer with values ranging from 0 to 10. To see all the available options, consolt the [optuna Trial documentation](https://optuna.readthedocs.io/en/stable/reference/generated/optuna.trial.Trial.html?highlight=suggest#optuna.trial.Trial.suggest_uniform)
 
 ### Model configuration
+
 The model configuration file should be the one you have been using up to this point to train models. This package will take the suggested hyperparameters from an optuna trial and make changes to the model configuration. This can either be done automatically with this package, or the user may supply an additional method for making custom changes. For example, consider the (truncated) configuration for training a model to predict hologram properties with the holodec data:
 
 * model:
@@ -135,7 +140,7 @@ The model configuration can be automatically updated using this package if the n
 This scheme will work in general as long as the named parameter in optuna.parameters uses : as the separator, and once split, the resulting list can be used to locate the relevant field in the model configuration.
 
 
-### Custom configuration edits
+### Custom model configuration updates
 
 The user can also supply rules for updating the model configuration file, by including a method named **custom_updates**, which will make the desired changes to the configuration file with optuna trail parameter guesses.
 

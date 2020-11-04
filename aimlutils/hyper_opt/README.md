@@ -16,7 +16,7 @@ There are three files that must be supplied to use the optimize script:
 
 ### Custom objective class
 
-The user must supply a custom **Objective** class (objective.py) that is composed with an internal **BaseObjective** class (base_objective.py), and contains a method named **train** that returns the value of the optimization metric in a dictionary. See the examples directory for both torch and Keras examples. Note that the objective class only needs to return the metric value (in dictionary form) and does not depend on the machine learning library used. For example, a simple Objective class template will have the following structure:
+The user must supply a custom **Objective** class (objective.py) that is composed with an internal **BaseObjective** class (base_objective.py), and contains a method named **train** that returns the value of the optimization metric in a dictionary. See the examples directory for both torch and Keras examples. Note that the objective class only needs to return the metric value (in dictionary form, see below) and does not depend on the machine learning library used. For example, a simple Objective class template will have the following structure:
 
     from aimlutils.hyper_opt.base_objective import *
 
@@ -43,10 +43,10 @@ The user must supply a custom **Objective** class (objective.py) that is compose
                 "val_accuracy": result["val_accuracy"]
             }
             return results_dictionary
-        
-The BaseObjective must be initialized using the input parameters to the Objective (they must match!). The metric used to toggle model performance must always be in the results dictionary, while other metrics that the user may want to track will also be stored and saved so long as they are included in the results dictionary. The base class will call the train method from its thunder **__call__** method, and finishes up by calling a save method that takes care of writing the metric(s) details to file. Check out the script run.py to see how things are called.
 
-Note that the first line in the train method states that any custom changes to the model configuration (conf) must be done here. If custom changes are required, the user must supply a method named **custom_updates** in addition to the Objective class (save both in the same script). See also the section **Custom model configuration updates** below for more details. 
+The BaseObjective must be initialized using the input parameters to the Objective, then Objective will inherit all of the methods and attributes from BaseObjective (this way of doing of OOP is called composition). You can have as many inputs to your custom Objective as needed, so long as those that are required to initialize the base class are included. The metric used to toggle the model's training performance must always be in the results dictionary, while other metrics that the user may want to track can also be stored and will be saved to disk as long as they are included in the results dictionary (the keys of the dictionary are used to name the columns in a pandas dataframe). The Objective class will call the train method from the inherited thunder **__call__** method, and will finish up by calling the inherited save method that writes the metric(s) details to disk. Note that, due to the composition of the two classes, you do not have to supply these two methods, as they are in pre-coded in the base class! You can customize them at your leisure using overriding methods in your custom Objective. Check out the scripts base_objective.py and run.py to see how things are composed and called.
+
+Note that the first line in the train method states that any custom changes to the model configuration (conf) must be done here. If custom changes are required, the user must supply a method named **custom_updates** in addition to the Objective class (save both in the same script). See also the section **Custom model configuration updates** below for an example. 
 
 ### Hyperparameter optimizer configuration
 

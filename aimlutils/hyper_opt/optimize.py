@@ -119,6 +119,8 @@ if __name__ == "__main__":
     with open(script_location, "w") as fid:
         for line in launch_script:
             fid.write(f"{line}\n")
+            
+    raise
     
     # Launch the jobs
     job_ids = []

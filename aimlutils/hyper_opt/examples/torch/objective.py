@@ -48,16 +48,8 @@ class Objective(BaseObjective):
     
     def __init__(self, study, config, metric = "val_loss", device = "cpu"):
         
-        ###########################################################
-        #
-        # Initialize the base class
-        #
-        ###########################################################
-        
         BaseObjective.__init__(self, study, config, metric, device)
 
-        if self.device != "cpu":
-            torch.backends.cudnn.benchmark = True
 
     def train(self, trial, conf):   
         
@@ -74,91 +66,6 @@ class Objective(BaseObjective):
         # Load ML pipeline, train the model, and return the result
         #
         ###########################################################
-        
-        # Load custom option for the VAE/compressor models
-        model_type = conf["type"]
-        
-        # Load image transformations.
-        transform = LoadTransformations(conf["transforms"], device = self.device)
-        
-        # Load dataset readers
-        train_gen = LoadReader(
-            reader_type = model_type,
-            split = "train", 
-            transform = transform,
-            scaler = None,
-            config = conf["data"]
-        )
-
-        valid_gen = LoadReader(
-            reader_type = model_type, 
-            split = "test", 
-            transform = transform, 
-            scaler = train_gen.get_transform(),
-            config = conf["data"],
-        )
-        
-        # Load data iterators from pytorch
-        n_workers = conf['iterator']['num_workers']
-
-        #logging.info(f"Loading training data iterator using {n_workers} workers")
-
-        dataloader = DataLoader(
-            train_gen,
-            **conf["iterator"]
-        )
-
-        valid_dataloader = DataLoader(
-            valid_gen,
-            **conf["iterator"]
-        )
-
-        # Load the model 
-        model = LoadModel(model_type, conf["model"], self.device)
-        
-        # Load the optimizer
-        optimizer_config = conf["optimizer"]
-        optimizer = LoadOptimizer(
-            optimizer_config["type"], 
-            model.parameters(), 
-            optimizer_config["lr"], 
-            optimizer_config["weight_decay"]
-        )
-        
-        # Load the trainer
-        trainer = CustomTrainer(
-            model = model,
-            optimizer = optimizer,
-            train_gen = train_gen,
-            valid_gen = valid_gen,
-            dataloader = dataloader,
-            valid_dataloader = valid_dataloader,
-            device = self.device,
-            **conf["trainer"]
-        )
-
-        # Initialize LR annealing scheduler 
-        if "ReduceLROnPlateau" in conf["callbacks"]:
-            schedule_config = conf["callbacks"]["ReduceLROnPlateau"]
-            scheduler = ReduceLROnPlateau(trainer.optimizer, **schedule_config)
-            logging.info(
-                f"Loaded ReduceLROnPlateau learning rate annealer with patience {schedule_config['patience']}"
-            )
-        elif "ExponentialLR" in conf["callbacks"]:
-            schedule_config = conf["callbacks"]["ExponentialLR"]
-            scheduler = ExponentialLR(trainer.optimizer, **schedule_config)
-            logging.info(
-                f"Loaded ExponentialLR learning rate annealer with reduce factor {schedule_config['gamma']}"
-            )
-
-        # Initialize early stopping
-        checkpoint_config = conf["callbacks"]["EarlyStopping"]
-        early_stopping = EarlyStopping(**checkpoint_config)
-                
-        # Train the model
-        val_loss, val_mse, val_bce, val_acc = trainer.train(
-            trial, scheduler, early_stopping, self.metric
-        )
         
         results = {
             "val_loss": val_loss, 

@@ -64,7 +64,7 @@ model_config["optuna"] = hyper_config["optuna"]
     
 # Check if path to objective method exists
 if os.path.isfile(model_config["optuna"]["objective"]):
-    sys.path.append(model_config["optuna"]["objective"])
+    sys.path.append(os.path.split(model_config["optuna"]["objective"])[0])
     from objective import Objective
 else:
     raise OSError(
@@ -101,13 +101,13 @@ study_name = model_config["optuna"]["name"]
 reload_study = bool(model_config["optuna"]["reload"])
 cached_study = f"{save_path}/{study_name}"
 
-if not os.path.isfile(cached_study) or not reload_study:
-    load_if_exists = False
-elif not reload_study:
-    os.remove(cached_study)
-    load_if_exists = reload_study
-else:
-    load_if_exists = True
+# if not os.path.isfile(cached_study) or not reload_study:
+#     load_if_exists = False
+# elif not reload_study:
+#     os.remove(cached_study)
+#     load_if_exists = reload_study
+# else:
+#     load_if_exists = True
 
 # Initialize the db record and study
 storage = storage=f"sqlite:///{cached_study}"
@@ -115,7 +115,7 @@ storage = storage=f"sqlite:///{cached_study}"
 study = optuna.create_study(study_name=study_name,
                             storage=storage,
                             direction=direction,
-                            load_if_exists=load_if_exists)
+                            load_if_exists=True)
 logging.info(f"Loaded study {study_name} located at {storage}")
 
 # Initialize objective function

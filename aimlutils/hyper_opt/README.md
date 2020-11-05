@@ -33,8 +33,12 @@ The custom **Objective** class (objective.py) must be composed with a **BaseObje
             conf = custom_updates(trial, conf)
 
             ... 
-
-            result = Model.fit(...)
+            
+            callbacks = [KerasPruningCallback(trial, self.metric, interval = 1)]
+            result = Model.fit(..., callbacks = callbacks)
+            
+            if trial.should_prune():
+                raise optuna.TrialPruned()
 
             results_dictionary = {
                 "val_loss": result["val_loss"],

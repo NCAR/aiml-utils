@@ -32,8 +32,8 @@ def configuration_report(my_dict, path=None):
 
 if __name__ == "__main__":
     
-    if len(sys.argv) != 3:
-        raise "Usage: python main.py hyperparameter.yml model.yml"
+    if len(sys.argv) != 3 or len(sys.argv) != 4:
+        raise "Usage: python main.py hyperparameter.yml model.yml [create database entry only]"
 
     if os.path.isfile(sys.argv[1]):
         with open(sys.argv[1]) as f:
@@ -46,6 +46,9 @@ if __name__ == "__main__":
             model_config = yaml.load(f, Loader=yaml.FullLoader)
     else:
         raise OSError(f"Model config file {sys.argv[1]} does not exist")
+        
+    # Override to create the database but skip submitting jobs. This is a debug option so that run.py will run
+    create_db_only = True if len(sys.argv) == 4 else False
         
     # Set up a logger
     root = logging.getLogger()
@@ -82,6 +85,12 @@ if __name__ == "__main__":
     # Set up new db entry if reload = 0 
     reload_study = bool(hyper_config["optuna"]["reload"])
         
+        
+    # Check if save directory exists
+    if not os.path.isdir(hyper_config["optuna"]["save_path"]):
+        raise OSError(f"You must create the save path directory: {hyper_config["optuna"]["save_path"]}")
+        
+        
     if not reload_study:        
         name = hyper_config["optuna"]["name"]
         path_to_study = os.path.join(hyper_config["optuna"]["save_path"], name)
@@ -110,6 +119,9 @@ if __name__ == "__main__":
             sampler = sampler
         )
         
+    if create_db_only:
+        sys.exit()
+        
     # Prepare slurm script
     launch_script = prepare_launch_script(hyper_config, model_config)
     
@@ -119,9 +131,7 @@ if __name__ == "__main__":
     with open(script_location, "w") as fid:
         for line in launch_script:
             fid.write(f"{line}\n")
-            
-    raise
-    
+
     # Launch the jobs
     job_ids = []
     name_condition = "J" in hyper_config["slurm"]["batch"]

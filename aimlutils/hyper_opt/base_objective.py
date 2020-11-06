@@ -106,14 +106,15 @@ class BaseObjective:
             f"Begining to train the model using the latest parameters from optuna"
         )
         
-        try:
-            result = self.train(trial, conf)
+        result = self.train(trial, conf)
         
-        except RuntimeError: # GPU memory overflow
-            logger.warning(
-                "Ran out of GPU memory, proceeding to prune the trial"
-            )
-            raise optuna.TrialPruned()
+#         try:
+#             result = self.train(trial, conf)
+#         except RuntimeError: # GPU memory overflow
+#             logger.warning(
+#                 "Ran out of GPU memory, proceeding to prune the trial"
+#             )
+#             raise optuna.TrialPruned()
         
         return result
     

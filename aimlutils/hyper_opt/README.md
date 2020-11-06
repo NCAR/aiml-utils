@@ -2,7 +2,13 @@
 
 ### Usage
 
-python optimize.py hyperparameters.yml model_config.yml
+Run the hyperparameter optimization script:
+
+* **python optimize.py hyperparameters.yml model_config.yml**
+
+Run the report script to get a dataframe of the results saved in the study:
+
+* **python report.py hyperparameters.yml**
 
 ### Dependencies
 
@@ -37,9 +43,6 @@ The custom **Objective** class (objective.py) must be composed with a **BaseObje
             
             callbacks = [KerasPruningCallback(trial, self.metric, interval = 1)]
             result = Model.fit(..., callbacks = callbacks)
-            
-            if trial.should_prune():
-                raise optuna.TrialPruned()
 
             results_dictionary = {
                 "val_loss": result["val_loss"],

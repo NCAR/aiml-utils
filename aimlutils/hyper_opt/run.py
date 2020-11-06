@@ -29,6 +29,17 @@ if len(sys.argv) != 3:
     sys.exit()
     
 
+# Set up a logger
+root = logging.getLogger()
+root.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(levelname)s:%(name)s:%(message)s')
+
+# Stream output to stdout
+ch = logging.StreamHandler()
+ch.setLevel(logging.INFO)
+ch.setFormatter(formatter)
+root.addHandler(ch)
+
 ################################################################
 
 # Check if hyperparameter config file exists
@@ -55,6 +66,9 @@ else:
         f"Model config file {sys.argv[1]} does not exist"
     )
     
+# Copy the optuna details to the model config
+model_config["optuna"] = hyper_config["optuna"] 
+    
 # Check if path to objective method exists
 if os.path.isfile(model_config["optuna"]["objective"]):
     sys.path.append(os.path.split(model_config["optuna"]["objective"])[0])
@@ -65,7 +79,8 @@ else:
     )
     
 # Check if the optimization metric direction is supported
-if str(model_config["optuna"]["direction"]) not in ["maximize", "minimize"]:
+direction = str(model_config["optuna"]["direction"])
+if direction not in ["maximize", "minimize"]:
     raise OSError(
         f"Optimizer direction {direction} not recognized. Choose from maximize or minimize"
     )
@@ -75,17 +90,6 @@ logging.info(f"Direction of optimization {direction}")
 
 ################################################################
       
-# Set up a logger
-root = logging.getLogger()
-root.setLevel(logging.DEBUG)
-formatter = logging.Formatter('%(levelname)s:%(name)s:%(message)s')
-
-# Stream output to stdout
-ch = logging.StreamHandler()
-ch.setLevel(logging.INFO)
-ch.setFormatter(formatter)
-root.addHandler(ch)
-
 # Stream output to log file
 if "log" in hyper_config:
     savepath = hyper_config["log"]["save_path"] if "save_path" in hyper_config["log"] else "log.txt"
@@ -96,17 +100,11 @@ if "log" in hyper_config:
     fh.setLevel(logging.DEBUG)
     fh.setFormatter(formatter)
     root.addHandler(fh)
-
-# Copy the optuna details to the model config
-model_config["optuna"] = hyper_config["optuna"] 
     
 # Get the path to save all the data
 save_path = model_config["optuna"]["save_path"]
 logging.info(f"Saving optimization details to {save_path}")
     
-# Set up the performance metric direction
-direction = str(model_config["optuna"]["direction"])
-
 # Grab the metric
 metric = str(model_config["optuna"]["metric"])
 logging.info(f"Using metric {metric}")

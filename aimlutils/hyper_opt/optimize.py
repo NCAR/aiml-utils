@@ -89,7 +89,7 @@ if __name__ == "__main__":
     # Check if save directory exists
     if not os.path.isdir(hyper_config["optuna"]["save_path"]):
         raise OSError(
-            f"Create the save directory {hyper_config["optuna"]["save_path"]} and try again"
+            f'Create the save directory {hyper_config["optuna"]["save_path"]} and try again'
         )
         
     # Initiate a study for the first time

@@ -14,8 +14,13 @@ def prepare_launch_script(hyper_config, model_config):
         for arg, val in hyper_config["slurm"]["batch"].items()
     ]
     slurm_options.append("module load ncarenv/1.3 gnu/8.3.0 openmpi/3.1.4 python/3.7.5 cuda/10.1")
-    slurm_options.append("ncar_pylib")
-    slurm_options.append(f"python run.py {sys.argv[1]} {sys.argv[2]}")
+    slurm_options.append(f'{hyper_config["slurm"]["kernel"]}')
+    import aimlutils.hyper_opt as opt
+    aiml_path = os.path.join(
+        os.path.abspath(opt.__file__).strip("__init__.py"), 
+        "run.py"
+    )
+    slurm_options.append(f"python {aiml_path} {sys.argv[1]} {sys.argv[2]}")
     return slurm_options
 
 def configuration_report(_dict, path=None):
@@ -134,6 +139,7 @@ if __name__ == "__main__":
     with open(script_location, "w") as fid:
         for line in launch_script:
             fid.write(f"{line}\n")
+    raise
 
     # Launch the jobs
     job_ids = []

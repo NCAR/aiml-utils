@@ -18,10 +18,10 @@ def prepare_launch_script(hyper_config, model_config):
     slurm_options.append(f"python run.py {sys.argv[1]} {sys.argv[2]}")
     return slurm_options
 
-def configuration_report(my_dict, path=None):
+def configuration_report(_dict, path=None):
     if path is None:
         path = []
-    for k,v in my_dict.items():
+    for k,v in _dict.items():
         newpath = path + [k]
         if isinstance(v, dict):
             for u in configuration_report(v, newpath):
@@ -88,17 +88,19 @@ if __name__ == "__main__":
         
     # Check if save directory exists
     if not os.path.isdir(hyper_config["optuna"]["save_path"]):
-        raise OSError(f"You must create the save path directory: {hyper_config["optuna"]["save_path"]}")
+        raise OSError(
+            f"Create the save directory {hyper_config["optuna"]["save_path"]} and try again"
+        )
         
-        
+    # Initiate a study for the first time
     if not reload_study:        
         name = hyper_config["optuna"]["name"]
         path_to_study = os.path.join(hyper_config["optuna"]["save_path"], name)
         storage =f"sqlite:///{path_to_study}"
         
         if os.path.isfile(path_to_study):
-            message = f"WARNING: The study already exists at {path_to_study}."
-            message += f" You must delete {path_to_study} before proceeding."
+            message = f"The study already exists at {path_to_study} and reload was False."
+            message += f" Delete the study at {path_to_study} and try again"
             raise OSError(message)
         
         direction = hyper_config["optuna"]["direction"]

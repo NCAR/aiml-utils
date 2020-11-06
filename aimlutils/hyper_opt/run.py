@@ -27,7 +27,11 @@ if len(sys.argv) != 3:
         "Usage: python main.py hyperparameter.yml model.yml"
     )
     sys.exit()
+    
 
+################################################################
+
+# Check if hyperparameter config file exists
 if os.path.isfile(sys.argv[1]):
     with open(sys.argv[1]) as f:
         hyper_config = yaml.load(f, Loader=yaml.FullLoader)
@@ -35,7 +39,14 @@ else:
     raise OSError(
         f"Hyperparameter optimization config file {sys.argv[1]} does not exist"
     )
+    
+# Check if the wall-time exists
+if "t" not in hyper_config["slurm"]["batch"]:
+    raise OSError(
+        "You must supply a wall time in the hyperparameter config at slurm:batch:t"
+    )
         
+# Check if model config file exists
 if os.path.isfile(sys.argv[2]):
     with open(sys.argv[2]) as f:
         model_config = yaml.load(f, Loader=yaml.FullLoader)
@@ -44,6 +55,26 @@ else:
         f"Model config file {sys.argv[1]} does not exist"
     )
     
+# Check if path to objective method exists
+if os.path.isfile(model_config["optuna"]["objective"]):
+    sys.path.append(os.path.split(model_config["optuna"]["objective"])[0])
+    from objective import Objective
+else:
+    raise OSError(
+        f'The objective file {model_config["optuna"]["objective"]} does not exist'
+    )
+    
+# Check if the optimization metric direction is supported
+if str(model_config["optuna"]["direction"]) not in ["maximize", "minimize"]:
+    raise OSError(
+        f"Optimizer direction {direction} not recognized. Choose from maximize or minimize"
+    )
+logging.info(f"Direction of optimization {direction}")
+    
+### Add other checks
+
+################################################################
+      
 # Set up a logger
 root = logging.getLogger()
 root.setLevel(logging.DEBUG)
@@ -55,7 +86,7 @@ ch.setLevel(logging.INFO)
 ch.setFormatter(formatter)
 root.addHandler(ch)
 
-# Stream output to file
+# Stream output to log file
 if "log" in hyper_config:
     savepath = hyper_config["log"]["save_path"] if "save_path" in hyper_config["log"] else "log.txt"
     mode = "a+" if bool(hyper_config["optuna"]["reload"]) else "w"
@@ -69,27 +100,13 @@ if "log" in hyper_config:
 # Copy the optuna details to the model config
 model_config["optuna"] = hyper_config["optuna"] 
     
-# Check if path to objective method exists
-if os.path.isfile(model_config["optuna"]["objective"]):
-    sys.path.append(os.path.split(model_config["optuna"]["objective"])[0])
-    from objective import Objective
-else:
-    raise OSError(
-        f'The objective file {model_config["optuna"]["objective"]} does not exist'
-    )
-    
 # Get the path to save all the data
 save_path = model_config["optuna"]["save_path"]
 logging.info(f"Saving optimization details to {save_path}")
     
 # Set up the performance metric direction
 direction = str(model_config["optuna"]["direction"])
-if direction not in ["maximize", "minimize"]:
-    raise OSError(
-        f"Optimizer direction {direction} not recognized. Choose from maximize or minimize"
-    )
-logging.info(f"Direction of optimization {direction}")
-    
+
 # Grab the metric
 metric = str(model_config["optuna"]["metric"])
 logging.info(f"Using metric {metric}")
@@ -100,7 +117,9 @@ if bool(model_config["optuna"]["gpu"]):
         gpu_report = sorted(gpu_report().items(), key = lambda x: x[1], reverse = True)
         device = gpu_report[0][0]
     except:
-        logging.warning("The gpu is not responding to a call from nvidia-smi. Trying gpu device = 0 but this may fail")
+        logging.warning(
+            "The gpu is not responding to a call from nvidia-smi. Setting gpu device = 0 but this may fail"
+        )
         device = 0
 else:
     device = 'cpu'
@@ -120,7 +139,7 @@ else:
     load_if_exists = True
 
 # Initialize the db record and study
-storage = storage=f"sqlite:///{cached_study}"
+storage = f"sqlite:///{cached_study}"
 
 study = optuna.create_study(study_name=study_name,
                             storage=storage,
@@ -133,9 +152,6 @@ objective = Objective(study, model_config, metric, device)
 
 # Optimize it
 logging.info(f'Running optimization for {model_config["optuna"]["n_trials"]} trials')
-
-if "t" not in hyper_config["slurm"]["batch"]:
-    raise OSError("You must supply a wall time in the hyperparameter config at slurm:batch:t")
     
 wall_time = hyper_config["slurm"]["batch"]["t"]
 
@@ -144,11 +160,11 @@ logging.info(
 )
 
 wall_time = 0.99 * get_sec(wall_time)
-study.optimize(objective, n_trials=int(model_config["optuna"]["n_trials"]), timeout = wall_time)
-
-if len(study.trials) < model_config["optuna"]["n_trials"]:
-    logging.warning("Not all of the trials completed due to the wall-time.")
-    logging.warning("Set reload = 1 in the hyperparameter config and resubmit some more workers to finish!")
+study.optimize(
+    objective, 
+    n_trials=int(model_config["optuna"]["n_trials"]), 
+    timeout = wall_time
+)
 
 # Clean up the data files
 saved_results = glob.glob(os.path.join(save_path, "hyper_opt_*.csv"))
@@ -170,11 +186,30 @@ best_parameters.to_csv(best_save_path)
 logging.info(f"Saved trial results to {hyper_opt_save_path}")
 logging.info(f"Saved best results to {best_save_path}")
 
-pruned_trials = [t for t in study.trials if t.state == optuna.trial.TrialState.PRUNED]
-complete_trials = [t for t in study.trials if t.state == optuna.trial.TrialState.COMPLETE]
+# Check a few other stats
+pruned_trials = [
+    t for t in study.trials if t.state == optuna.trial.TrialState.PRUNED
+]
+complete_trials = [
+    t for t in study.trials if t.state == optuna.trial.TrialState.COMPLETE
+]
 
 logging.info(f'Number of requested trials: {model_config["optuna"]["n_trials"]}')
 logging.info(f"Number of finished trials: {len(study.trials)}")
 logging.info(f"Number of pruned trials: {len(pruned_trials)}")
 logging.info(f"Number of complete trials: {len(complete_trials)}")
 logging.info(f"Best trial: {study.best_trial.value}")
+logging.info("Best parameters in the study:")
+for param, val in study.best_params.items():
+    logging.info(f"{param}: {val}")
+    
+if len(study.trials) < model_config["optuna"]["n_trials"]:
+    logging.warning(
+        "Not all of the trials completed due to the wall-time."
+    )
+    logging.warning(
+        "Set reload = 1 in the hyperparameter config and resubmit some more workers to finish!"
+    )
+
+save_study = os.path.join(save_path, f"study_summary.csv")
+study.trials_dataframe().to_csv(save_study, index = None)

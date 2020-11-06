@@ -32,8 +32,8 @@ def configuration_report(my_dict, path=None):
 
 if __name__ == "__main__":
     
-    if len(sys.argv) != 3 or len(sys.argv) != 4:
-        raise "Usage: python main.py hyperparameter.yml model.yml [create database entry only]"
+    if len(sys.argv) not in [3, 4]:
+        raise "Usage: python main.py hyperparameter.yml model.yml [create database entry only (bool)]"
 
     if os.path.isfile(sys.argv[1]):
         with open(sys.argv[1]) as f:
@@ -119,6 +119,7 @@ if __name__ == "__main__":
             sampler = sampler
         )
         
+    # Stop here if 4th arg is defined -- intention is that you manually run run.py for debugging purposes
     if create_db_only:
         sys.exit()
         

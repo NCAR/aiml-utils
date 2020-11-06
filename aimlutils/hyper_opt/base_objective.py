@@ -78,10 +78,14 @@ class BaseObjective:
         for metric, value in results_dict.items():
             self.results[metric].append(value)
         try:
-            self.results[f"best_{self.metric}"].append(self.study.best_value)
+            self.results[f"best_{self.metric}"].append(self.study.best_trial.value)
         except:
             result = results_dict[self.metric]
             self.results[f"best_{self.metric}"].append(result)
+            
+        # Save pruning boolean
+        self.results["pruned"] = int(trial.should_prune())
+        #self.results["complete"] = int(trial.state == optuna.trial.TrialState.COMPLETE)
         
         # Save the df of results to disk
         pd.DataFrame.from_dict(self.results).to_csv(self.results_fn)

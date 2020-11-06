@@ -19,6 +19,7 @@ There are three files that must be supplied to use the optimize script:
 The custom **Objective** class (objective.py) must be composed with a **BaseObjective** class (which lives in base_objective.py), and must contain a method named **train** that returns the value of the optimization metric (in a dictionary, see below). There are example objective scripts for both torch and Keras in the examples directory. Your custom Objective class will inherit all of the methods and attributes from the BaseObjective (this way of doing of OOP is called composition). The Objective's train does not depend on the machine learning library used! For example, a simple template has the following structure:
 
     from aimlutils.hyper_opt.base_objective import *
+    from aimlutils.hyper_opt.utils import KerasPruningCallback
 
     class Objective(BaseObjective):
 
@@ -54,6 +55,8 @@ As noted, the metric used to toggle the model's training performance must be in 
 
 Note that the first line in the train method states that any custom changes to the model configuration (conf) must be done here. If custom changes are required, the user may supply a method named **custom_updates** in addition to the Objective class (you may save both in the same script, or import the method from somewhere else in your custom Objective script). See also the section **Custom model configuration updates** below for an example. 
 
+Finally, if using Keras, you need to include the KerasPruningCallback that will allow optuna to termine unpromising trials. We do something similar when using torch -- see the examples directory.
+
 ### Hyperparameter optimizer configuration
 
 There are three main fields, log, slurm, and optuna, and variable subfields within each field. The log field allows us to save a file for printing messages and warnings that are placed in areas throughout the package. The slurm field allows the user to specify how many GPU nodes should be used, and supports any slurm setting. The optuna field allows the user to configure the optimization procedure, including specifying which parameters will be used, as well as the performance metric. For example, consider the configuration settings:
@@ -74,7 +77,7 @@ There are three main fields, log, slurm, and optuna, and variable subfields with
 * optuna
   + name: "holodec_optimization.db"
   + reload: 0
-  + objective: "examples/torch_objective.py"
+  + objective: "examples/torch/objective.py"
   + metric: "val_loss"
   + direction: "minimize"
   + n_trials: 500

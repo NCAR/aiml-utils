@@ -2,12 +2,19 @@ import warnings
 warnings.filterwarnings("ignore")
 
 from aimlutils.utils.gpu import gpu_report
+import pandas as pd
 import logging
 import optuna
+import time
 import glob
 import yaml
 import sys
 import os
+
+def get_sec(time_str):
+    """Get Seconds from time."""
+    h, m, s = time_str.split(':')
+    return int(h) * 3600 + int(m) * 60 + int(s)
 
 # References
 # https://github.com/optuna/optuna/issues/1365
@@ -58,7 +65,7 @@ if "log" in hyper_config:
     fh.setLevel(logging.DEBUG)
     fh.setFormatter(formatter)
     root.addHandler(fh)
-    
+
 # Copy the optuna details to the model config
 model_config["optuna"] = hyper_config["optuna"] 
     
@@ -70,7 +77,6 @@ else:
     raise OSError(
         f'The objective file {model_config["optuna"]["objective"]} does not exist'
     )
-
     
 # Get the path to save all the data
 save_path = model_config["optuna"]["save_path"]
@@ -90,8 +96,12 @@ logging.info(f"Using metric {metric}")
 
 # Get list of devices and initialize the Objective class
 if bool(model_config["optuna"]["gpu"]):
-    gpu_report = sorted(gpu_report().items(), key = lambda x: x[1], reverse = True)
-    device = gpu_report[0][0]
+    try:
+        gpu_report = sorted(gpu_report().items(), key = lambda x: x[1], reverse = True)
+        device = gpu_report[0][0]
+    except:
+        logging.warning("The gpu is not responding to a call from nvidia-smi. Trying gpu device = 0 but this may fail")
+        device = 0
 else:
     device = 'cpu'
 logging.info(f"Using device {device}")
@@ -101,13 +111,13 @@ study_name = model_config["optuna"]["name"]
 reload_study = bool(model_config["optuna"]["reload"])
 cached_study = f"{save_path}/{study_name}"
 
-# if not os.path.isfile(cached_study) or not reload_study:
-#     load_if_exists = False
-# elif not reload_study:
-#     os.remove(cached_study)
-#     load_if_exists = reload_study
-# else:
-#     load_if_exists = True
+if not os.path.isfile(cached_study) or not reload_study:
+    load_if_exists = False
+elif not reload_study:
+    os.remove(cached_study)
+    load_if_exists = reload_study
+else:
+    load_if_exists = True
 
 # Initialize the db record and study
 storage = storage=f"sqlite:///{cached_study}"
@@ -122,8 +132,23 @@ logging.info(f"Loaded study {study_name} located at {storage}")
 objective = Objective(study, model_config, metric, device)
 
 # Optimize it
-study.optimize(objective, n_trials=int(model_config["optuna"]["n_trials"]))
-logging.info(f"Running optimization for {n_trials} trials")
+logging.info(f'Running optimization for {model_config["optuna"]["n_trials"]} trials')
+
+if "t" not in hyper_config["slurm"]["batch"]:
+    raise OSError("You must supply a wall time in the hyperparameter config at slurm:batch:t")
+    
+wall_time = hyper_config["slurm"]["batch"]["t"]
+
+logging.info(
+    f"This script will run for 99% of the wall-time of {wall_time} and try to die without error"
+)
+
+wall_time = 0.99 * get_sec(wall_time)
+study.optimize(objective, n_trials=int(model_config["optuna"]["n_trials"]), timeout = wall_time)
+
+if len(study.trials) < model_config["optuna"]["n_trials"]:
+    logging.warning("Not all of the trials completed due to the wall-time.")
+    logging.warning("Set reload = 1 in the hyperparameter config and resubmit some more workers to finish!")
 
 # Clean up the data files
 saved_results = glob.glob(os.path.join(save_path, "hyper_opt_*.csv"))
@@ -144,3 +169,12 @@ best_parameters.to_csv(best_save_path)
 
 logging.info(f"Saved trial results to {hyper_opt_save_path}")
 logging.info(f"Saved best results to {best_save_path}")
+
+pruned_trials = [t for t in study.trials if t.state == optuna.trial.TrialState.PRUNED]
+complete_trials = [t for t in study.trials if t.state == optuna.trial.TrialState.COMPLETE]
+
+logging.info(f'Number of requested trials: {model_config["optuna"]["n_trials"]}')
+logging.info(f"Number of finished trials: {len(study.trials)}")
+logging.info(f"Number of pruned trials: {len(pruned_trials)}")
+logging.info(f"Number of complete trials: {len(complete_trials)}")
+logging.info(f"Best trial: {study.best_trial.value}")

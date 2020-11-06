@@ -65,7 +65,6 @@ def samplers(sampler):
         return optuna.integration.IntersectionSearchSpace()
     
 
-
 class KerasPruningCallback(Callback):
 
     def __init__(self, trial, monitor):

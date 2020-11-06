@@ -5,6 +5,11 @@ import optuna
 import logging
 import pandas as pd
 
+if len(sys.argv) != 2:
+    raise OSError(
+        "Usage: python report.py hyperparameter.yml"
+    )
+
 # Check if hyperparameter config file exists
 if os.path.isfile(sys.argv[1]):
     with open(sys.argv[1]) as f:

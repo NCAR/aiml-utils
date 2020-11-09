@@ -48,9 +48,15 @@ complete_trials = [
 ]
 
 logging.info(f'Number of requested trials: {hyper_config["optuna"]["n_trials"]}')
-logging.info(f"Number of finished trials: {len(study.trials)}")
+logging.info(f"Number of trials: {len(study.trials)}")
 logging.info(f"Number of pruned trials: {len(pruned_trials)}")
-logging.info(f"Number of complete trials: {len(complete_trials)}")
+logging.info(f"Number of completed trials: {len(complete_trials)}")
+
+if len(complete_trials) == 0:
+    logging.info("There are no complete trials in this study.")
+    logging.info("Wait until the workers finish a few trials and try again.")
+    sys.exit()
+
 logging.info(f"Best trial: {study.best_trial.value}")
 logging.info("Best parameters in the study:")
 for param, val in study.best_params.items():
@@ -64,4 +70,6 @@ if len(study.trials) < hyper_config["optuna"]["n_trials"]:
         "Set reload = 1 in the hyperparameter config and resubmit some more workers to finish!"
     )
     
-study.trials_dataframe().to_csv(f"{study_name}.csv", index = None)
+save_fn = os.path.join(save_path, f"{study_name}.csv")
+logging.info(f"Saving the results of the study to file at {save_fn}")
+study.trials_dataframe().to_csv(save_fn, index = None)

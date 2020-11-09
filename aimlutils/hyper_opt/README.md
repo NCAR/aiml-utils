@@ -64,10 +64,9 @@ Finally, if using Keras, you need to include the KerasPruningCallback that will 
 
 There are three main fields, log, slurm, and optuna, and variable subfields within each field. The log field allows us to save a file for printing messages and warnings that are placed in areas throughout the package. The slurm field allows the user to specify how many GPU nodes should be used, and supports any slurm setting. The optuna field allows the user to configure the optimization procedure, including specifying which parameters will be used, as well as the performance metric. For example, consider the configuration settings:
 
-* log
-  + save_path: "path/to/data/log.txt"
 * slurm
   + jobs: 20
+  + kernel: "ncar_pylib /glade/work/schreck/py37"
   + batch:
     + account: "NAML0001"
     + gres: "gpu:v100:1"
@@ -107,8 +106,12 @@ There are three main fields, log, slurm, and optuna, and variable subfields with
         + name: "lr"
         + low: 0.0000001
         + high: 0.01
+* log [optional]
+  + save_path: "path/to/data/log.txt"
 
-The subfields within the optuna field have the following functionality:
+The subfields within "slurm" should mostly be familiar to you. Note that you need to supply the kernel that will be used. 
+
+The subfields within the "optuna" field have the following functionality:
 
 * name: The name of the study.
 * reload: Whether to continue using a previous study (True) or to initialize a new study (False). If your initial number of workers do not reach the number of trials and you wish to resubmit, set to True.
@@ -123,6 +126,8 @@ The subfields within the optuna field have the following functionality:
 * parameters
   + type: Option to select an optuna trial setting. See the [optuna Trial documentation](https://optuna.readthedocs.io/en/stable/reference/generated/optuna.trial.Trial.html?highlight=suggest#optuna.trial.Trial.suggest_uniform) for what is available. Currently, this package supports the available options from optuna: "categorical", "discrete_uniform", "float", "int", "loguniform", and "uniform".
   + settings: This dictionary field allows you to specify any settings that accompany the optuna trial type. In the example above, the named num_dense parameter is stated to be an integer with values ranging from 0 to 10. To see all the available options, consolt the [optuna Trial documentation](https://optuna.readthedocs.io/en/stable/reference/generated/optuna.trial.Trial.html?highlight=suggest#optuna.trial.Trial.suggest_uniform)
+  
+Lastly, the "log" field allows you to save the logging details to file; they will always be printed to stdout. If this field is removed, logging details will only be printed to stdout.
 
 ### Model configuration
 

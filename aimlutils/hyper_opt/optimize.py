@@ -4,7 +4,95 @@ import yaml
 import optuna
 import logging
 import subprocess
+from argparse import ArgumentParser
 from aimlutils.hyper_opt.utils import samplers
+
+
+def args():
+    parser = ArgumentParser(description=
+        "hyper_opt: A distributed multi-gpu hyperparameter optimization package build with optuna"
+    )
+
+    parser.add_argument("hyperparameter", type=str, help=           
+            "Path to the hyperparameter configuration containing your inputs."
+    )
+    
+    parser.add_argument("model", type=str, help=
+            "Path to the model configuration containing your inputs."
+    )
+    parser.add_argument(
+        "-n", 
+        "--name", 
+        dest="name", 
+        type=str,
+        default=False, 
+        help="The name of the study"
+    )
+    parser.add_argument(
+        "-r", 
+        "--reload", 
+        dest="reload", 
+        type=str,
+        default=False, 
+        help="Set = 0 to initiate a new study, = 1 to continue a study"
+    )
+    parser.add_argument(
+        "-o", 
+        "--objective", 
+        dest="objective", 
+        type=str,
+        default=False, 
+        help="Path to the supplied objective class"
+    )
+    parser.add_argument(
+        "-d", 
+        "--direction", 
+        dest="direction", 
+        type=str,
+        default=False, 
+        help="Direction of the metric. Choose from maximize or minimize"
+    )
+    parser.add_argument(
+        "-m", 
+        "--metric", 
+        dest="metric", 
+        type=str,
+        default=False, 
+        help="The validation metric"
+    )
+    parser.add_argument(
+        "-t", 
+        "--trials", 
+        dest="n_trials", 
+        type=str,
+        default=False, 
+        help="The number of trials in the study"
+    )
+    parser.add_argument(
+        "-g", 
+        "--gpu", 
+        dest="gpu", 
+        type=str,
+        default=False, 
+        help="Use the gpu or not (bool)"
+    )
+    parser.add_argument(
+        "-s", 
+        "--save_path", 
+        dest="save_path", 
+        type=str,
+        default=False, 
+        help="Path to the save directory."
+    )   
+    parser.add_argument(
+        "-c", 
+        "--create_study", 
+        dest="create_study", 
+        type=str,
+        default=False, 
+        help="Create a study but do not submit any workers."
+    )   
+    return vars(parser.parse_args())
 
 
 def prepare_launch_script(hyper_config, model_config):
@@ -37,23 +125,33 @@ def configuration_report(_dict, path=None):
 
 if __name__ == "__main__":
     
-    if len(sys.argv) not in [3, 4]:
-        raise "Usage: python main.py hyperparameter.yml model.yml [create database entry only (bool)]"
+    args_dict = args()
+    
+    if "hyperparameter" not in args_dict:
+        raise OSError("Usage: python main.py hyperparameter.yml model.yml [create database entry only (bool)]")
+    if "model" not in args_dict:
+        raise OSError("Usage: python main.py hyperparameter.yml model.yml [create database entry only (bool)]")
+        
+    hyper_config = args_dict.pop("hyperparameter")
+    model_config = args_dict.pop("model")
 
-    if os.path.isfile(sys.argv[1]):
-        with open(sys.argv[1]) as f:
+    #if len(sys.argv) not in [3, 4]:
+    #    raise "Usage: python main.py hyperparameter.yml model.yml [create database entry only (bool)]"
+
+    if os.path.isfile(hyper_config):
+        with open(hyper_config) as f:
             hyper_config = yaml.load(f, Loader=yaml.FullLoader)
     else:
         raise OSError(f"Hyperparameter optimization config file {sys.argv[1]} does not exist")
 
-    if os.path.isfile(sys.argv[2]):
-        with open(sys.argv[2]) as f:
+    if os.path.isfile(model_config):
+        with open(model_config) as f:
             model_config = yaml.load(f, Loader=yaml.FullLoader)
     else:
         raise OSError(f"Model config file {sys.argv[1]} does not exist")
         
     # Override to create the database but skip submitting jobs. This is a debug option so that run.py will run
-    create_db_only = True if len(sys.argv) == 4 else False
+    create_db_only = True if create_study["create_study"] else False
         
     # Set up a logger
     root = logging.getLogger()
@@ -77,6 +175,15 @@ if __name__ == "__main__":
         fh.setFormatter(formatter)
         root.addHandler(fh)
         
+    # Override other options in hyperparameter config file, if supplied.
+    for name, val in args_dict.items():
+        if val:
+            current_value = hyper_config["optuna"][name]
+            logging.info(
+                f"Overriding {name} in the hyperparameter configuration: {current_value} -> {val}"
+            )
+            hyper_config["optuna"][name] = val
+        
     # Print the configurations to the logger
     logging.info("Current hyperparameter configuration settings:")
     for p, v in configuration_report(hyper_config):
@@ -89,7 +196,6 @@ if __name__ == "__main__":
 
     # Set up new db entry if reload = 0 
     reload_study = bool(hyper_config["optuna"]["reload"])
-        
         
     # Check if save directory exists
     if not os.path.isdir(hyper_config["optuna"]["save_path"]):
@@ -126,8 +232,9 @@ if __name__ == "__main__":
             sampler = sampler
         )
         
-    # Stop here if 4th arg is defined -- intention is that you manually run run.py for debugging purposes
+    # Stop here if arg is defined -- intention is that you manually run run.py for debugging purposes
     if create_db_only:
+        logging.info(f"Created study {name} located at {storage}. Exiting.")
         sys.exit()
         
     # Prepare slurm script

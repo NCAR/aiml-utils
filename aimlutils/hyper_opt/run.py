@@ -27,7 +27,6 @@ if len(sys.argv) != 3:
         "Usage: python main.py hyperparameter.yml model.yml"
     )
     sys.exit()
-    
 
 # Set up a logger
 root = logging.getLogger()
@@ -123,6 +122,8 @@ else:
     device = 'cpu'
 logging.info(f"Using device {device}")
 
+################################################################
+
 # Initialize the study object
 study_name = model_config["optuna"]["name"]
 reload_study = bool(model_config["optuna"]["reload"])
@@ -163,6 +164,8 @@ study.optimize(
     n_trials=int(model_config["optuna"]["n_trials"]), 
     timeout = wall_time
 )
+
+################################################################
 
 # Clean up the data files
 saved_results = glob.glob(os.path.join(save_path, "hyper_opt_*.csv"))

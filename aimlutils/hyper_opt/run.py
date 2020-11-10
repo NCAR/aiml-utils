@@ -169,23 +169,24 @@ study.optimize(
 
 # Clean up the data files
 saved_results = glob.glob(os.path.join(save_path, "hyper_opt_*.csv"))
-saved_results = pd.concat(
-    [pd.read_csv(x) for x in saved_results], sort = True
-).reset_index(drop=True)
-saved_results = saved_results.drop(
-    columns = [x for x in saved_results.columns if "Unnamed" in x]
-)
-saved_results = saved_results.sort_values(["trial"]).reset_index(drop = True)
-best_parameters = saved_results[saved_results[metric]==max(saved_results[metric])]
+if len(saved_results):
+    saved_results = pd.concat(
+        [pd.read_csv(x) for x in saved_results], sort = True
+    ).reset_index(drop=True)
+    saved_results = saved_results.drop(
+        columns = [x for x in saved_results.columns if "Unnamed" in x]
+    )
+    saved_results = saved_results.sort_values(["trial"]).reset_index(drop = True)
+    best_parameters = saved_results[saved_results[metric]==max(saved_results[metric])]
 
-# Save results to file
-hyper_opt_save_path = os.path.join(save_path, "hyper_opt.csv")
-best_save_path = os.path.join(save_path, "best.csv")
-saved_results.to_csv(hyper_opt_save_path)
-best_parameters.to_csv(best_save_path)
+    # Save results to file
+    hyper_opt_save_path = os.path.join(save_path, "hyper_opt.csv")
+    best_save_path = os.path.join(save_path, "best.csv")
+    saved_results.to_csv(hyper_opt_save_path)
+    best_parameters.to_csv(best_save_path)
 
-logging.info(f"Saved trial results to {hyper_opt_save_path}")
-logging.info(f"Saved best results to {best_save_path}")
+    logging.info(f"Saved trial results to {hyper_opt_save_path}")
+    logging.info(f"Saved best results to {best_save_path}")
 
 # Check a few other stats
 pruned_trials = [

@@ -21,7 +21,7 @@ def args():
             "Path to the model configuration containing your inputs."
     )
     parser.add_argument(
-        "-n", 
+        "-n",
         "--name", 
         dest="name", 
         type=str,
@@ -82,7 +82,7 @@ def args():
         dest="save_path", 
         type=str,
         default=False, 
-        help="Path to the save directory."
+        help="Path to the save directory"
     )   
     parser.add_argument(
         "-c", 
@@ -90,7 +90,7 @@ def args():
         dest="create_study", 
         type=str,
         default=False, 
-        help="Create a study but do not submit any workers."
+        help="Create a study but do not submit any workers"
     )   
     return vars(parser.parse_args())
 
@@ -126,17 +126,12 @@ def configuration_report(_dict, path=None):
 if __name__ == "__main__":
     
     args_dict = args()
-    
-    if "hyperparameter" not in args_dict:
-        raise OSError("Usage: python main.py hyperparameter.yml model.yml [create database entry only (bool)]")
-    if "model" not in args_dict:
-        raise OSError("Usage: python main.py hyperparameter.yml model.yml [create database entry only (bool)]")
-        
+
     hyper_config = args_dict.pop("hyperparameter")
     model_config = args_dict.pop("model")
 
-    #if len(sys.argv) not in [3, 4]:
-    #    raise "Usage: python main.py hyperparameter.yml model.yml [create database entry only (bool)]"
+    if not hyper_config or not model_config:
+        raise OSError("Usage: python main.py hyperparameter.yml model.yml [optional parser options]")
 
     if os.path.isfile(hyper_config):
         with open(hyper_config) as f:
@@ -149,9 +144,6 @@ if __name__ == "__main__":
             model_config = yaml.load(f, Loader=yaml.FullLoader)
     else:
         raise OSError(f"Model config file {sys.argv[1]} does not exist")
-        
-    # Override to create the database but skip submitting jobs. This is a debug option so that run.py will run
-    create_db_only = True if create_study["create_study"] else False
         
     # Set up a logger
     root = logging.getLogger()
@@ -177,7 +169,7 @@ if __name__ == "__main__":
         
     # Override other options in hyperparameter config file, if supplied.
     for name, val in args_dict.items():
-        if val:
+        if val and (name in hyper_config):
             current_value = hyper_config["optuna"][name]
             logging.info(
                 f"Overriding {name} in the hyperparameter configuration: {current_value} -> {val}"
@@ -193,7 +185,7 @@ if __name__ == "__main__":
     for p, v in configuration_report(model_config):
         full_path = ".".join(p)
         logging.info(f"{full_path}: {v}")
-
+        
     # Set up new db entry if reload = 0 
     reload_study = bool(hyper_config["optuna"]["reload"])
         
@@ -232,6 +224,9 @@ if __name__ == "__main__":
             sampler = sampler
         )
         
+    # Override to create the database but skip submitting jobs. 
+    create_db_only = True if args_dict["create_study"] else False
+    
     # Stop here if arg is defined -- intention is that you manually run run.py for debugging purposes
     if create_db_only:
         logging.info(f"Created study {name} located at {storage}. Exiting.")

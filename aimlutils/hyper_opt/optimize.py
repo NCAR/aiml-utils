@@ -101,7 +101,11 @@ def prepare_launch_script(hyper_config, model_config):
         f"#SBATCH -{arg} {val}" if len(arg) == 1 else f"#SBATCH --{arg}={val}" 
         for arg, val in hyper_config["slurm"]["batch"].items()
     ]
-    slurm_options.append("module load ncarenv/1.3 gnu/8.3.0 openmpi/3.1.4 python/3.7.5 cuda/10.1")
+    if "bash" in hyper_config["slurm"]:
+        if len(hyper_config["slurm"]["bash"]) > 0:
+            for line in hyper_config["slurm"]["bash"]:
+                slurm_options.append(line)
+    #slurm_options.append("module load ncarenv/1.3 gnu/8.3.0 openmpi/3.1.4 python/3.7.5 cuda/10.1")
     slurm_options.append(f'{hyper_config["slurm"]["kernel"]}')
     import aimlutils.hyper_opt as opt
     aiml_path = os.path.join(
@@ -236,7 +240,7 @@ if __name__ == "__main__":
     launch_script = prepare_launch_script(hyper_config, model_config)
     
     # Save the configured script
-    script_path = os.path.split(hyper_config["optuna"]["save_path"])[0]
+    script_path = hyper_config["optuna"]["save_path"]
     script_location = os.path.join(script_path, "launch.sh")
     with open(script_location, "w") as fid:
         for line in launch_script:
@@ -249,7 +253,7 @@ if __name__ == "__main__":
     n_workers = hyper_config["slurm"]["jobs"]
     for worker in range(n_workers):
         w = subprocess.Popen(
-            f"sbatch -J {slurm_job_name}_{worker} {script_location}", 
+            f"sbatch -J {slurm_job_name}_{worker} {script_location}",
             shell=True,
             stdout = subprocess.PIPE,
             stderr = subprocess.PIPE

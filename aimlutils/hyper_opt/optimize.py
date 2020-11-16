@@ -183,11 +183,11 @@ if __name__ == "__main__":
     # Print the configurations to the logger
     logging.info("Current hyperparameter configuration settings:")
     for p, v in configuration_report(hyper_config):
-        full_path = ".".join(p)
+        full_path = ".".join([str(_p) for _p in p])
         logging.info(f"{full_path}: {v}")
     logging.info("Current model configuration settings:")
     for p, v in configuration_report(model_config):
-        full_path = ".".join(p)
+        full_path = ".".join([str(_p) for _p in p])
         logging.info(f"{full_path}: {v}")
         
     # Set up new db entry if reload = 0 

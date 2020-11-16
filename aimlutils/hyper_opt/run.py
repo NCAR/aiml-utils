@@ -11,6 +11,7 @@ import yaml
 import sys
 import os
 
+
 def get_sec(time_str):
     """Get Seconds from time."""
     h, m, s = time_str.split(':')
@@ -155,14 +156,15 @@ logging.info(f'Running optimization for {model_config["optuna"]["n_trials"]} tri
 wall_time = hyper_config["slurm"]["batch"]["t"]
 
 logging.info(
-    f"This script will run for 99% of the wall-time of {wall_time} and try to die without error"
+    f"This script will run for 95% of the wall-time of {wall_time} and try to die without error"
 )
 
-wall_time = 0.99 * get_sec(wall_time)
+wall_time = 0.95 * get_sec(wall_time)
 study.optimize(
     objective, 
-    n_trials=int(model_config["optuna"]["n_trials"]), 
-    timeout = wall_time
+    n_trials = int(model_config["optuna"]["n_trials"]), 
+    timeout = wall_time,
+    catch = (ValueError,)#, TypeError)
 )
 
 ################################################################

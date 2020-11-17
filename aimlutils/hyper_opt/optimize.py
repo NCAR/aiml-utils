@@ -1,3 +1,6 @@
+import warnings
+warnings.filterwarnings("ignore")
+
 import os
 import sys
 import yaml
@@ -93,6 +96,50 @@ def args():
         help="Create a study but do not submit any workers"
     )   
     return vars(parser.parse_args())
+
+
+def fix_broken_study(_study, name, storage, direction):
+    
+    """
+        This method removes broken trials, which are those 
+        that failed to complete 1 epoch before slurm (or something else) killed the job.
+        Failure to remove these trails leads to a error when optuna tries to update the 
+        parameters. This is because these trails only have "NoneType" data associated 
+        with them, but we need numerical data (e.g. the loss value) to update parameters.
+    """
+    
+    if len(_study.trials) == 0:
+        return _study, []
+    
+    trials = []
+    removed = []
+    for trial in _study.trials:
+        if len(trial.intermediate_values) == 0:
+            trials.append(trial)
+            continue
+        step, intermediate_value = max(trial.intermediate_values.items())
+        if intermediate_value is not None:
+            trials.append(trial)
+        else:
+            removed.append(trial.number+1)
+            
+    if len(removed) == 0:
+        return _study, []
+    
+    # Delete the current study
+    optuna.delete_study(study_name=name, storage=storage)
+    
+    # Create a new one in its place
+    study_fixed = optuna.create_study(study_name=name, 
+                                  storage=storage, 
+                                  direction=direction,
+                                  load_if_exists=False)
+    
+    # Add the working trials to the new study
+    for trial in trials:
+        study_fixed.add_trial(trial)
+        
+    return study_fixed, removed
 
 
 def prepare_launch_script(hyper_config, model_config):
@@ -199,23 +246,21 @@ if __name__ == "__main__":
             f'Create the save directory {hyper_config["optuna"]["save_path"]} and try again'
         )
         
+    name = hyper_config["optuna"]["name"]
+    path_to_study = os.path.join(hyper_config["optuna"]["save_path"], name)
+    storage = f"sqlite:///{path_to_study}"
+    direction = hyper_config["optuna"]["direction"]
+    
     # Initiate a study for the first time
-    if not reload_study:        
-        name = hyper_config["optuna"]["name"]
-        path_to_study = os.path.join(hyper_config["optuna"]["save_path"], name)
-        storage =f"sqlite:///{path_to_study}"
-        
+    if not reload_study:                
         if os.path.isfile(path_to_study):
             message = f"The study already exists at {path_to_study} and reload was False."
             message += f" Delete the study at {path_to_study} and try again"
             raise OSError(message)
-        
-        direction = hyper_config["optuna"]["direction"]
         if direction not in ["maximize", "minimize"]:
             raise OSError(
                 f"Optimizer direction {direction} not recognized. Choose from maximize or minimize"
             )
-        
         if "sampler" not in hyper_config["optuna"]:
             sampler = optuna.samplers.TPESampler()
         else:
@@ -227,6 +272,24 @@ if __name__ == "__main__":
             direction = direction,
             sampler = sampler
         )
+    # Check to see if there are any broken trials
+    else:
+        logging.info(
+            f"Checking the study for broken trials (those that did not complete 1 epoch before dying)"
+        )
+        study = optuna.load_study(
+            study_name = name,
+            storage = storage
+        )
+        study, removed = fix_broken_study(study, name, storage, direction)
+        
+        if len(removed):
+            logging.info(
+                f"... removing problematic trials {removed}."
+            )
+        else:
+            logging.info("All trials check out!")
+            
         
     # Override to create the database but skip submitting jobs. 
     create_db_only = True if args_dict["create_study"] else False
@@ -235,7 +298,7 @@ if __name__ == "__main__":
     if create_db_only:
         logging.info(f"Created study {name} located at {storage}. Exiting.")
         sys.exit()
-        
+                
     # Prepare slurm script
     launch_script = prepare_launch_script(hyper_config, model_config)
     

@@ -1,7 +1,10 @@
+import warnings
+warnings.filterwarnings("ignore")
+
+import sys
 import optuna
 import logging
 from tensorflow.keras.callbacks import Callback
-import sys
 
 
 logger = logging.getLogger(__name__)

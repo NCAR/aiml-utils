@@ -164,7 +164,7 @@ study.optimize(
     objective, 
     n_trials = int(model_config["optuna"]["n_trials"]), 
     timeout = wall_time,
-    catch = (ValueError,)#, TypeError)
+    catch = (ValueError,)#
 )
 
 ################################################################

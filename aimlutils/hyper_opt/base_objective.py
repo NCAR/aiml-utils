@@ -91,7 +91,7 @@ class BaseObjective:
         pd.DataFrame.from_dict(self.results).to_csv(self.results_fn)
         
         logger.info(
-            f"Saving trail {trial.number} results to local file {self.results_fn}"
+            f"Saving trial {trial.number} results to local file {self.results_fn}"
         )
         
         return results_dict[self.metric]
@@ -108,15 +108,7 @@ class BaseObjective:
         
         result = self.train(trial, conf)
         
-#         try:
-#             result = self.train(trial, conf)
-#         except RuntimeError: # GPU memory overflow
-#             logger.warning(
-#                 "Ran out of GPU memory, proceeding to prune the trial"
-#             )
-#             raise optuna.TrialPruned()
-        
-        return result
+        return self.save(trial, result)
     
     def train(self, trial, conf):
         raise NotImplementedError

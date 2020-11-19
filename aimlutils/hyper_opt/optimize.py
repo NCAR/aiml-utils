@@ -152,7 +152,6 @@ def prepare_launch_script(hyper_config, model_config):
         if len(hyper_config["slurm"]["bash"]) > 0:
             for line in hyper_config["slurm"]["bash"]:
                 slurm_options.append(line)
-    #slurm_options.append("module load ncarenv/1.3 gnu/8.3.0 openmpi/3.1.4 python/3.7.5 cuda/10.1")
     slurm_options.append(f'{hyper_config["slurm"]["kernel"]}')
     import aimlutils.hyper_opt as opt
     aiml_path = os.path.join(
@@ -252,7 +251,7 @@ if __name__ == "__main__":
     direction = hyper_config["optuna"]["direction"]
     
     # Initiate a study for the first time
-    if not reload_study:                
+    if not reload_study:        
         if os.path.isfile(path_to_study):
             message = f"The study already exists at {path_to_study} and reload was False."
             message += f" Delete the study at {path_to_study} and try again"
@@ -285,7 +284,7 @@ if __name__ == "__main__":
         
         if len(removed):
             logging.info(
-                f"... removing problematic trials {removed}."
+                f"Removing problematic trials {removed}."
             )
         else:
             logging.info("All trials check out!")

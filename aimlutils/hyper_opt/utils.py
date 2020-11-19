@@ -26,7 +26,7 @@ def trial_suggest_loader(trial, config):
     
         _type = config["type"]
         if _type == "categorical":
-            return int(trial.suggest_categorical(**config["settings"]))
+            return trial.suggest_categorical(**config["settings"])
         elif _type == "discrete_uniform":
             return int(trial.suggest_discrete_uniform(**config["settings"]))
         elif _type == "float":

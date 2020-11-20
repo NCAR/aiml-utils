@@ -167,53 +167,55 @@ study.optimize(
     catch = (ValueError,)#
 )
 
+#study._storage = study._storage._backend  # avoid using chaced storage
+
 ################################################################
 
-# Clean up the data files
-saved_results = glob.glob(os.path.join(save_path, "hyper_opt_*.csv"))
-if len(saved_results):
-    saved_results = pd.concat(
-        [pd.read_csv(x) for x in saved_results], sort = True
-    ).reset_index(drop=True)
-    saved_results = saved_results.drop(
-        columns = [x for x in saved_results.columns if "Unnamed" in x]
-    )
-    saved_results = saved_results.sort_values(["trial"]).reset_index(drop = True)
-    best_parameters = saved_results[saved_results[metric]==max(saved_results[metric])]
+# # Clean up the data files
+# saved_results = glob.glob(os.path.join(save_path, "hyper_opt_*.csv"))
+# if len(saved_results):
+#     saved_results = pd.concat(
+#         [pd.read_csv(x) for x in saved_results], sort = True
+#     ).reset_index(drop=True)
+#     saved_results = saved_results.drop(
+#         columns = [x for x in saved_results.columns if "Unnamed" in x]
+#     )
+#     saved_results = saved_results.sort_values(["trial"]).reset_index(drop = True)
+#     best_parameters = saved_results[saved_results[metric]==max(saved_results[metric])]
 
-    # Save results to file
-    hyper_opt_save_path = os.path.join(save_path, "hyper_opt.csv")
-    best_save_path = os.path.join(save_path, "best.csv")
-    saved_results.to_csv(hyper_opt_save_path)
-    best_parameters.to_csv(best_save_path)
+#     # Save results to file
+#     hyper_opt_save_path = os.path.join(save_path, "hyper_opt.csv")
+#     best_save_path = os.path.join(save_path, "best.csv")
+#     saved_results.to_csv(hyper_opt_save_path)
+#     best_parameters.to_csv(best_save_path)
 
-    logging.info(f"Saved trial results to {hyper_opt_save_path}")
-    logging.info(f"Saved best results to {best_save_path}")
+#     logging.info(f"Saved trial results to {hyper_opt_save_path}")
+#     logging.info(f"Saved best results to {best_save_path}")
 
-# Check a few other stats
-pruned_trials = [
-    t for t in study.trials if t.state == optuna.trial.TrialState.PRUNED
-]
-complete_trials = [
-    t for t in study.trials if t.state == optuna.trial.TrialState.COMPLETE
-]
+# # Check a few other stats
+# pruned_trials = [
+#     t for t in study.trials if t.state == optuna.trial.TrialState.PRUNED
+# ]
+# complete_trials = [
+#     t for t in study.trials if t.state == optuna.trial.TrialState.COMPLETE
+# ]
 
-logging.info(f'Number of requested trials: {model_config["optuna"]["n_trials"]}')
-logging.info(f"Number of finished trials: {len(study.trials)}")
-logging.info(f"Number of pruned trials: {len(pruned_trials)}")
-logging.info(f"Number of complete trials: {len(complete_trials)}")
-logging.info(f"Best trial: {study.best_trial.value}")
-logging.info("Best parameters in the study:")
-for param, val in study.best_params.items():
-    logging.info(f"{param}: {val}")
+# logging.info(f'Number of requested trials: {model_config["optuna"]["n_trials"]}')
+# logging.info(f"Number of finished trials: {len(study.trials)}")
+# logging.info(f"Number of pruned trials: {len(pruned_trials)}")
+# logging.info(f"Number of complete trials: {len(complete_trials)}")
+# logging.info(f"Best trial: {study.best_trial.value}")
+# logging.info("Best parameters in the study:")
+# for param, val in study.best_params.items():
+#     logging.info(f"{param}: {val}")
     
-if len(study.trials) < model_config["optuna"]["n_trials"]:
-    logging.warning(
-        "Not all of the trials completed due to the wall-time."
-    )
-    logging.warning(
-        "Set reload = 1 in the hyperparameter config and resubmit some more workers to finish!"
-    )
+# if len(study.trials) < model_config["optuna"]["n_trials"]:
+#     logging.warning(
+#         "Not all of the trials completed due to the wall-time."
+#     )
+#     logging.warning(
+#         "Set reload = 1 in the hyperparameter config and resubmit some more workers to finish!"
+#     )
 
-save_study = os.path.join(save_path, f"study_summary.csv")
-study.trials_dataframe().to_csv(save_study, index = None)
+# save_study = os.path.join(save_path, f"study_summary.csv")
+# study.trials_dataframe().to_csv(save_study, index = None)

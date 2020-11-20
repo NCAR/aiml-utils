@@ -23,7 +23,6 @@ supported_trials = [
 def trial_suggest_loader(trial, config):
     
     try:
-    
         _type = config["type"]
         if _type == "categorical":
             return trial.suggest_categorical(**config["settings"])
@@ -41,7 +40,6 @@ def trial_suggest_loader(trial, config):
             message = f"Type {_type} is not valid. Select from {supported_trials}"
             logger.warning(message)
             raise OSError(message)
-            
     except Exception as E:
         print("FAILED IN TRIAL SUGGEST", E, config)
         raise OSError

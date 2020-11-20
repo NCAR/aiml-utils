@@ -34,10 +34,12 @@ save_path = hyper_config["optuna"]["save_path"]
 study_name = hyper_config["optuna"]["name"]
 reload_study = bool(hyper_config["optuna"]["reload"])
 cached_study = f"{save_path}/{study_name}"
-    
+
+#storage = f'postgresql+psycopg2://john:schreck@localhost/{cached_study}'
 storage = f"sqlite:///{cached_study}"
 
 study = optuna.load_study(study_name=study_name, storage=storage)
+#study._storage = study._storage._backend  # avoid using chaed storage
 
 # Check a few other stats
 pruned_trials = [
@@ -47,8 +49,8 @@ complete_trials = [
     t for t in study.trials if t.state == optuna.trial.TrialState.COMPLETE
 ]
 
-logging.info(f'Number of requested trials: {hyper_config["optuna"]["n_trials"]}')
-logging.info(f"Number of trials: {len(study.trials)}")
+logging.info(f'Number of requested trials per worker: {hyper_config["optuna"]["n_trials"]}')
+logging.info(f"Number of trials in the database: {len(study.trials)}")
 logging.info(f"Number of pruned trials: {len(pruned_trials)}")
 logging.info(f"Number of completed trials: {len(complete_trials)}")
 
@@ -58,6 +60,10 @@ if len(complete_trials) == 0:
     sys.exit()
 
 logging.info(f"Best trial: {study.best_trial.value}")
+
+importance = optuna.importance.get_param_importances(study=study)
+logging.info(f"Parameter importance {dict(importance)}")
+
 logging.info("Best parameters in the study:")
 for param, val in study.best_params.items():
     logging.info(f"{param}: {val}")

@@ -193,7 +193,7 @@ if __name__ == "__main__":
         with open(model_config) as f:
             model_config = yaml.load(f, Loader=yaml.FullLoader)
     else:
-        raise OSError(f"Model config file {sys.argv[1]} does not exist")
+        raise OSError(f"Model config file {sys.argv[1]} does not exist")        
         
     # Set up a logger
     root = logging.getLogger()
@@ -251,7 +251,7 @@ if __name__ == "__main__":
     direction = hyper_config["optuna"]["direction"]
     
     # Initiate a study for the first time
-    if not reload_study:        
+    if not reload_study:
         if os.path.isfile(path_to_study):
             message = f"The study already exists at {path_to_study} and reload was False."
             message += f" Delete the study at {path_to_study} and try again"
@@ -273,6 +273,9 @@ if __name__ == "__main__":
         )
     # Check to see if there are any broken trials
     else:
+        if not os.path.isfile(path_to_study):
+            raise OSError("Reload was true but the study does not yet exist. Set reload = 0 and try again.")
+            
         logging.info(
             f"Checking the study for broken trials (those that did not complete 1 epoch before dying)"
         )

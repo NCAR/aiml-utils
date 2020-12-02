@@ -164,7 +164,7 @@ study.optimize(
     objective, 
     n_trials = int(model_config["optuna"]["n_trials"]), 
     timeout = wall_time,
-    catch = (ValueError,)#
+    catch = (ValueError,)
 )
 
 #study._storage = study._storage._backend  # avoid using chaced storage

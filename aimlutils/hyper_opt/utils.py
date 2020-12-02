@@ -54,35 +54,36 @@ supported_samplers = [
 ]
 
 def samplers(sampler):
-    _type = sampler["type"]
+    _type = sampler.pop("type")
     if _type not in supported_samplers:
         message = f"Sampler {_type} is not valid. Select from {supported_samplers}"
         logger.warning(message)
         raise OSError(message)
     if _type == "TPESampler":
-        return optuna.samplers.TPESampler()
+        return optuna.samplers.TPESampler(**sampler)
     elif _type == "GridSampler":
         if "search_space" not in sampler:
             raise OSError("You must provide search_space options with the GridSampler.")
         else:
-            return optuna.samplers.GridSampler(sampler["search_space"])
+            return optuna.samplers.GridSampler(**sampler)
     elif _type == "RandomSampler":
-        return optuna.samplers.RandomSampler()
+        return optuna.samplers.RandomSampler(**sampler)
     elif _type == "CmaEsSampler":
-        return optuna.integration.CmaEsSampler()
+        return optuna.integration.CmaEsSampler(**sampler)
     elif _type == "IntersectionSearchSpace":
-        return optuna.integration.IntersectionSearchSpace()
+        return optuna.integration.IntersectionSearchSpace(**sampler)
     
 
 class KerasPruningCallback(Callback):
 
-    def __init__(self, trial, monitor):
+    def __init__(self, trial, monitor, interval):
         # type: (optuna.trial.Trial, str) -> None
 
         super(KerasPruningCallback, self).__init__()
 
         self.trial = trial
         self.monitor = monitor
+        self.interval = interval
 
     def on_epoch_end(self, epoch, logs=None):
         # type: (int, Dict[str, float]) -> None

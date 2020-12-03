@@ -1,9 +1,13 @@
+import warnings
+warnings.filterwarnings("ignore")
+
 import os
 import sys
 import yaml
 import optuna
 import logging
 import pandas as pd
+import matplotlib.pyplot as plt
 
 if len(sys.argv) != 2:
     raise OSError(
@@ -79,3 +83,13 @@ if len(study.trials) < hyper_config["optuna"]["n_trials"]:
 save_fn = os.path.join(save_path, f"{study_name}.csv")
 logging.info(f"Saving the results of the study to file at {save_fn}")
 study.trials_dataframe().to_csv(save_fn, index = None)
+
+fig = optuna.visualization.matplotlib.plot_optimization_history(study)
+fig.set_yscale("log")
+plt.tight_layout()
+
+figure_save_path = os.path.join(save_path, "optimization_history.pdf")
+plt.savefig(figure_save_path, dpi = 300)
+logging.info(
+    f"Saving the optimization history plot to file at {figure_save_path}"
+)

@@ -98,7 +98,7 @@ def args():
     return vars(parser.parse_args())
 
 
-def fix_broken_study(_study, name, storage, direction):
+def fix_broken_study(_study, name, storage, direction, sampler):
     
     """
         This method removes broken trials, which are those 
@@ -133,6 +133,7 @@ def fix_broken_study(_study, name, storage, direction):
     study_fixed = optuna.create_study(study_name=name, 
                                   storage=storage, 
                                   direction=direction,
+                                  sampler=sampler,
                                   load_if_exists=False)
     
     # Add the working trials to the new study
@@ -281,9 +282,10 @@ if __name__ == "__main__":
         )
         study = optuna.load_study(
             study_name = name,
-            storage = storage
+            storage = storage, 
+            sampler = sampler
         )
-        study, removed = fix_broken_study(study, name, storage, direction)
+        study, removed = fix_broken_study(study, name, storage, direction, sampler)
         
         if len(removed):
             logging.info(

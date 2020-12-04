@@ -93,3 +93,13 @@ plt.savefig(figure_save_path, dpi = 300)
 logging.info(
     f"Saving the optimization history plot to file at {figure_save_path}"
 )
+
+fig = optuna.visualization.matplotlib.plot_intermediate_values(study)
+fig.set_yscale("log")
+plt.tight_layout()
+
+figure_save_path = os.path.join(save_path, "intermediate_values.pdf")
+plt.savefig(figure_save_path, dpi = 300)
+logging.info(
+    f"Saving the intermediate values plot to file at {figure_save_path}"
+)

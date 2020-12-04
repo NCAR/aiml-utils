@@ -1,6 +1,7 @@
 import warnings
 warnings.filterwarnings("ignore")
 
+from aimlutils.hyper_opt.utils import samplers
 from aimlutils.utils.gpu import gpu_report
 import pandas as pd
 import logging
@@ -141,8 +142,14 @@ else:
 # Initialize the db record and study
 storage = f"sqlite:///{cached_study}"
 
+if "sampler" not in hyper_config["optuna"]:
+    sampler = optuna.samplers.TPESampler()
+else:
+    sampler = samplers(hyper_config["optuna"]["sampler"])
+
 study = optuna.create_study(study_name=study_name,
                             storage=storage,
+                            sampler=sampler,
                             direction=direction,
                             load_if_exists=True)
 logging.info(f"Loaded study {study_name} located at {storage}")

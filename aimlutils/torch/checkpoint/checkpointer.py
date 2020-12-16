@@ -26,7 +26,8 @@ class EarlyStopping:
                  verbose=False,
                  delta=0,
                  save_every_epoch=False,
-                 path_save='checkpoint.pt'):
+                 path_save='checkpoint.pt',
+                 tag = None):
         """
         Args:
             patience (int): How long to wait after last time validation loss improved.
@@ -50,6 +51,7 @@ class EarlyStopping:
         self.path = path_save
         self.dirpath = os.path.dirname(self.path)
         self.save_every_epoch = save_every_epoch
+        self.tag = tag
 
         logger.info(
             f"Loaded EarlyStopping checkpointer with patience {self.patience}")
@@ -89,10 +91,16 @@ class EarlyStopping:
             'lr': self.print_learning_rate(optimizer)
         }
         if not best:  # save a model, not the best one seen so far
-            save_path = os.path.join(self.dirpath, "checkpoint.pt")
+            if self.tag is not None:
+                save_path = os.path.join(self.dirpath, f"checkpoint_{self.tag}.pt")
+            else:
+                save_path = os.path.join(self.dirpath, "checkpoint.pt")
             torch.save(checkpoint, save_path)
         else:  # save best model so far
-            save_path = os.path.join(self.dirpath, "best.pt")
+            if self.tag is not None:
+                save_path = os.path.join(self.dirpath, f"best_{self.tag}.pt")
+            else:
+                save_path = os.path.join(self.dirpath, "best.pt")
             torch.save(checkpoint, save_path)
             self.val_loss_min = val_loss
 

@@ -3,3 +3,5 @@ author: AIML @ NCAR
 logo: ../NCAR_UCAR_LIVERY/Logos/Contemporary Logos/NCAR/Dark Logo/NCAR-contemp-logo-blue.png
 execute:
   execute_notebooks: "off"
+parse:
+  myst_extended_syntax: true

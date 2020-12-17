@@ -3,6 +3,7 @@ warnings.filterwarnings("ignore")
 
 from aimlutils.hyper_opt.utils import samplers
 from aimlutils.utils.gpu import gpu_report
+import importlib.machinery
 import pandas as pd
 import logging
 import optuna
@@ -72,8 +73,10 @@ model_config["optuna"] = hyper_config["optuna"]
     
 # Check if path to objective method exists
 if os.path.isfile(model_config["optuna"]["objective"]):
-    sys.path.append(os.path.split(model_config["optuna"]["objective"])[0])
-    from objective import Objective
+    loader = importlib.machinery.SourceFileLoader("custom_objective", model_config["optuna"]["objective"])
+    mod = loader.load_module()
+    #sys.path.append(os.path.split(model_config["optuna"]["objective"])[0])
+    from custom_objective import Objective
 else:
     raise OSError(
         f'The objective file {model_config["optuna"]["objective"]} does not exist'

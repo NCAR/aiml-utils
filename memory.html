@@ -1,0 +1,467 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>4. Memory profiling python scripts with memory_profiler &#8212; Analytics and Integrative Machine Learning</title>
+    
+  <link rel="stylesheet" href="_static/css/index.73d71520a4ca3b99cfee5594769eaaae.css">
+
+    
+  <link rel="stylesheet"
+    href="_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    
+      
+  <link rel="stylesheet"
+    href="_static/vendor/open-sans_all/1.44.1/index.css">
+  <link rel="stylesheet"
+    href="_static/vendor/lato_latin-ext/1.44.1/index.css">
+
+    
+    <link rel="stylesheet" href="_static/sphinx-book-theme.2d2078699c18a0efb88233928e1cf6ed.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css" />
+    <link rel="stylesheet" type="text/css" href="_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    
+  <link rel="preload" as="script" href="_static/js/index.3da636dd464baa7582d2.js">
+
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="_static/togglebutton.js"></script>
+    <script src="_static/clipboard.min.js"></script>
+    <script src="_static/copybutton.js"></script>
+    <script >var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="_static/sphinx-book-theme.be0a4a0c39cd630af62a2fcf693f3f06.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["\\(", "\\)"]], "displayMath": [["\\[", "\\]"]], "processRefs": false, "processEnvironments": false}})</script>
+    <script async="async" src="https://unpkg.com/thebelab@latest/lib/index.js"></script>
+    <script >
+        const thebe_selector = ".thebe"
+        const thebe_selector_input = "pre"
+        const thebe_selector_output = ".output"
+    </script>
+    <script async="async" src="_static/sphinx-thebe.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="3. Callbacks: Utilities for interacting with ML training" href="callbacks.html" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="en" />
+
+
+
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+<div class="col-12 col-md-3 bd-sidebar site-navigation show" id="site-navigation">
+    
+        <div class="navbar-brand-box">
+<a class="navbar-brand text-wrap" href="index.html">
+  
+  <img src="_static/NCAR-contemp-logo-blue.png" class="logo" alt="logo">
+  
+  
+  <h1 class="site-logo" id="site-title">Analytics and Integrative Machine Learning</h1>
+  
+</a>
+</div>
+
+<form class="bd-search d-flex align-items-center" action="search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search this book..." aria-label="Search this book..." autocomplete="off" >
+</form>
+
+<nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <ul class="nav sidenav_l1">
+ <li class="toctree-l1">
+  <a class="reference internal" href="home.html">
+   Introduction
+  </a>
+ </li>
+</ul>
+<ul class="current nav sidenav_l1">
+ <li class="toctree-l1">
+  <a class="reference internal" href="generators.html">
+   1. Methods, iterables, and generators for reading files
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="data_loaders.html">
+   2. Data Loaders for ML Pipelines
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="callbacks.html">
+   3. Callbacks: Utilities for interacting with ML training
+  </a>
+ </li>
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   4. Memory profiling python scripts with
+   <em>
+    memory_profiler
+   </em>
+  </a>
+ </li>
+</ul>
+
+</nav>
+
+ <!-- To handle the deprecated key -->
+
+<div class="navbar_extra_footer">
+  Powered by <a href="https://jupyterbook.org">Jupyter Book</a>
+</div>
+
+</div>
+
+
+          
+
+
+          
+<main class="col py-md-3 pl-md-4 bd-content overflow-auto" role="main">
+    
+    <div class="row topbar fixed-top container-xl">
+    <div class="col-12 col-md-3 bd-topbar-whitespace site-navigation show">
+    </div>
+    <div class="col pl-2 topbar-main">
+        
+        <button id="navbar-toggler" class="navbar-toggler ml-0" type="button" data-toggle="collapse"
+            data-toggle="tooltip" data-placement="bottom" data-target=".site-navigation" aria-controls="navbar-menu"
+            aria-expanded="true" aria-label="Toggle navigation" aria-controls="site-navigation"
+            title="Toggle navigation" data-toggle="tooltip" data-placement="left">
+            <i class="fas fa-bars"></i>
+            <i class="fas fa-arrow-left"></i>
+            <i class="fas fa-arrow-up"></i>
+        </button>
+        
+        <div class="dropdown-buttons-trigger">
+    <button id="dropdown-buttons-trigger" class="btn btn-secondary topbarbtn" aria-label="Download this page"><i
+            class="fas fa-download"></i></button>
+
+    
+    <div class="dropdown-buttons">
+        <!-- ipynb file if we had a myst markdown file -->
+        
+        <!-- Download raw file -->
+        <a class="dropdown-buttons" href="_sources/memory.ipynb"><button type="button"
+                class="btn btn-secondary topbarbtn" title="Download source file" data-toggle="tooltip"
+                data-placement="left">.ipynb</button></a>
+        <!-- Download PDF via print -->
+        <button type="button" id="download-print" class="btn btn-secondary topbarbtn" title="Print to PDF"
+            onClick="window.print()" data-toggle="tooltip" data-placement="left">.pdf</button>
+    </div>
+    
+</div>
+        <!-- Source interaction buttons -->
+
+
+        <!-- Full screen (wrap in <a> to have style consistency -->
+        <a class="full-screen-button"><button type="button" class="btn btn-secondary topbarbtn" data-toggle="tooltip"
+                data-placement="bottom" onclick="toggleFullScreen()" aria-label="Fullscreen mode"
+                title="Fullscreen mode"><i
+                    class="fas fa-expand"></i></button></a>
+
+        <!-- Launch buttons -->
+
+<div class="dropdown-buttons-trigger">
+    <button id="dropdown-buttons-trigger" class="btn btn-secondary topbarbtn"
+        aria-label="Launch interactive content"><i class="fas fa-rocket"></i></button>
+    <div class="dropdown-buttons">
+        
+        <a class="binder-button" href="https://mybinder.org/v2/gh/executablebooks/jupyter-book/master?urlpath=tree/memory.ipynb"><button type="button"
+                class="btn btn-secondary topbarbtn" title="Launch Binder" data-toggle="tooltip"
+                data-placement="left"><img class="binder-button-logo"
+                    src="_static/images/logo_binder.svg"
+                    alt="Interact on binder">Binder</button></a>
+        
+        
+        
+        
+    </div>
+</div>
+
+    </div>
+
+    <!-- Table of contents -->
+    <div class="d-none d-md-block col-md-2 bd-toc show">
+        
+        <div class="tocsection onthispage pt-5 pb-3">
+            <i class="fas fa-list"></i> Contents
+        </div>
+        <nav id="bd-toc-nav">
+            <ul class="nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#pip">
+   Pip
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#conda">
+   Conda
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#simple-decorator-above-any-script-function">
+   1. Simple decorator above any script function
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#decorators-above-sub-functions">
+   2. Decorators above sub-functions
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#eliminate-m-memory-profile-flag-by-importing-module-into-the-script">
+   3. Eliminate -m memory_profile flag by importing module into the script
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#track-and-plot-memory-as-a-function-of-time">
+   4. Track and plot memory as a function of time
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#a-more-complicated-script-example-output">
+   5. A more complicated script example output
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#jupyter-notebook-importing-module">
+   6. Jupyter notebook importing module
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#jupyter-notebook-magic-function">
+   7. Jupyter notebook magic function
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#other-methods-of-running-and-customizing-memory-profiler">
+   8. Other methods of running and customizing
+   <em>
+    memory_profiler
+   </em>
+  </a>
+ </li>
+</ul>
+
+        </nav>
+        
+    </div>
+</div>
+    <div id="main-content" class="row">
+        <div class="col-12 col-md-9 pl-md-3 pr-md-0">
+        
+              <div>
+                
+  <div class="section" id="memory-profiling-python-scripts-with-memory-profiler">
+<h1>4. Memory profiling python scripts with <em>memory_profiler</em><a class="headerlink" href="#memory-profiling-python-scripts-with-memory-profiler" title="Permalink to this headline">¶</a></h1>
+<p>The <em>memory_profiler</em> package provides line-by-line output of how much memory is allocated for a process, cell, script, or workflow.</p>
+<hr class="docutils" />
+<p>Installing <em>memory_profiler</em> is very easy.</p>
+<div class="section" id="pip">
+<h2>Pip<a class="headerlink" href="#pip" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-U</span> <span class="pre">memory_profiler</span></code></p>
+</div>
+<div class="section" id="conda">
+<h2>Conda<a class="headerlink" href="#conda" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">config</span> <span class="pre">--add</span> <span class="pre">channels</span> <span class="pre">conda-forge</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">memory_profiler</span></code></p>
+<hr class="docutils" />
+<p><em>Memory_profiler</em> isn’t just easy to install, it’s easy to implement into your scripts, jupyter notebooks, or entire workflows. Below are a few of the many ways <em>memory_profiler</em> can be implemented. See documentation <a class="reference external" href="https://pypi.org/project/memory-profiler/">here</a> and <a class="reference external" href="https://github.com/pythonprofilers/memory_profiler">here</a>.</p>
+</div>
+<div class="section" id="simple-decorator-above-any-script-function">
+<h2>1. Simple decorator above any script function<a class="headerlink" href="#simple-decorator-above-any-script-function" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">&#64;profile</span></code> above any function like in the script (<code class="docutils literal notranslate"><span class="pre">example.py</span></code>) below. You can set the precision with which the memory usage is reported.</p>
+<img alt="_images/example.py.png" class="align-center" src="_images/example.py.png" />
+<p>Run using the following command: <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">memory_profiler</span> <span class="pre">example.py</span></code> and you will generate a file called <code class="docutils literal notranslate"><span class="pre">memory_profiler.log</span></code> containing the following output.</p>
+<img alt="_images/example.py_output.png" class="align-center" src="_images/example.py_output.png" />
+</div>
+<div class="section" id="decorators-above-sub-functions">
+<h2>2. Decorators above sub-functions<a class="headerlink" href="#decorators-above-sub-functions" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">&#64;profile</span></code> above any sub-functions (<code class="docutils literal notranslate"><span class="pre">test.py</span></code>) called in your main script (<code class="docutils literal notranslate"><span class="pre">example.py</span></code>) below.</p>
+<img alt="_images/test.py.png" class="align-center" src="_images/test.py.png" />
+<p><code class="docutils literal notranslate"><span class="pre">memory_profiler.log</span></code> will output the following:</p>
+<img alt="_images/test.py_output.png" class="align-center" src="_images/test.py_output.png" />
+</div>
+<div class="section" id="eliminate-m-memory-profile-flag-by-importing-module-into-the-script">
+<h2>3. Eliminate -m memory_profile flag by importing module into the script<a class="headerlink" href="#eliminate-m-memory-profile-flag-by-importing-module-into-the-script" title="Permalink to this headline">¶</a></h2>
+<img alt="_images/example.py_m.png" class="align-center" src="_images/example.py_m.png" />
+</div>
+<div class="section" id="track-and-plot-memory-as-a-function-of-time">
+<h2>4. Track and plot memory as a function of time<a class="headerlink" href="#track-and-plot-memory-as-a-function-of-time" title="Permalink to this headline">¶</a></h2>
+<p>Import and decorate exactly as the above example. Then instead of python, run via  <code class="docutils literal notranslate"><span class="pre">mprof</span> <span class="pre">run</span> <span class="pre">example.py</span></code></p>
+<img alt="_images/example.py_m.png" class="align-center" src="_images/example.py_m.png" />
+<p>This method of running will still lead to the familiar output we’ve seen in previous ways of using <em>memory_profiler</em>.</p>
+<img alt="_images/mprofile.dat.png" class="align-center" src="_images/mprofile.dat.png" />
+<p>However, in addition to the line-by-line summary, the output of  <code class="docutils literal notranslate"><span class="pre">mprof</span> <span class="pre">run</span></code> will be saved in a file that begins with <code class="docutils literal notranslate"><span class="pre">mprofile_</span></code> and ends in <code class="docutils literal notranslate"><span class="pre">.dat</span></code>. To create a plot out of this output, run  <code class="docutils literal notranslate"><span class="pre">mprof</span> <span class="pre">plot</span> <span class="pre">--output=plot.png</span></code> and the following will be created:</p>
+<img alt="_images/mprof_run_plot.png" class="align-center" src="_images/mprof_run_plot.png" />
+</div>
+<div class="section" id="a-more-complicated-script-example-output">
+<h2>5. A more complicated script example output<a class="headerlink" href="#a-more-complicated-script-example-output" title="Permalink to this headline">¶</a></h2>
+<img alt="_images/complex.png" class="align-center" src="_images/complex.png" />
+<img alt="_images/complex_plot.png" class="align-center" src="_images/complex_plot.png" />
+</div>
+<div class="section" id="jupyter-notebook-importing-module">
+<h2>6. Jupyter notebook importing module<a class="headerlink" href="#jupyter-notebook-importing-module" title="Permalink to this headline">¶</a></h2>
+<p>When comparing or testing various functions, <em>memory_profiler</em> can be used by importing the module’s various methods.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">memory_profiler</span> <span class="kn">import</span> <span class="n">memory_usage</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mem_usage</span> <span class="o">=</span> <span class="n">memory_usage</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">interval</span><span class="o">=.</span><span class="mi">2</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">mem_usage</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[45.046875, 45.046875, 45.046875, 45.046875, 45.046875]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">aaa</span><span class="p">():</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">10</span> <span class="o">**</span> <span class="mi">6</span><span class="p">)</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">10</span> <span class="o">**</span> <span class="mi">7</span><span class="p">)</span>
+    <span class="k">del</span> <span class="n">b</span>
+    <span class="k">return</span> <span class="n">a</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mem_usage</span> <span class="o">=</span> <span class="n">memory_usage</span><span class="p">(</span><span class="n">aaa</span><span class="p">,</span> <span class="n">interval</span><span class="o">=.</span><span class="mi">2</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">mem_usage</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[129.24609375, 129.2578125, 136.890625, 136.890625, 136.890625, 136.890625]
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="jupyter-notebook-magic-function">
+<h2>7. Jupyter notebook magic function<a class="headerlink" href="#jupyter-notebook-magic-function" title="Permalink to this headline">¶</a></h2>
+<p>Using <em>memory_profiler</em> can be as easy as implementing notebok magic functions, as shown below.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">load_ext</span> memory_profiler
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">memit</span> range(10000)
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>peak memory: 136.90 MiB, increment: 0.00 MiB
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">memit</span> range(10000000)
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>peak memory: 136.91 MiB, increment: 0.01 MiB
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="other-methods-of-running-and-customizing-memory-profiler">
+<h2>8. Other methods of running and customizing <em>memory_profiler</em><a class="headerlink" href="#other-methods-of-running-and-customizing-memory-profiler" title="Permalink to this headline">¶</a></h2>
+<p>The <em>memory_profile</em> module can be run via multi-processing and will output the memory usage of child processes. <em>Memory_profiler</em> can also be used to debug via a memory threshold. There are various ways of reporting the results of the memory profiling. Finally, there are various ways to customize the output and plotting of <em>memory_profiler</em>. For more customization and further running options, please see documentation <a class="reference external" href="https://pypi.org/project/memory-profiler/">here</a> and <a class="reference external" href="https://github.com/pythonprofilers/memory_profiler">here</a>.</p>
+</div>
+</div>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            kernelName: "python3",
+            path: "./."
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+              </div>
+              
+        </div>
+    </div>
+    
+    
+    <div class='prev-next-bottom'>
+        
+    <a class='left-prev' id="prev-link" href="callbacks.html" title="previous page">3. Callbacks: Utilities for interacting with ML training</a>
+
+    </div>
+    <footer class="footer mt-5 mt-md-0">
+    <div class="container">
+      <p>
+        
+          By AIML @ NCAR<br/>
+        
+            &copy; Copyright 2020.<br/>
+      </p>
+    </div>
+  </footer>
+</main>
+
+
+      </div>
+    </div>
+
+    
+  <script src="_static/js/index.3da636dd464baa7582d2.js"></script>
+
+
+    
+  </body>
+</html>

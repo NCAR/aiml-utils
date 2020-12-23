@@ -1,5 +1,7 @@
 - file: home
+- file: howto
 - file: generators.ipynb
 - file: data_loaders.ipynb
 - file: callbacks.ipynb
 - file: memory.ipynb
+- file: slurm.ipynb 

@@ -1,0 +1,15 @@
+numpy
+pandas
+optuna
+matplotlib
+tensorflow
+torch
+torchvision
+pyyaml
+scipy
+xarray
+netcdf4
+jupyter
+jupyter-book
+ghp-import
+sphinxcontrib-bibtex<2.0.0

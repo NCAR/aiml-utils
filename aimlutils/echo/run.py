@@ -1,10 +1,11 @@
 import warnings
 warnings.filterwarnings("ignore")
 
-from aimlutils.hyper_opt.utils import samplers
+from aimlutils.echo.src.samplers import samplers
 from aimlutils.utils.gpu import gpu_report
 import importlib.machinery
 import pandas as pd
+import numpy as np
 import logging
 import optuna
 import time
@@ -12,6 +13,8 @@ import glob
 import yaml
 import sys
 import os
+
+start_the_clock = time.time()
 
 
 def get_sec(time_str):
@@ -73,24 +76,39 @@ model_config["optuna"] = hyper_config["optuna"]
     
 # Check if path to objective method exists
 if os.path.isfile(model_config["optuna"]["objective"]):
-    loader = importlib.machinery.SourceFileLoader("custom_objective", model_config["optuna"]["objective"])
+    loader = importlib.machinery.SourceFileLoader(
+        "custom_objective", 
+        model_config["optuna"]["objective"]
+    )
     mod = loader.load_module()
-    #sys.path.append(os.path.split(model_config["optuna"]["objective"])[0])
     from custom_objective import Objective
 else:
     raise OSError(
-        f'The objective file {model_config["optuna"]["objective"]} does not exist'
+        f'The objective file {model_config["optuna"]["objective"]}\
+        does not exist'
     )
     
 # Check if the optimization metric direction is supported
-direction = str(model_config["optuna"]["direction"])
-if direction not in ["maximize", "minimize"]:
-    raise OSError(
-        f"Optimizer direction {direction} not recognized. Choose from maximize or minimize"
-    )
+direction = model_config["optuna"]["direction"]
+single_objective = isinstance(direction, str)
+
+if single_objective:
+    if direction not in ["maximize", "minimize"]:
+        raise OSError(
+            f"Optimizer direction {direction} not recognized. \
+            Choose from maximize or minimize"
+        )
+else:
+    for direc in direction:
+        if direc not in ["maximize", "minimize"]:
+            raise OSError(
+            f"Optimizer direction {direc} not recognized. \
+            Choose from maximize or minimize"
+        )
+
 logging.info(f"Direction of optimization {direction}")
     
-### Add other checks
+### Add other config checks
 
 ################################################################
       
@@ -110,17 +128,25 @@ save_path = model_config["optuna"]["save_path"]
 logging.info(f"Saving optimization details to {save_path}")
     
 # Grab the metric
-metric = str(model_config["optuna"]["metric"])
+if isinstance(model_config["optuna"]["metric"], list):
+    metric = [str(m) for m in model_config["optuna"]["metric"]]
+else:
+    metric = str(model_config["optuna"]["metric"])
 logging.info(f"Using metric {metric}")
 
 # Get list of devices and initialize the Objective class
 if bool(model_config["optuna"]["gpu"]):
     try:
-        gpu_report = sorted(gpu_report().items(), key = lambda x: x[1], reverse = True)
+        gpu_report = sorted(
+            gpu_report().items(), 
+            key = lambda x: x[1], 
+            reverse = True
+        )
         device = gpu_report[0][0]
     except:
         logging.warning(
-            "The gpu is not responding to a call from nvidia-smi. Setting gpu device = 0 but this may fail"
+            "The gpu is not responding to a call from nvidia-smi.\
+            Setting gpu device = 0, but this may fail."
         )
         device = 0
 else:
@@ -145,87 +171,87 @@ else:
 # Initialize the db record and study
 storage = f"sqlite:///{cached_study}"
 
+# Initialize the sampler
 if "sampler" not in hyper_config["optuna"]:
-    sampler = optuna.samplers.TPESampler()
+    if single_objective: # single-objective
+        sampler = optuna.samplers.TPESampler()
+    else: # multi-objective equivalent of TPESampler
+        sampler = optuna.multi_objective.samplers.MOTPEMultiObjectiveSampler()
 else:
     sampler = samplers(hyper_config["optuna"]["sampler"])
 
-study = optuna.create_study(study_name=study_name,
-                            storage=storage,
-                            sampler=sampler,
-                            direction=direction,
-                            load_if_exists=True)
+# Load or initiate study
+if single_objective:
+    study = optuna.create_study(study_name=study_name,
+                                storage=storage,
+                                sampler=sampler,
+                                direction=direction,
+                                load_if_exists=True)
+else:
+    study = optuna.multi_objective.study.create_study(
+        study_name=study_name,
+        storage=storage,
+        sampler=sampler,
+        directions=direction,
+        load_if_exists=True
+    )
 logging.info(f"Loaded study {study_name} located at {storage}")
 
 # Initialize objective function
 objective = Objective(study, model_config, metric, device)
 
 # Optimize it
-logging.info(f'Running optimization for {model_config["optuna"]["n_trials"]} trials')
+logging.info(
+    f'Running optimization for {model_config["optuna"]["n_trials"]} trials'
+)
     
+# Get the cluster job wall-time
 wall_time = hyper_config["slurm"]["batch"]["t"]
+wall_time_secs = get_sec(wall_time)
 
 logging.info(
-    f"This script will run for 95% of the wall-time of {wall_time} and try to die without error"
+    f"This script will run for a fraction of the wall-time of {wall_time} and try to die without error"
 )
 
-wall_time = 0.95 * get_sec(wall_time)
-study.optimize(
-    objective, 
-    n_trials = int(model_config["optuna"]["n_trials"]), 
-    timeout = wall_time,
-    catch = (ValueError,)
-)
+run_times = []
+estimated_run_time = wall_time_secs
 
-#study._storage = study._storage._backend  # avoid using chaced storage
+# study.optimize(
+#     objective, 
+#     n_trials = int(model_config["optuna"]["n_trials"]), 
+#     timeout = estimated_run_time,
+#     catch = (ValueError,)
+# )
 
-################################################################
+# Testing out way to stop running trials if too close to wall-time. 
+# Update to computing the mean of the run times of all completed trials in the database.
 
-# # Clean up the data files
-# saved_results = glob.glob(os.path.join(save_path, "hyper_opt_*.csv"))
-# if len(saved_results):
-#     saved_results = pd.concat(
-#         [pd.read_csv(x) for x in saved_results], sort = True
-#     ).reset_index(drop=True)
-#     saved_results = saved_results.drop(
-#         columns = [x for x in saved_results.columns if "Unnamed" in x]
-#     )
-#     saved_results = saved_results.sort_values(["trial"]).reset_index(drop = True)
-#     best_parameters = saved_results[saved_results[metric]==max(saved_results[metric])]
-
-#     # Save results to file
-#     hyper_opt_save_path = os.path.join(save_path, "hyper_opt.csv")
-#     best_save_path = os.path.join(save_path, "best.csv")
-#     saved_results.to_csv(hyper_opt_save_path)
-#     best_parameters.to_csv(best_save_path)
-
-#     logging.info(f"Saved trial results to {hyper_opt_save_path}")
-#     logging.info(f"Saved best results to {best_save_path}")
-
-# # Check a few other stats
-# pruned_trials = [
-#     t for t in study.trials if t.state == optuna.trial.TrialState.PRUNED
-# ]
-# complete_trials = [
-#     t for t in study.trials if t.state == optuna.trial.TrialState.COMPLETE
-# ]
-
-# logging.info(f'Number of requested trials: {model_config["optuna"]["n_trials"]}')
-# logging.info(f"Number of finished trials: {len(study.trials)}")
-# logging.info(f"Number of pruned trials: {len(pruned_trials)}")
-# logging.info(f"Number of complete trials: {len(complete_trials)}")
-# logging.info(f"Best trial: {study.best_trial.value}")
-# logging.info("Best parameters in the study:")
-# for param, val in study.best_params.items():
-#     logging.info(f"{param}: {val}")
+for iteration in range(int(model_config["optuna"]["n_trials"])):
     
-# if len(study.trials) < model_config["optuna"]["n_trials"]:
-#     logging.warning(
-#         "Not all of the trials completed due to the wall-time."
-#     )
-#     logging.warning(
-#         "Set reload = 1 in the hyperparameter config and resubmit some more workers to finish!"
-#     )
-
-# save_study = os.path.join(save_path, f"study_summary.csv")
-# study.trials_dataframe().to_csv(save_study, index = None)
+    try:
+        start_time = time.time()
+        study.optimize(
+            objective, 
+            n_trials = 1, 
+            timeout = estimated_run_time,
+            #catch = (ValueError,) 
+        )
+        end_time = time.time()
+        run_times.append(end_time - start_time)
+    
+    except Exception as E:
+        logging.warning(
+                f"Dying early due to error {E}"
+            )
+        break
+    
+    if len(run_times) > 1:
+        average_run_time = np.mean(run_times)
+        sigma_run_time = np.std(run_times) if len(run_times) > 2 else 0.0
+        estimated_run_time = average_run_time + 2 * sigma_run_time
+        time_left = wall_time_secs - (time.time() - start_the_clock)
+        if time_left < estimated_run_time:
+            logging.warning(
+                f"Dying early as estimated run-time exceeds the time remaining on this node."
+            )
+            break

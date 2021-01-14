@@ -1,4 +1,4 @@
-# hyper_opt: A distributed multi-gpu hyperparameter optimization package build with optuna
+# **E**arth **C**omputing **H**yperparameter **O**ptimization (ECHO): A distributed hyperparameter optimization package build with Optuna
 
 ### Usage
 
@@ -8,7 +8,7 @@ python optimize.py hyperparameters.yml model_config.yml
 ```
 Run the report script to get a dataframe of the results saved in the study:
 ```python
-python report.py hyperparameters.yml
+python report.py hyperparameters.yml [-p plot_config.yml]
 ```
 ### Dependencies
 
@@ -25,8 +25,8 @@ There are three files that must be supplied to use the optimize script:
 The custom **Objective** class (objective.py) must be composed with a **BaseObjective** class (which lives in base_objective.py), and must contain a method named **train** that returns the value of the optimization metric (in a dictionary, see below). There are example objective scripts for both torch and Keras in the examples directory. Your custom Objective class will inherit all of the methods and attributes from the BaseObjective (this way of doing of OOP is called composition). The Objective's train does not depend on the machine learning library used! For example, a simple template has the following structure:
 
 ```python
-from aimlutils.hyper_opt.base_objective import *
-from aimlutils.hyper_opt.utils import KerasPruningCallback
+from aimlutils.echo.src.base_objective import *
+from aimlutils.echo.src.pruning import KerasPruningCallback
 
 class Objective(BaseObjective):
 
@@ -90,6 +90,7 @@ optuna:
   save_path: 'test'
   sampler:
     type: "TPESampler"
+    n_startup_trials: 30 
   parameters:
     num_dense:
       type: "int"
@@ -147,7 +148,7 @@ model:
   tasks: ["x", "y", "z", "d", "binary"]
 optimizer:
   type: "lookahead-diffgrad"
-  learning_rate**: 0.000631
+  learning_rate: 0.000631
   weight_decay: 0.0
 trainer:
   start_epoch: 0
@@ -166,7 +167,9 @@ This scheme will work in general as long as the named parameter in optuna.parame
 
 You may additionally supply rules for updating the model configuration file, by including a method named **custom_updates**, which will make the desired changes to the configuration file with optuna trail parameter guesses.
 
-In the example configurations described above, the hyperparameter configuration contained an optuna.parameters field "num_dense," but this field is not present in the model configuration. There is however a "dense_hiddden_dims" field in the model configuration that contains a list of the layer sizes in the model, where the number of layers is the length of the list. In our example just one layer specified but we want to vary that number. To use the "num_dense" hyperparameter from the hyperparameter configuration file, we can create the following method:
+In the example configurations described above, the hyperparameter configuration contained an optuna.parameters field "num_dense," but this field is not present in the model configuration. There is however a "dense_hiddden_dims" field in the model configuration that contains a list of the layer sizes in the model, where the number of layers is the length of the list. In our example just one layer specified but we want to vary that number. 
+
+To use the "num_dense" hyperparameter from the hyperparameter configuration file, we can create the following method:
 
 ```python
 def custom_updates(trial, conf):
@@ -185,4 +188,46 @@ def custom_updates(trial, conf):
 
 The method should be called first thing in the custom Objective.train method (see the example Objective above). You may have noticed that the configuration (named conf) contains both hyperparameter and model fields. This package will copy the hyperparameter optuna field to the model configuration for convenience, so that we can reduce the total number of class and method dependencies (which helps me keep the code generalized). This occurs in the run.py script.
 
-One final remark about the types of trial parameters optuna will support, which were noted a few passages above. In short, optuna has a limited range of the types of trial parameters, all of them being numerical in one form or another (float or int). If you wanted to optimize the activation layer(s) in your neural network, you could go about that by utilizing the "categorical" trial suggestor and proceeding to "tokenize" a list of potential activations. For example, we could "tokenize" the following list of activation layers ["relu", "linear", "leaky-relu", "tanh", "sigmoid"] by simply assigning them integers from a categorical trial suggestor as follows: [0, 1, 2, 3, 4]. Optuna will then attempt to optimize the tokenized list (rather than the explicit activation names), eventually settling on one of them (lets say its 2). Then its just a matter of doing a reverse-lookup to find that "leaky-relu" was the best performing activation layer.
+One final remark about the types of trial parameters optuna will support, which were noted a few passages above. In short, optuna has a limited range of the types of trial parameters, all of them being numerical in one form or another (float or int). If you wanted to optimize the activation layer(s) in your neural network, you could go about that by utilizing the "categorical" trial suggestor and proceeding to "tokenize" a list of potential activations. 
+
+For example, we could "tokenize" the following list of activation layers ["relu", "linear", "leaky-relu", "tanh", "sigmoid"] by simply assigning them integers from a categorical trial suggestor as follows: [0, 1, 2, 3, 4]. Optuna will then attempt to optimize the tokenized list (rather than the explicit activation names), eventually settling on one of them (lets say its 2). Then its just a matter of doing a reverse-lookup to find that "leaky-relu" was the best performing activation layer.
+
+### Custom plot settings for report.py
+
+The script report.py will load the current study, identify the best trial in the study, and will compute the relative importantance of each parameter using both fanova and MDI (see [here](https://optuna.readthedocs.io/en/v1.3.0/reference/importance.html) for details). 
+
+Additionally, the script will create two figures, an optimization history plot and an intermediate values plot. If your metric returns two values to be optimized, only the pareto front plot will be generated. See the [documentation](https://optuna.readthedocs.io/en/v1.3.0/reference/visualization.html) for details on the plots. 
+
+Note that ECHO only supports the [matplotlib](https://optuna.readthedocs.io/en/latest/reference/visualization/matplotlib.html) generated plots from Optuna, for now. Optuna's default is to use plot.ly, however not all LTS Jupyter-lab environments support that backend.
+
+The user may customize the plots to a degree, by additionally supplying a plot configuration yaml file (named plot_config.yml above, and called as an optional argument using the parser -p or --plot). Currently, the user may only adjust the rcParam backend variables (see [here](https://matplotlib.org/3.3.3/tutorials/introductory/customizing.html) for a comprehensive list) plus a limited set of other variables (see below), 
+
+```yaml
+optimization_history: 
+    save_path: '/glade/work/schreck/repos/holodec-ml/scripts/schreck/decoder/results/opt_multi_particle'
+    set_xlim: [0, 100]
+    set_ylim: [3e4, 1e6]
+    set_xscale: "log"
+    set_yscale: "log"
+    rcparams: 
+        'backend': 'ps'
+        'lines.markersize'  : 4
+        'axes.labelsize': 10
+        'legend.fontsize': 10
+        'xtick.labelsize': 10
+        'ytick.labelsize': 10
+        'xtick.top': True
+        'xtick.bottom': True
+        'ytick.right': True
+        'ytick.left': True
+        'xtick.direction': 'in'
+        'ytick.direction': 'in'
+        'font.serif'    : 'Helvetica'
+        'figure.dpi'       : 600
+        'figure.autolayout': True
+        'legend.numpoints'     : 1
+        'legend.handlelength'  : 1.0
+        'legend.columnspacing' : 1.0
+```
+
+For the other supported plots, simply add or change "optimization_history" to "intermediate_values", or if optimizing more than one metric, "pareto_front".

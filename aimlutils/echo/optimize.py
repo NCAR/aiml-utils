@@ -178,7 +178,9 @@ def prepare_launch_script(hyper_config: str,
         if len(hyper_config["slurm"]["bash"]) > 0:
             for line in hyper_config["slurm"]["bash"]:
                 slurm_options.append(line)
-    slurm_options.append(f'{hyper_config["slurm"]["kernel"]}')
+    if "kernel" in hyper_config["slurm"]:
+        if hyper_config["slurm"]["kernel"] is not None:
+            slurm_options.append(f'{hyper_config["slurm"]["kernel"]}')
     import aimlutils.hyper_opt as opt
     aiml_path = os.path.join(
         os.path.abspath(opt.__file__).strip("__init__.py"), 
@@ -284,7 +286,6 @@ if __name__ == "__main__":
     #path_to_study = os.path.join(hyper_config["optuna"]["save_path"], name)
     #storage = f"sqlite:///{path_to_study}"
     storage = model_config["optuna"]["storage"]
-    
     direction = hyper_config["optuna"]["direction"]
     single_objective = isinstance(direction, str)
     

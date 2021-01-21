@@ -63,7 +63,7 @@ Finally, if using Keras, you need to include the (customized) KerasPruningCallba
 
 ### Hyperparameter optimizer configuration
 
-There are three main fields, log, slurm, and optuna, and variable subfields within each field. The log field allows us to save a file for printing messages and warnings that are placed in areas throughout the package. The slurm field allows the user to specify how many GPU nodes should be used, and supports any slurm setting. The optuna field allows the user to configure the optimization procedure, including specifying which parameters will be used, as well as the performance metric. For example, consider the configuration settings:
+There are three main fields, log, slurm, and optuna, and variable subfields within each field. The log field allows us to save a file for printing messages and warnings that are placed in areas throughout the package. The slurm field allows the user to specify how many GPU nodes should be used, and supports any slurm setting. Torque support is coming soon. The optuna field allows the user to configure the optimization procedure, including specifying which parameters will be used, as well as the performance metric. For example, consider the configuration settings:
 
 ```yaml
 slurm:
@@ -111,11 +111,16 @@ optuna:
         name: "lr"
         low: 0.0000001
         high: 0.01
+    model:activation:
+      type: "categorical"
+      settings:
+        name: "activation"
+        choices: ["relu", "linear", "leaky", "elu", "prelu"]
 log [optional]:
   save_path: "path/to/data/log.txt"
 ```
 
-The subfields within "slurm" should mostly be familiar to you. Note that you need to supply the kernel that will be used. Additional snippets that you might need in your launch script can be added to the list in the "bash" field. For example, if you are not loading modules in your .bashrc file, then you will need to add them as in the example above.  
+The subfields within "slurm" should mostly be familiar to you. The kernel field is optional and can be any call(s) to activate a conda/python/ncar_pylib/etc environment. Additional snippets that you might need in your launch script can be added to the list in the "bash" field. For example, as in the example above, loading modules before training a model is required. Note that the bash options will be run in order, and before the kernel field. Remove or leave the kernel field blank if you do not need it.
 
 The subfields within the "optuna" field have the following functionality:
 
@@ -148,6 +153,7 @@ model:
   dense_hidden_dims: [1000]
   dense_dropouts: [0.0]
   tasks: ["x", "y", "z", "d", "binary"]
+  activation: "relu"
 optimizer:
   type: "lookahead-diffgrad"
   learning_rate: 0.000631
@@ -163,6 +169,8 @@ trainer:
 The model configuration will be automatically updated if and only if the name of the parameter specified in the hyperparameter configuration, optuna.parameters can be used as a nested lookup key in the model configuration file. For example, observe in the hyperparameter configuration file above that the named parameter **optimizer:learning_rate** contains a colon, that is downstream used to split the named parameter into multiple keys that allow us to, starting from the top of the nested tree in the model configuration file, work our way down until the relevant field is located and the trial-suggested value is substituted in. In this example, the split keys are ["optimizer", "learning_rate"]. 
 
 This scheme will work in general as long as the named parameter in optuna.parameters uses : as the separator, and once split, the resulting list can be used to locate the relevant field in the model configuration.
+
+Note that optuna has a limited range of trial parameters types; all but one them being numerical in one form or another. If you wanted to optimize the activation layer(s) in your neural network as in the example above, you could go about that by utilizing the "categorical" trial suggestor. For example, the following list of activation layer names could be specified: ["relu", "linear", "leaky", "elu", "prelu"].
 
 
 ### Custom model configuration updates
@@ -189,8 +197,6 @@ def custom_updates(trial, conf):
 ```
 
 The method should be called first thing in the custom Objective.train method (see the example Objective above). You may have noticed that the configuration (named conf) contains both hyperparameter and model fields. This package will copy the hyperparameter optuna field to the model configuration for convenience, so that we can reduce the total number of class and method dependencies (which helps me keep the code generalized). This occurs in the run.py script.
-
-One final remark about the types of trial parameters optuna will support, which were noted a few passages above. In short, optuna has a limited range of the types of trial parameters, all but one them being numerical in one form or another. If you wanted to optimize the activation layer(s) in your neural network, you could go about that by utilizing the "categorical" trial suggestor. For example, the following list of activation layer names could be specified: ["relu", "linear", "leaky-relu", "tanh", "sigmoid"].
 
 ### Custom plot settings for report.py
 

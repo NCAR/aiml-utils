@@ -80,7 +80,8 @@ slurm:
     o: "hyper_opt.out"
     e: "hyper_opt.err"
 optuna:
-  name: "holodec_optimization.db"
+  study_name: "holodec_optimization"
+  storage: "sqlite:///path/to/data/storage.db
   reload: 0
   objective: "examples/torch/objective.py"
   metric: "val_loss"
@@ -118,7 +119,8 @@ The subfields within "slurm" should mostly be familiar to you. Note that you nee
 
 The subfields within the "optuna" field have the following functionality:
 
-* name: The name of the study.
+* study_name: The name of the study.
+* storage: sqlite or mysql destination.
 * reload: Whether to continue using a previous study (True) or to initialize a new study (False). If your initial number of workers do not reach the number of trials and you wish to resubmit, set to True.
 * objective: The path to the user-supplied objective class (it must be named objective.py)
 * metric: The metric to be used to determine the model performance. 
@@ -178,7 +180,7 @@ def custom_updates(trial, conf):
     hyperparameters = conf["optuna"]["parameters"]
 
     # Now update some via custom rules
-    num_dense = trial.suggest_discrete_uniform(**hyperparameters["num_dense"]) 
+    num_dense = trial.suggest_discrete_uniform(**hyperparameters["num_dense"])
 
     # Update the config based on optuna's suggestion
     conf["model"]["dense_hidden_dims"] = [1000 for k in range(num_dense)]        
@@ -188,9 +190,7 @@ def custom_updates(trial, conf):
 
 The method should be called first thing in the custom Objective.train method (see the example Objective above). You may have noticed that the configuration (named conf) contains both hyperparameter and model fields. This package will copy the hyperparameter optuna field to the model configuration for convenience, so that we can reduce the total number of class and method dependencies (which helps me keep the code generalized). This occurs in the run.py script.
 
-One final remark about the types of trial parameters optuna will support, which were noted a few passages above. In short, optuna has a limited range of the types of trial parameters, all of them being numerical in one form or another (float or int). If you wanted to optimize the activation layer(s) in your neural network, you could go about that by utilizing the "categorical" trial suggestor and proceeding to "tokenize" a list of potential activations. 
-
-For example, we could "tokenize" the following list of activation layers ["relu", "linear", "leaky-relu", "tanh", "sigmoid"] by simply assigning them integers from a categorical trial suggestor as follows: [0, 1, 2, 3, 4]. Optuna will then attempt to optimize the tokenized list (rather than the explicit activation names), eventually settling on one of them (lets say its 2). Then its just a matter of doing a reverse-lookup to find that "leaky-relu" was the best performing activation layer.
+One final remark about the types of trial parameters optuna will support, which were noted a few passages above. In short, optuna has a limited range of the types of trial parameters, all but one them being numerical in one form or another. If you wanted to optimize the activation layer(s) in your neural network, you could go about that by utilizing the "categorical" trial suggestor. For example, the following list of activation layer names could be specified: ["relu", "linear", "leaky-relu", "tanh", "sigmoid"].
 
 ### Custom plot settings for report.py
 

@@ -33,6 +33,13 @@ def args():
         help="The name of the study"
     )
     parser.add_argument(
+        "--override", 
+        dest="override", 
+        type=bool,
+        default=False,
+        help="Force remove the study name from the storage"
+    )
+    parser.add_argument(
         "-r", 
         "--reload", 
         dest="reload", 
@@ -273,9 +280,11 @@ if __name__ == "__main__":
             f'Create the save directory {hyper_config["optuna"]["save_path"]} and try again'
         )
         
-    name = hyper_config["optuna"]["name"]
-    path_to_study = os.path.join(hyper_config["optuna"]["save_path"], name)
-    storage = f"sqlite:///{path_to_study}"
+    study_name = hyper_config["optuna"]["study_name"]
+    #path_to_study = os.path.join(hyper_config["optuna"]["save_path"], name)
+    #storage = f"sqlite:///{path_to_study}"
+    storage = model_config["optuna"]["storage"]
+    
     direction = hyper_config["optuna"]["direction"]
     single_objective = isinstance(direction, str)
     
@@ -290,11 +299,8 @@ if __name__ == "__main__":
 
     # Initiate a study for the first time
     if not reload_study:
-        if os.path.isfile(path_to_study):
-            message = f"The study already exists at {path_to_study} and reload was False."
-            message += f" Delete the study at {path_to_study} and try again"
-            raise OSError(message)
         
+        # Check the direction
         if isinstance(direction, list):
             for direc in direction:
                 if direc not in ["maximize", "minimize"]:
@@ -307,17 +313,44 @@ if __name__ == "__main__":
                 raise OSError(
                     f"Optimizer direction {direction} not recognized. Choose from maximize or minimize"
                 )
+        
+        # Check if the study record already exists.
+        try:
+            optuna.load_study(
+                study_name = study_name,
+                storage = storage,
+                direction = direction,
+                sampler = sampler
+            )
+        except KeyError: # The study name was not in storage, can proceed
+            pass
+        
+        except:
+            if args_dict["override"]:
+                message = f"Removing the study that exists in storage {storage}."
+                optuna.delete_study(
+                    study_name = study_name,
+                    storage = storage,
+                    direction = direction,
+                    sampler = sampler
+            )
+            else:
+                message = f"The study {study_name} already exists in storage and reload was False."
+                message += f" Delete it from {storage}, and try again or rerun this script"
+                message += f" with the flag: --override 1"
+                raise OSError(message)
                 
+        # Create a new study in the storage object
         if single_objective:
             create_study = optuna.create_study(
-                study_name = name,
+                study_name = study_name,
                 storage = storage,
                 direction = direction,
                 sampler = sampler
             )
         else:
             create_study = optuna.multi_objective.study.create_study(
-                study_name = name,
+                study_name = study_name,
                 storage = storage,
                 directions = direction,
                 sampler = sampler
@@ -333,17 +366,17 @@ if __name__ == "__main__":
         )
         if single_objective:
             study = optuna.load_study(
-                study_name = name,
+                study_name = study_name,
                 storage = storage, 
                 sampler = sampler
             )
         else:
             study = optuna.multi_objective.study.load_study(
-                study_name = name,
+                study_name = study_name,
                 storage = storage, 
                 sampler = sampler
             )
-        study, removed = fix_broken_study(study, name, storage, direction, sampler)
+        study, removed = fix_broken_study(study, study_name, storage, direction, sampler)
         
         if len(removed):
             logging.info(
@@ -358,7 +391,7 @@ if __name__ == "__main__":
     
     # Stop here if arg is defined -- intention is that you manually run run.py for debugging purposes
     if create_db_only:
-        logging.info(f"Created study {name} located at {storage}. Exiting.")
+        logging.info(f"Created study {study_name} located at {storage}. Exiting.")
         sys.exit()
                 
     # Prepare slurm script

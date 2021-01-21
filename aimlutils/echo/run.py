@@ -156,20 +156,21 @@ logging.info(f"Using device {device}")
 ################################################################
 
 # Initialize the study object
-study_name = model_config["optuna"]["name"]
+study_name = model_config["optuna"]["study_name"]
 reload_study = bool(model_config["optuna"]["reload"])
-cached_study = f"{save_path}/{study_name}"
 
-if not os.path.isfile(cached_study) or not reload_study:
-    load_if_exists = False
-elif not reload_study:
-    os.remove(cached_study)
-    load_if_exists = reload_study
-else:
-    load_if_exists = True
+# cached_study = f"{save_path}/{study_name}"
 
-# Initialize the db record and study
-storage = f"sqlite:///{cached_study}"
+# if not os.path.isfile(cached_study) or not reload_study:
+#     load_if_exists = False
+# elif not reload_study:
+#     os.remove(cached_study)
+#     load_if_exists = reload_study
+# else:
+#     load_if_exists = True
+
+# Identify the storage location
+storage = model_config["optuna"]["storage"] #f"sqlite:///{cached_study}"
 
 # Initialize the sampler
 if "sampler" not in hyper_config["optuna"]:

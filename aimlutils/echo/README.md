@@ -22,7 +22,7 @@ There are three files that must be supplied to use the optimize script:
 
 ### Custom objective class
 
-The custom **Objective** class (objective.py) must be composed with a **BaseObjective** class (which lives in base_objective.py), and must contain a method named **train** that returns the value of the optimization metric (in a dictionary, see below). There are example objective scripts for both torch and Keras in the examples directory. Your custom Objective class will inherit all of the methods and attributes from the BaseObjective (this way of doing of OOP is called composition). The Objective's train does not depend on the machine learning library used! For example, a simple template has the following structure:
+The custom **Objective** class (objective.py) must inherit a **BaseObjective** class (which lives in base_objective.py), and must contain a method named **train** that returns the value of the optimization metric (in a dictionary, see below). There are example objective scripts for both torch and Keras in the examples directory. Your custom Objective class will inherit all of the methods and attributes from the BaseObjective. The Objective's train does not depend on the machine learning library used! For example, a simple template has the following structure:
 
 ```python
 from aimlutils.echo.src.base_objective import *
@@ -30,10 +30,10 @@ from aimlutils.echo.src.pruning import KerasPruningCallback
 
 class Objective(BaseObjective):
 
-    def __init__(self, study, config, metric = "val_loss", device = "cpu"):
+    def __init__(self, config, metric = "val_loss", device = "cpu"):
 
         # Initialize the base class
-        BaseObjective.__init__(self, study, config, metric, device)
+        BaseObjective.__init__(self, config, metric, device)
 
     def train(self, trial, conf):
 
@@ -53,7 +53,7 @@ class Objective(BaseObjective):
         }
         return results_dictionary
 ```
-You can have as many inputs to your custom Objective as needed, as long as those that are required to initialize the base class are included. The Objective class will call the train method from the inherited thunder **__call__** method, and will finish up by calling the inherited save method that writes the metric(s) details to disk. Note that, due to the composition of the two classes, you do not have to supply these two methods, as they are in pre-coded in the base class! You can customize them at your leisure using overriding methods in your custom Objective. Check out the scripts base_objective.py and run.py to see how things are composed and called.
+You can have as many inputs to your custom Objective as needed, as long as those that are required to initialize the base class are included. The Objective class will call the train method from the inherited thunder **__call__** method, and will finish up by calling the inherited save method that writes the metric(s) details to disk. Note that, due to the inheritance of the one class on the other, you do not have to supply these two methods, as they are in pre-coded in the base class. You can customize them at your leisure using overriding methods in your custom Objective. Check out the scripts base_objective.py and run.py to see how things are structured and called.
 
 As noted, the metric used to toggle the model's training performance must be in the results dictionary. Other metrics that the user may want to track will be saved to disk if they are included in the results dictionary (the keys of the dictionary are used to name the columns in a pandas dataframe). See the example above where several metrics are being returned.
 
@@ -63,7 +63,7 @@ Finally, if using Keras, you need to include the (customized) KerasPruningCallba
 
 ### Hyperparameter optimizer configuration
 
-There are three main fields, log, slurm, and optuna, and variable subfields within each field. The log field allows us to save a file for printing messages and warnings that are placed in areas throughout the package. The slurm field allows the user to specify how many GPU nodes should be used, and supports any slurm setting. Torque support is coming soon. The optuna field allows the user to configure the optimization procedure, including specifying which parameters will be used, as well as the performance metric. For example, consider the configuration settings:
+There are three main fields, log, slurm, and optuna, and variable subfields within each field. The log field allows us to save a file for printing messages and warnings that are placed in areas throughout the package. The slurm field allows the user to specify how many GPU nodes should be used, and supports any slurm setting. qsub support is coming soon. The optuna field allows the user to configure the optimization procedure, including specifying which parameters will be used, as well as the performance metric. For example, consider the configuration settings:
 
 ```yaml
 slurm:

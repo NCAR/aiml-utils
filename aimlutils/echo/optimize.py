@@ -181,7 +181,7 @@ def prepare_launch_script(hyper_config: str,
     if "kernel" in hyper_config["slurm"]:
         if hyper_config["slurm"]["kernel"] is not None:
             slurm_options.append(f'{hyper_config["slurm"]["kernel"]}')
-    import aimlutils.hyper_opt as opt
+    import aimlutils.echo as opt
     aiml_path = os.path.join(
         os.path.abspath(opt.__file__).strip("__init__.py"), 
         "run.py"
@@ -285,7 +285,7 @@ if __name__ == "__main__":
     study_name = hyper_config["optuna"]["study_name"]
     #path_to_study = os.path.join(hyper_config["optuna"]["save_path"], name)
     #storage = f"sqlite:///{path_to_study}"
-    storage = model_config["optuna"]["storage"]
+    storage = hyper_config["optuna"]["storage"]
     direction = hyper_config["optuna"]["direction"]
     single_objective = isinstance(direction, str)
     
@@ -320,7 +320,7 @@ if __name__ == "__main__":
             optuna.load_study(
                 study_name = study_name,
                 storage = storage,
-                direction = direction,
+                #direction = direction,
                 sampler = sampler
             )
         except KeyError: # The study name was not in storage, can proceed
@@ -359,8 +359,8 @@ if __name__ == "__main__":
             
     # Check to see if there are any broken trials
     else:
-        if not os.path.isfile(path_to_study):
-            raise OSError("Reload was true but the study does not yet exist. Set reload = 0 and try again.")
+        #if not os.path.isfile(path_to_study):
+        #    raise OSError("Reload was true but the study does not yet exist. Set reload = 0 and try again.")
             
         logging.info(
             f"Checking the study for broken trials (those that did not complete 1 epoch before dying)"

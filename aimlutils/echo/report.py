@@ -157,7 +157,8 @@ if __name__ == "__main__":
     root.addHandler(ch)
 
     save_path = hyper_config["optuna"]["save_path"]
-    study_name = hyper_config["optuna"]["name"]
+    study_name = hyper_config["optuna"]["study_name"]
+    storage = hyper_config["optuna"]["storage"]
     reload_study = bool(hyper_config["optuna"]["reload"])
     cached_study = f"{save_path}/{study_name}"
 
@@ -166,7 +167,7 @@ if __name__ == "__main__":
 
     # Load from database
     #storage = f'postgresql+psycopg2://john:schreck@localhost/{cached_study}'
-    storage = f"sqlite:///{cached_study}"
+    #storage = f"sqlite:///{cached_study}"
 
     if single_objective:
         study = optuna.load_study(study_name=study_name, storage=storage)

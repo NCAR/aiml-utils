@@ -21,9 +21,8 @@ def recursive_update(nested_keys, dictionary, update):
 
 class BaseObjective:
     
-    def __init__(self, study, config, metric = "val_loss", device = "cpu"):
+    def __init__(self, config, metric = "val_loss", device = "cpu"):
         
-        self.study = study
         self.config = config
         self.metric = metric
         self.device = f"cuda:{device}" if device != "cpu" else "cpu"
@@ -58,6 +57,11 @@ class BaseObjective:
                     conf,
                     trial_suggest_loader(trial, update))
                 updated.append(named_parameter)
+            else:
+                if named_parameter in conf:
+                    conf[named_parameter] = trial_suggest_loader(trial, update)
+                    updated.append(named_parameter)
+                    
         logger.info(f"Those that got updated automatically: {updated}")
         return conf
         

@@ -199,7 +199,7 @@ else:
 logging.info(f"Loaded study {study_name} located at {storage}")
 
 # Initialize objective function
-objective = Objective(study, model_config, metric, device)
+objective = Objective(model_config, metric, device)
 
 # Optimize it
 logging.info(
@@ -239,6 +239,12 @@ for iteration in range(int(model_config["optuna"]["n_trials"])):
         )
         end_time = time.time()
         run_times.append(end_time - start_time)
+        
+    except KeyboardInterrupt:
+        logging.warning(
+                f"Recieved signal to die from keyboard. Exiting."
+            )
+        break
     
     except Exception as E:
         logging.warning(

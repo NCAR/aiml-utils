@@ -115,7 +115,7 @@ class BaseObjective:
         
         # Train the model
         logger.info(
-            f"Begining to train the model using the latest parameters from optuna"
+            f"Beginning to train the model using the latest parameters from optuna"
         )
         
         result = self.train(trial, conf)

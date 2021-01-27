@@ -8,12 +8,13 @@ import optuna
 import logging
 import subprocess
 from argparse import ArgumentParser
-from aimlutils.hyper_opt.utils import samplers
+from aimlutils.echo.src.samplers import samplers
+from typing import Dict
 
 
 def args():
     parser = ArgumentParser(description=
-        "hyper_opt: A distributed multi-gpu hyperparameter optimization package build with optuna"
+        "ECHO: A distributed multi-gpu hyperparameter optimization package build with Optuna"
     )
 
     parser.add_argument("hyperparameter", type=str, help=           
@@ -30,6 +31,13 @@ def args():
         type=str,
         default=False, 
         help="The name of the study"
+    )
+    parser.add_argument(
+        "--override", 
+        dest="override", 
+        type=bool,
+        default=False,
+        help="Force remove the study name from the storage"
     )
     parser.add_argument(
         "-r", 
@@ -98,11 +106,17 @@ def args():
     return vars(parser.parse_args())
 
 
-def fix_broken_study(_study, name, storage, direction, sampler):
+def fix_broken_study(_study: optuna.study.Study, 
+                     name: str, 
+                     storage: str, 
+                     direction: str, 
+                     sampler: optuna.samplers.BaseSampler):
     
     """
         This method removes broken trials, which are those 
-        that failed to complete 1 epoch before slurm (or something else) killed the job.
+        that failed to complete 1 epoch before slurm (or something else) killed the job
+        and returned NAN or NONE.
+        
         Failure to remove these trails leads to a error when optuna tries to update the 
         parameters. This is because these trails only have "NoneType" data associated 
         with them, but we need numerical data (e.g. the loss value) to update parameters.
@@ -130,11 +144,20 @@ def fix_broken_study(_study, name, storage, direction, sampler):
     optuna.delete_study(study_name=name, storage=storage)
     
     # Create a new one in its place
-    study_fixed = optuna.create_study(study_name=name, 
-                                  storage=storage, 
-                                  direction=direction,
-                                  sampler=sampler,
-                                  load_if_exists=False)
+    if isinstance(direction, str):
+        study_fixed = optuna.create_study(study_name=name, 
+                                      storage=storage, 
+                                      direction=direction,
+                                      sampler=sampler,
+                                      load_if_exists=False)
+    else:
+        study_fixed = optuna.multi_objective.create_study(
+            study_name=name,
+            storage=storage,
+            directions=direction,
+            sampler=sampler,
+            load_if_exists=False
+        )
     
     # Add the working trials to the new study
     for trial in trials:
@@ -143,7 +166,9 @@ def fix_broken_study(_study, name, storage, direction, sampler):
     return study_fixed, removed
 
 
-def prepare_launch_script(hyper_config, model_config):
+def prepare_launch_script(hyper_config: str, 
+                          model_config: str):
+    
     slurm_options = ["#!/bin/bash -l"]
     slurm_options += [
         f"#SBATCH -{arg} {val}" if len(arg) == 1 else f"#SBATCH --{arg}={val}" 
@@ -153,8 +178,10 @@ def prepare_launch_script(hyper_config, model_config):
         if len(hyper_config["slurm"]["bash"]) > 0:
             for line in hyper_config["slurm"]["bash"]:
                 slurm_options.append(line)
-    slurm_options.append(f'{hyper_config["slurm"]["kernel"]}')
-    import aimlutils.hyper_opt as opt
+    if "kernel" in hyper_config["slurm"]:
+        if hyper_config["slurm"]["kernel"] is not None:
+            slurm_options.append(f'{hyper_config["slurm"]["kernel"]}')
+    import aimlutils.echo as opt
     aiml_path = os.path.join(
         os.path.abspath(opt.__file__).strip("__init__.py"), 
         "run.py"
@@ -162,7 +189,10 @@ def prepare_launch_script(hyper_config, model_config):
     slurm_options.append(f"python {aiml_path} {sys.argv[1]} {sys.argv[2]}")
     return slurm_options
 
-def configuration_report(_dict, path=None):
+
+def configuration_report(_dict: Dict[str, str], 
+                         path: bool = None):
+    
     if path is None:
         path = []
     for k,v in _dict.items():
@@ -182,19 +212,25 @@ if __name__ == "__main__":
     model_config = args_dict.pop("model")
 
     if not hyper_config or not model_config:
-        raise OSError("Usage: python main.py hyperparameter.yml model.yml [optional parser options]")
+        raise OSError(
+            "Usage: python main.py hyperparameter.yml model.yml [optional parser options]"
+        )
 
     if os.path.isfile(hyper_config):
         with open(hyper_config) as f:
             hyper_config = yaml.load(f, Loader=yaml.FullLoader)
     else:
-        raise OSError(f"Hyperparameter optimization config file {sys.argv[1]} does not exist")
+        raise OSError(
+            f"Hyperparameter optimization config file {sys.argv[1]} does not exist"
+        )
 
     if os.path.isfile(model_config):
         with open(model_config) as f:
             model_config = yaml.load(f, Loader=yaml.FullLoader)
     else:
-        raise OSError(f"Model config file {sys.argv[1]} does not exist")        
+        raise OSError(
+            f"Model config file {sys.argv[1]} does not exist"
+        )        
         
     # Set up a logger
     root = logging.getLogger()
@@ -246,46 +282,102 @@ if __name__ == "__main__":
             f'Create the save directory {hyper_config["optuna"]["save_path"]} and try again'
         )
         
-    name = hyper_config["optuna"]["name"]
-    path_to_study = os.path.join(hyper_config["optuna"]["save_path"], name)
-    storage = f"sqlite:///{path_to_study}"
+    study_name = hyper_config["optuna"]["study_name"]
+    #path_to_study = os.path.join(hyper_config["optuna"]["save_path"], name)
+    #storage = f"sqlite:///{path_to_study}"
+    storage = hyper_config["optuna"]["storage"]
     direction = hyper_config["optuna"]["direction"]
+    single_objective = isinstance(direction, str)
     
+    # Initialize the sampler
+    if "sampler" not in hyper_config["optuna"]:
+        if single_objective: # single-objective
+            sampler = optuna.samplers.TPESampler()
+        else: # multi-objective equivalent of TPESampler
+            sampler = optuna.multi_objective.samplers.MOTPEMultiObjectiveSampler()
+    else:
+        sampler = samplers(hyper_config["optuna"]["sampler"])
+
     # Initiate a study for the first time
     if not reload_study:
-        if os.path.isfile(path_to_study):
-            message = f"The study already exists at {path_to_study} and reload was False."
-            message += f" Delete the study at {path_to_study} and try again"
-            raise OSError(message)
-        if direction not in ["maximize", "minimize"]:
-            raise OSError(
-                f"Optimizer direction {direction} not recognized. Choose from maximize or minimize"
-            )
-        if "sampler" not in hyper_config["optuna"]:
-            sampler = optuna.samplers.TPESampler()
-        else:
-            sampler = samplers(hyper_config["optuna"]["sampler"])
         
-        create_study = optuna.create_study(
-            study_name = name,
-            storage = storage,
-            direction = direction,
-            sampler = sampler
-        )
+        # Check the direction
+        if isinstance(direction, list):
+            for direc in direction:
+                if direc not in ["maximize", "minimize"]:
+                    raise OSError(
+                    f"Optimizer direction {direc} not recognized. Choose from maximize or minimize"
+                )
+            
+        else:
+            if direction not in ["maximize", "minimize"]:
+                raise OSError(
+                    f"Optimizer direction {direction} not recognized. Choose from maximize or minimize"
+                )
+        
+        # Check if the study record already exists.
+        try:
+            optuna.load_study(
+                study_name = study_name,
+                storage = storage,
+                #direction = direction,
+                sampler = sampler
+            )
+        except KeyError: # The study name was not in storage, can proceed
+            pass
+        
+        except:
+            if args_dict["override"]:
+                message = f"Removing the study that exists in storage {storage}."
+                optuna.delete_study(
+                    study_name = study_name,
+                    storage = storage,
+                    direction = direction,
+                    sampler = sampler
+            )
+            else:
+                message = f"The study {study_name} already exists in storage and reload was False."
+                message += f" Delete it from {storage}, and try again or rerun this script"
+                message += f" with the flag: --override 1"
+                raise OSError(message)
+                
+        # Create a new study in the storage object
+        if single_objective:
+            create_study = optuna.create_study(
+                study_name = study_name,
+                storage = storage,
+                direction = direction,
+                sampler = sampler
+            )
+        else:
+            create_study = optuna.multi_objective.study.create_study(
+                study_name = study_name,
+                storage = storage,
+                directions = direction,
+                sampler = sampler
+            )
+            
     # Check to see if there are any broken trials
     else:
-        if not os.path.isfile(path_to_study):
-            raise OSError("Reload was true but the study does not yet exist. Set reload = 0 and try again.")
+        #if not os.path.isfile(path_to_study):
+        #    raise OSError("Reload was true but the study does not yet exist. Set reload = 0 and try again.")
             
         logging.info(
             f"Checking the study for broken trials (those that did not complete 1 epoch before dying)"
         )
-        study = optuna.load_study(
-            study_name = name,
-            storage = storage, 
-            sampler = sampler
-        )
-        study, removed = fix_broken_study(study, name, storage, direction, sampler)
+        if single_objective:
+            study = optuna.load_study(
+                study_name = study_name,
+                storage = storage, 
+                sampler = sampler
+            )
+        else:
+            study = optuna.multi_objective.study.load_study(
+                study_name = study_name,
+                storage = storage, 
+                sampler = sampler
+            )
+        study, removed = fix_broken_study(study, study_name, storage, direction, sampler)
         
         if len(removed):
             logging.info(
@@ -300,7 +392,7 @@ if __name__ == "__main__":
     
     # Stop here if arg is defined -- intention is that you manually run run.py for debugging purposes
     if create_db_only:
-        logging.info(f"Created study {name} located at {storage}. Exiting.")
+        logging.info(f"Created study {study_name} located at {storage}. Exiting.")
         sys.exit()
                 
     # Prepare slurm script
@@ -312,8 +404,15 @@ if __name__ == "__main__":
     with open(script_location, "w") as fid:
         for line in launch_script:
             fid.write(f"{line}\n")
+            
+    
+    #####
+    #
+    # Torque support coming soon
+    #
+    ####
 
-    # Launch the jobs
+    # Launch the slurm jobs
     job_ids = []
     name_condition = "J" in hyper_config["slurm"]["batch"]
     slurm_job_name = hyper_config["slurm"]["batch"]["J"] if name_condition else "hyper_opt"

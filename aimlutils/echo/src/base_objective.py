@@ -1,7 +1,7 @@
 import warnings
 warnings.filterwarnings("ignore")
 
-from aimlutils.hyper_opt.utils import trial_suggest_loader
+from aimlutils.echo.src.trial_suggest import trial_suggest_loader
 from collections import defaultdict
 import copy, os, sys, random
 import pandas as pd 
@@ -21,9 +21,8 @@ def recursive_update(nested_keys, dictionary, update):
 
 class BaseObjective:
     
-    def __init__(self, study, config, metric = "val_loss", device = "cpu"):
+    def __init__(self, config, metric = "val_loss", device = "cpu"):
         
-        self.study = study
         self.config = config
         self.metric = metric
         self.device = f"cuda:{device}" if device != "cpu" else "cpu"
@@ -58,16 +57,31 @@ class BaseObjective:
                     conf,
                     trial_suggest_loader(trial, update))
                 updated.append(named_parameter)
+            else:
+                if named_parameter in conf:
+                    conf[named_parameter] = trial_suggest_loader(trial, update)
+                    updated.append(named_parameter)
+                    
         logger.info(f"Those that got updated automatically: {updated}")
         return conf
         
+#     #Deprecated as of writing of report.py script 
+
     def save(self, trial, results_dict):
         
         # Make sure the relevant metric was placed into the results dictionary
-        if self.metric not in results_dict:
-            raise OSError(
-                "You must return the metric result to the hyperparameter optimizer"
-            )
+        single_objective = isinstance(self.metric, str)
+        if single_objective:
+            if self.metric not in results_dict:
+                raise OSError(
+                    "You must return the metric result to the hyperparameter optimizer"
+                )
+        else:
+            for metric in self.metric:
+                if metric not in results_dict:
+                    raise OSError(
+                        "You must return the metric result to the hyperparameter optimizer"
+                    )
         
         # Save the hyperparameters used in the trial
         self.results["trial"].append(trial.number)
@@ -77,11 +91,6 @@ class BaseObjective:
         # Save the metric and "other metrics"
         for metric, value in results_dict.items():
             self.results[metric].append(value)
-        try:
-            self.results[f"best_{self.metric}"].append(self.study.best_trial.value)
-        except:
-            result = results_dict[self.metric]
-            self.results[f"best_{self.metric}"].append(result)
             
         # Save pruning boolean
         self.results["pruned"] = int(trial.should_prune())
@@ -94,7 +103,10 @@ class BaseObjective:
             f"Saving trial {trial.number} results to local file {self.results_fn}"
         )
         
-        return results_dict[self.metric]
+        if single_objective:
+            return results_dict[self.metric]
+        else:
+            return [result[metric] for metric in self.metric]
     
     def __call__(self, trial):
         
@@ -103,7 +115,7 @@ class BaseObjective:
         
         # Train the model
         logger.info(
-            f"Begining to train the model using the latest parameters from optuna"
+            f"Beginning to train the model using the latest parameters from optuna"
         )
         
         result = self.train(trial, conf)

@@ -30,6 +30,24 @@ def args():
         default=False, 
         help="A yaml structured file containining settings for matplotlib/pylab objects"
     )
+    
+    parser.add_argument(
+        "-t",
+        "--n_trees", 
+        dest="n_trees", 
+        type=int,
+        default=64, 
+        help="The number of trees to use in parameter importance models. Default is 64."
+    )
+    
+    parser.add_argument(
+        "-d",
+        "--max_depth", 
+        dest="max_depth", 
+        type=int,
+        default=64, 
+        help="The maximum depth to use in parameter importance models. Default is 64."
+    )
         
     return vars(parser.parse_args())
     
@@ -119,12 +137,17 @@ if __name__ == "__main__":
     if len(sys.argv) < 2:
         raise OSError(
             "Usage: python report.py hyperparameter.yml [optional arguments]"
+            "To see the available parser options: python report.py --help"
         )
     
     args_dict = args()
 
     hyper_config = args_dict.pop("hyperparameter")
     plot_config = args_dict.pop("plot") if "plot" in args_dict else False
+    
+    # Options for the parameter importance tree models
+    n_trees = args_dict.pop("n_trees")
+    max_depth = args_dict.pop("max_depth")
 
     # Check if hyperparameter config file exists
     if os.path.isfile(hyper_config):

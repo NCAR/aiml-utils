@@ -26,8 +26,8 @@ def args():
     )
     parser.add_argument(
         "-n",
-        "--name", 
-        dest="name", 
+        "--study_name", 
+        dest="study_name", 
         type=str,
         default=False, 
         help="The name of the study"
@@ -328,7 +328,7 @@ if __name__ == "__main__":
         
         except:
             if args_dict["override"]:
-                message = f"Removing the study that exists in storage {storage}."
+                message = f"Removing the study_name {study_name} that exists in storage {storage}."
                 optuna.delete_study(
                     study_name = study_name,
                     storage = storage,

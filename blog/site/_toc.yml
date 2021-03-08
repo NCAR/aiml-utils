@@ -1,7 +1,8 @@
 - file: home
 - file: howto
-- file: generators.ipynb
-- file: data_loaders.ipynb
-- file: callbacks.ipynb
-- file: memory.ipynb
+- file: optuna_mariadb.ipynb
 - file: slurm.ipynb 
+- file: memory.ipynb
+- file: callbacks.ipynb
+- file: data_loaders.ipynb
+- file: generators.ipynb

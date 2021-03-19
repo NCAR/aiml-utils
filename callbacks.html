@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>3. Callbacks: Utilities for interacting with ML training &#8212; Analytics and Integrative Machine Learning</title>
+    <title>(10/29/20) Callbacks: Utilities for interacting with ML training &#8212; Analytics and Integrative Machine Learning</title>
     
   <link rel="stylesheet" href="_static/css/index.73d71520a4ca3b99cfee5594769eaaae.css">
 
@@ -57,8 +57,8 @@
     <script async="async" src="_static/sphinx-thebe.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="4. Memory profiling python scripts with memory_profiler" href="memory.html" />
-    <link rel="prev" title="2. Data Loaders for ML Pipelines" href="data_loaders.html" />
+    <link rel="next" title="(10/28/20) Data Loaders for ML Pipelines" href="data_loaders.html" />
+    <link rel="prev" title="(12/22/20) Memory profiling python scripts with memory_profiler" href="memory.html" />
 
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="docsearch:language" content="en" />
@@ -100,26 +100,46 @@
 </ul>
 <ul class="current nav sidenav_l1">
  <li class="toctree-l1">
-  <a class="reference internal" href="generators.html">
-   1. Methods, iterables, and generators for reading files
+  <a class="reference internal" href="howto.html">
+   Add a jupyter notebook as a blog
   </a>
  </li>
  <li class="toctree-l1">
-  <a class="reference internal" href="data_loaders.html">
-   2. Data Loaders for ML Pipelines
+  <a class="reference internal" href="howto.html#license">
+   License
   </a>
  </li>
- <li class="toctree-l1 current active">
-  <a class="current reference internal" href="#">
-   3. Callbacks: Utilities for interacting with ML training
+ <li class="toctree-l1">
+  <a class="reference internal" href="optuna_mariadb.html">
+   (2/26/21) A short primer on using Optuna and ECHO to interact with a sql database
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="slurm.html">
+   (12/22/20) Helpful SLURM Commands
   </a>
  </li>
  <li class="toctree-l1">
   <a class="reference internal" href="memory.html">
-   4. Memory profiling python scripts with
+   (12/22/20) Memory profiling python scripts with
    <em>
     memory_profiler
    </em>
+  </a>
+ </li>
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   (10/29/20) Callbacks: Utilities for interacting with ML training
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="data_loaders.html">
+   (10/28/20) Data Loaders for ML Pipelines
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="generators.html">
+   (10/27/20) Methods, iterables, and generators for reading files
   </a>
  </li>
 </ul>
@@ -265,9 +285,10 @@
               <div>
                 
   <div class="section" id="callbacks-utilities-for-interacting-with-ml-training">
-<h1>3. Callbacks: Utilities for interacting with ML training<a class="headerlink" href="#callbacks-utilities-for-interacting-with-ml-training" title="Permalink to this headline">¶</a></h1>
-<p>This blog aims to address one of the most common issues in machine learning: how to adjust training parameters on the fly when a performance metric is not looking so good. For example, a model may be stopped early (current epoch &lt; max epochs) when a performance metric goes south.</p>
-<p>In attacking this problem we will learn how to incorporate “callbacks”, which means that we will provide a means for adjusting certain things about the training on the fly. Typically this amounts to specifying some condition(s) for adjusting training parameters, and using them to know when to toggle the training. Some commonly used callbacks include stopping training early (“early stopping”), annealing the learning rate, writing metrics to file after each epoch, etc.</p>
+<h1>(10/29/20) Callbacks: Utilities for interacting with ML training<a class="headerlink" href="#callbacks-utilities-for-interacting-with-ml-training" title="Permalink to this headline">¶</a></h1>
+<p>This blog aims to address one of the most common issues in machine learning: how to adjust training parameters on the fly when a performance metric is not looking so good. For example, a model may be stopped early (current epoch &lt; max epochs) when a performance metric is not looking so good.</p>
+<p>Sometimes this problem is easy to solve, for example the objective that monitors the training progress (e.g. the loss, accuracy, etc) stops improving, and that may get worse as training continues. In attacking this problem we will learn how to incorporate “callbacks,” which will allow us to do lots of things including “early stopping”.</p>
+<p>We can achieve this by specifying some condition(s), and use them as a means for toggling the training. This could mean stopping training early, annealing the learning rate, or something else.</p>
 <div class="section" id="keras-callbacks-documentation">
 <h2>Keras callbacks <a class="reference external" href="https://www.tensorflow.org/api_docs/python/tf/keras/callbacks">(documentation)</a><a class="headerlink" href="#keras-callbacks-documentation" title="Permalink to this headline">¶</a></h2>
 <p>Fortunatly, keras/tensorflow and torch have got you covered. The Model.fit() method in the Keras library admits a “callback” argument that allows you to feed into the training protocal a list of callback rules. I’ll cover four examples below then show you how to write a custom callback. Visit the callbacks documentation page to see more options.</p>
@@ -551,16 +572,16 @@
         },
         codeMirrorConfig: {
             theme: "abcdef",
-            mode: "python"
+            mode: "Python 3.8.6 64-bit"
         },
         kernelOptions: {
-            kernelName: "python3",
+            kernelName: "Python 3.8.6 64-bit",
             path: "./."
         },
         predefinedOutput: true
     }
     </script>
-    <script>kernelName = 'python3'</script>
+    <script>kernelName = 'Python 3.8.6 64-bit'</script>
 
               </div>
               
@@ -570,8 +591,8 @@
     
     <div class='prev-next-bottom'>
         
-    <a class='left-prev' id="prev-link" href="data_loaders.html" title="previous page">2. Data Loaders for ML Pipelines</a>
-    <a class='right-next' id="next-link" href="memory.html" title="next page">4. Memory profiling python scripts with <em>memory_profiler</em></a>
+    <a class='left-prev' id="prev-link" href="memory.html" title="previous page">(12/22/20) Memory profiling python scripts with <em>memory_profiler</em></a>
+    <a class='right-next' id="next-link" href="data_loaders.html" title="next page">(10/28/20) Data Loaders for ML Pipelines</a>
 
     </div>
     <footer class="footer mt-5 mt-md-0">

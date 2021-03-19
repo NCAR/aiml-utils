@@ -1,0 +1,468 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>(12/22/20) Helpful SLURM Commands &#8212; Analytics and Integrative Machine Learning</title>
+    
+  <link rel="stylesheet" href="_static/css/index.73d71520a4ca3b99cfee5594769eaaae.css">
+
+    
+  <link rel="stylesheet"
+    href="_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    
+      
+  <link rel="stylesheet"
+    href="_static/vendor/open-sans_all/1.44.1/index.css">
+  <link rel="stylesheet"
+    href="_static/vendor/lato_latin-ext/1.44.1/index.css">
+
+    
+    <link rel="stylesheet" href="_static/sphinx-book-theme.2d2078699c18a0efb88233928e1cf6ed.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css" />
+    <link rel="stylesheet" type="text/css" href="_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    
+  <link rel="preload" as="script" href="_static/js/index.3da636dd464baa7582d2.js">
+
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="_static/togglebutton.js"></script>
+    <script src="_static/clipboard.min.js"></script>
+    <script src="_static/copybutton.js"></script>
+    <script >var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
+    <script src="_static/sphinx-book-theme.be0a4a0c39cd630af62a2fcf693f3f06.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["\\(", "\\)"]], "displayMath": [["\\[", "\\]"]], "processRefs": false, "processEnvironments": false}})</script>
+    <script async="async" src="https://unpkg.com/thebelab@latest/lib/index.js"></script>
+    <script >
+        const thebe_selector = ".thebe"
+        const thebe_selector_input = "pre"
+        const thebe_selector_output = ".output"
+    </script>
+    <script async="async" src="_static/sphinx-thebe.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="(12/22/20) Memory profiling python scripts with memory_profiler" href="memory.html" />
+    <link rel="prev" title="(2/26/21) A short primer on using Optuna and ECHO to interact with a sql database" href="optuna_mariadb.html" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="en" />
+
+
+
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+<div class="col-12 col-md-3 bd-sidebar site-navigation show" id="site-navigation">
+    
+        <div class="navbar-brand-box">
+<a class="navbar-brand text-wrap" href="index.html">
+  
+  <img src="_static/NCAR-contemp-logo-blue.png" class="logo" alt="logo">
+  
+  
+  <h1 class="site-logo" id="site-title">Analytics and Integrative Machine Learning</h1>
+  
+</a>
+</div>
+
+<form class="bd-search d-flex align-items-center" action="search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search this book..." aria-label="Search this book..." autocomplete="off" >
+</form>
+
+<nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <ul class="nav sidenav_l1">
+ <li class="toctree-l1">
+  <a class="reference internal" href="home.html">
+   Introduction
+  </a>
+ </li>
+</ul>
+<ul class="current nav sidenav_l1">
+ <li class="toctree-l1">
+  <a class="reference internal" href="howto.html">
+   Add a jupyter notebook as a blog
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="howto.html#license">
+   License
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="optuna_mariadb.html">
+   (2/26/21) A short primer on using Optuna and ECHO to interact with a sql database
+  </a>
+ </li>
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   (12/22/20) Helpful SLURM Commands
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="memory.html">
+   (12/22/20) Memory profiling python scripts with
+   <em>
+    memory_profiler
+   </em>
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="callbacks.html">
+   (10/29/20) Callbacks: Utilities for interacting with ML training
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="data_loaders.html">
+   (10/28/20) Data Loaders for ML Pipelines
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="generators.html">
+   (10/27/20) Methods, iterables, and generators for reading files
+  </a>
+ </li>
+</ul>
+
+</nav>
+
+ <!-- To handle the deprecated key -->
+
+<div class="navbar_extra_footer">
+  Powered by <a href="https://jupyterbook.org">Jupyter Book</a>
+</div>
+
+</div>
+
+
+          
+
+
+          
+<main class="col py-md-3 pl-md-4 bd-content overflow-auto" role="main">
+    
+    <div class="row topbar fixed-top container-xl">
+    <div class="col-12 col-md-3 bd-topbar-whitespace site-navigation show">
+    </div>
+    <div class="col pl-2 topbar-main">
+        
+        <button id="navbar-toggler" class="navbar-toggler ml-0" type="button" data-toggle="collapse"
+            data-toggle="tooltip" data-placement="bottom" data-target=".site-navigation" aria-controls="navbar-menu"
+            aria-expanded="true" aria-label="Toggle navigation" aria-controls="site-navigation"
+            title="Toggle navigation" data-toggle="tooltip" data-placement="left">
+            <i class="fas fa-bars"></i>
+            <i class="fas fa-arrow-left"></i>
+            <i class="fas fa-arrow-up"></i>
+        </button>
+        
+        <div class="dropdown-buttons-trigger">
+    <button id="dropdown-buttons-trigger" class="btn btn-secondary topbarbtn" aria-label="Download this page"><i
+            class="fas fa-download"></i></button>
+
+    
+    <div class="dropdown-buttons">
+        <!-- ipynb file if we had a myst markdown file -->
+        
+        <!-- Download raw file -->
+        <a class="dropdown-buttons" href="_sources/slurm.ipynb"><button type="button"
+                class="btn btn-secondary topbarbtn" title="Download source file" data-toggle="tooltip"
+                data-placement="left">.ipynb</button></a>
+        <!-- Download PDF via print -->
+        <button type="button" id="download-print" class="btn btn-secondary topbarbtn" title="Print to PDF"
+            onClick="window.print()" data-toggle="tooltip" data-placement="left">.pdf</button>
+    </div>
+    
+</div>
+        <!-- Source interaction buttons -->
+
+
+        <!-- Full screen (wrap in <a> to have style consistency -->
+        <a class="full-screen-button"><button type="button" class="btn btn-secondary topbarbtn" data-toggle="tooltip"
+                data-placement="bottom" onclick="toggleFullScreen()" aria-label="Fullscreen mode"
+                title="Fullscreen mode"><i
+                    class="fas fa-expand"></i></button></a>
+
+        <!-- Launch buttons -->
+
+<div class="dropdown-buttons-trigger">
+    <button id="dropdown-buttons-trigger" class="btn btn-secondary topbarbtn"
+        aria-label="Launch interactive content"><i class="fas fa-rocket"></i></button>
+    <div class="dropdown-buttons">
+        
+        <a class="binder-button" href="https://mybinder.org/v2/gh/executablebooks/jupyter-book/master?urlpath=tree/slurm.ipynb"><button type="button"
+                class="btn btn-secondary topbarbtn" title="Launch Binder" data-toggle="tooltip"
+                data-placement="left"><img class="binder-button-logo"
+                    src="_static/images/logo_binder.svg"
+                    alt="Interact on binder">Binder</button></a>
+        
+        
+        
+        
+    </div>
+</div>
+
+    </div>
+
+    <!-- Table of contents -->
+    <div class="d-none d-md-block col-md-2 bd-toc show">
+        
+        <div class="tocsection onthispage pt-5 pb-3">
+            <i class="fas fa-list"></i> Contents
+        </div>
+        <nav id="bd-toc-nav">
+            <ul class="nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#track-your-job-memory-and-cpu-usage-with-sacct">
+   Track your job memory and CPU usage with sacct
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#track-current-cluster-usage-with-sinfo">
+   Track current cluster usage with sinfo
+  </a>
+ </li>
+</ul>
+
+        </nav>
+        
+    </div>
+</div>
+    <div id="main-content" class="row">
+        <div class="col-12 col-md-9 pl-md-3 pr-md-0">
+        
+              <div>
+                
+  <div class="section" id="helpful-slurm-commands">
+<h1>(12/22/20) Helpful SLURM Commands<a class="headerlink" href="#helpful-slurm-commands" title="Permalink to this headline">¶</a></h1>
+<p>David John Gagne</p>
+<p>SLURM is currently the scheduler on the Casper cluster, which means it is used to manage the queueing and scheduling of jobs. You are likely very familiar with sbatch and squeue at this point. SLURM also has a whole suite of other commands that give you an incredibly detailed view into the usage of the cluster by yourself and everyone else. This blog will provide some insights to help you better manage your own jobs and keep track of how busy Casper is.</p>
+<div class="section" id="track-your-job-memory-and-cpu-usage-with-sacct">
+<h2>Track your job memory and CPU usage with sacct<a class="headerlink" href="#track-your-job-memory-and-cpu-usage-with-sacct" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">sacct</span></code> queries the SLURM scheduler database to find out how well you or any other user has utilized their requested resources on a job by job basis. The default output of sacct is not very useful, but with a few alterations to the command, you can get a wealth of information.</p>
+<p>I recommend running sacct in the following format (Note that ! allows you to run a command line program within a notebook. Do not copy the ! if you want to use the command in the terminal window):</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span> sacct --units<span class="o">=</span>G --format<span class="o">=</span><span class="s2">&quot;User,JobName,JobID,AllocNodes,ReqCPUs,Elapsed,CPUTime,TotalCPU,ReqMem,MaxRSS,ExitCode,State&quot;</span> -S <span class="m">2020</span>-12-01 -E <span class="m">2020</span>-12-31 -u dgagne
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>     User    JobName        JobID AllocNodes  ReqCPUS    Elapsed    CPUTime   TotalCPU     ReqMem     MaxRSS ExitCode      State 
+--------- ---------- ------------ ---------- -------- ---------- ---------- ---------- ---------- ---------- -------- ---------- 
+   dgagne        sfc 6249373               1       16   00:00:06   00:01:36  00:00.683      128Gn                 1:0     FAILED 
+               batch 6249373.bat+          1       16   00:00:06   00:01:36  00:00.682      128Gn          0      1:0     FAILED 
+              extern 6249373.ext+          1       16   00:00:06   00:01:36   00:00:00      128Gn          0      0:0  COMPLETED 
+   dgagne        sfc 6249377               1       16   00:00:39   00:10:24  00:12.017      128Gn                 1:0     FAILED 
+               batch 6249377.bat+          1       16   00:00:39   00:10:24  00:12.016      128Gn      0.35G      1:0     FAILED 
+              extern 6249377.ext+          1       16   00:00:39   00:10:24  00:00.001      128Gn          0      0:0  COMPLETED 
+   dgagne        sfc 6249380               1       16   00:00:23   00:06:08  00:11.773      128Gn                 1:0     FAILED 
+               batch 6249380.bat+          1       16   00:00:23   00:06:08  00:11.772      128Gn          0      1:0     FAILED 
+              extern 6249380.ext+          1       16   00:00:23   00:06:08  00:00.001      128Gn          0      0:0  COMPLETED 
+   dgagne        sfc 6249390               1       16   00:08:07   02:09:52  21:33.130      128Gn                 0:0  COMPLETED 
+               batch 6249390.bat+          1       16   00:08:07   02:09:52  21:33.129      128Gn      1.40G      0:0  COMPLETED 
+              extern 6249390.ext+          1       16   00:08:08   02:10:08   00:00:00      128Gn          0      0:0  COMPLETED 
+   dgagne        sfc 6250928               1       16   00:01:47   00:28:32  01:21.477      128Gn                 1:0     FAILED 
+               batch 6250928.bat+          1       16   00:01:47   00:28:32  01:21.476      128Gn      0.90G      1:0     FAILED 
+              extern 6250928.ext+          1       16   00:01:47   00:28:32  00:00.001      128Gn          0      0:0  COMPLETED 
+   dgagne        sfc 6250961               1       16   00:01:21   00:21:36  01:19.700      128Gn                 1:0     FAILED 
+               batch 6250961.bat+          1       16   00:01:21   00:21:36  01:19.699      128Gn      0.90G      1:0     FAILED 
+              extern 6250961.ext+          1       16   00:01:21   00:21:36  00:00.001      128Gn          0      0:0  COMPLETED 
+   dgagne        sfc 6251023               1       16   00:01:58   00:31:28  01:23.110      128Gn                 1:0     FAILED 
+               batch 6251023.bat+          1       16   00:01:58   00:31:28  01:23.109      128Gn      0.90G      1:0     FAILED 
+              extern 6251023.ext+          1       16   00:01:58   00:31:28  00:00.001      128Gn          0      0:0  COMPLETED 
+   dgagne        sfc 6251026               1       16   00:04:27   01:11:12  09:42.497      128Gn                 1:0     FAILED 
+               batch 6251026.bat+          1       16   00:04:27   01:11:12  09:42.496      128Gn      1.16G      1:0     FAILED 
+              extern 6251026.ext+          1       16   00:04:27   01:11:12   00:00:00      128Gn          0      0:0  COMPLETED 
+   dgagne        sfc 6257007               1       16   00:05:45   01:32:00  13:28.988      128Gn                 1:0     FAILED 
+               batch 6257007.bat+          1       16   00:05:45   01:32:00  13:28.987      128Gn      1.24G      1:0     FAILED 
+              extern 6257007.ext+          1       16   00:05:45   01:32:00  00:00.001      128Gn          0      0:0  COMPLETED 
+   dgagne        sfc 6257047               1       16   00:00:03   00:00:48  00:03.086      128Gn                 1:0     FAILED 
+               batch 6257047.bat+          1       16   00:00:03   00:00:48  00:03.085      128Gn          0      1:0     FAILED 
+              extern 6257047.ext+          1       16   00:00:03   00:00:48   00:00:00      128Gn          0      0:0  COMPLETED 
+   dgagne    casp_nb 6266629               1       12   06:00:00 3-00:00:00  00:22.151      256Gn                 0:0    TIMEOUT 
+               batch 6266629.bat+          1       12   06:00:01 3-00:00:12  00:22.150      256Gn      0.30G     0:15  CANCELLED 
+              extern 6266629.ext+          1       12   06:00:00 3-00:00:00  00:00.001      256Gn          0      0:0  COMPLETED 
+   dgagne        sfc 6295916               1       16   00:03:06   00:49:36  05:27.670      128Gn                 1:0     FAILED 
+               batch 6295916.bat+          1       16   00:03:06   00:49:36  05:27.669      128Gn      1.06G      1:0     FAILED 
+              extern 6295916.ext+          1       16   00:03:06   00:49:36   00:00:00      128Gn          0      0:0  COMPLETED 
+   dgagne        sfc 6295929               1       16   00:11:13   02:59:28  28:03.125      128Gn                 0:0  COMPLETED 
+               batch 6295929.bat+          1       16   00:11:13   02:59:28  28:03.124      128Gn      1.38G      0:0  COMPLETED 
+              extern 6295929.ext+          1       16   00:11:13   02:59:28  00:00.001      128Gn          0      0:0  COMPLETED 
+   dgagne   htrainrt 6316207               1       30   00:10:11   05:05:30  48:06.423      200Gn                 0:0  COMPLETED 
+               batch 6316207.bat+          1       30   00:10:11   05:05:30  48:06.422      200Gn     56.67G      0:0  COMPLETED 
+              extern 6316207.ext+          1       30   00:10:11   05:05:30  00:00.001      200Gn          0      0:0  COMPLETED 
+   dgagne   htrainrt 6316247               1       30   00:44:20   22:10:00   02:20:53      200Gn                 0:0  COMPLETED 
+               batch 6316247.bat+          1       30   00:44:20   22:10:00   02:20:52      200Gn    104.03G      0:0  COMPLETED 
+              extern 6316247.ext+          1       30   00:44:21   22:10:30  00:01.001      200Gn      0.00G      0:0  COMPLETED 
+   dgagne    casp_nb 6319681               1        4   00:00:33   00:02:12  00:00.286       64Gn                 0:0  COMPLETED 
+               batch 6319681.bat+          1        4   00:00:33   00:02:12  00:00.285       64Gn      0.05G      0:0  COMPLETED 
+              extern 6319681.ext+          1        4   00:00:33   00:02:12  00:00.001       64Gn          0      0:0  COMPLETED 
+   dgagne    casp_nb 6319684               1        8   00:00:32   00:04:16  00:00.280       64Gn                 0:0  COMPLETED 
+               batch 6319684.bat+          1        8   00:00:32   00:04:16  00:00.280       64Gn      0.05G      0:0  COMPLETED 
+              extern 6319684.ext+          1        8   00:00:32   00:04:16   00:00:00       64Gn          0      0:0  COMPLETED 
+</pre></div>
+</div>
+</div>
+</div>
+<p>The command breaks down into these parts:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">--units=G</span></code>: Print all memory-related outputs in Gigabytes. You can also use M or K for Megabytes and Kilobytes</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--format=&quot;...&quot;</span></code>: The list of columns to output. The full list can be found <a class="reference external" href="https://slurm.schedmd.com/sacct.html">here</a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-S</span> <span class="pre">2020-12-01</span></code>: The start date for the query. Can be adjusted so only recent jobs are visible.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-E</span> <span class="pre">2020-12-31</span></code>: The end date for the query.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-u</span> <span class="pre">dgagne</span></code>: The username. Can be a comma separated list of users, like <code class="docutils literal notranslate"><span class="pre">-u</span> <span class="pre">dgagne,cbecker,schreck,ggantos</span></code></p></li>
+</ul>
+<p>What does the output mean? The most relevant comparisons relate to CPU and memory usage.</p>
+<ul class="simple">
+<li><p>Elapsed: total time the job runs in Day-Hour:Minute:Second format.</p></li>
+<li><p>CPUTime: total time the CPUs are allocated, which should be close to Elapsed * ReqCPUs.</p></li>
+<li><p>TotalCPU: The total amount of time the CPUs are in use by the user or the system. If this is far less than CPUTime, then you are requesting too many CPUs for your job. Note that TotalCPU does not account for child processes, so if you are running multiprocessing or dask, this number may be deceptively low.</p></li>
+</ul>
+<p>For memory usage</p>
+<ul class="simple">
+<li><p>ReqMem: The total amount of memory the job requested.</p></li>
+<li><p>MaxRSS: The maximum amount of memory the job used. If MaxRSS is far less than ReqMem, then decrease future memory requests. If it is the same or close to the same as ReqMem and your job is taking a longer than expected time to run, the program may be swapping memory to disk. You should ask for more memory in that case.</p></li>
+</ul>
+</div>
+<div class="section" id="track-current-cluster-usage-with-sinfo">
+<h2>Track current cluster usage with sinfo<a class="headerlink" href="#track-current-cluster-usage-with-sinfo" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">sinfo</span></code> prints out information about the current usage of every node in the cluster. It is helpful to see which nodes have what resources, and you can see how busy each node is. This may be especially useful when you are about to launch a multi-GPU or large memory job and want to make sure the memory and GPUs are available. The default <code class="docutils literal notranslate"><span class="pre">sinfo</span></code> call provides a very high level summary. Just like <code class="docutils literal notranslate"><span class="pre">sacct</span></code>, I recommend running the following command:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span> sinfo --Format<span class="o">=</span><span class="s2">&quot;NodeHost:15,Features:50,CPUs:5,CPUsLoad:10,Gres:30,GresUsed:50,AllocMem:.15,FreeMem:.15  ,StateLong:15,Available:6&quot;</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>HOSTNAMES      AVAIL_FEATURES                                    CPUS CPU_LOAD  GRES                          GRES_USED                                                ALLOCMEM       FREE_MEM  STATE            AVAIL   
+casper23       casper,skylake,mlx5_0,gp100,gpu,x11               72   0.16      gpu:gp100:1                   gpu:gp100:0(IDX:N/A),mps:0                                      0         342060  drained          up      
+casper20       casper,skylake,mlx5_0                             72   0.56      (null)                        gpu:0,mps:0                                                     0         295669  reserved         up      
+casper25       casper,skylake,mlx5_0,4xv100,v100,gpu             72   0.04      gpu:v100:4,mps:v100:400       gpu:v100:0(IDX:N/A),mps:v100:0(IDX:N/A)                         0         734630  reserved         up      
+casper28       casper,skylake,mlx5_0,8xv100,v100,gpu             72   0.01      gpu:v100:8,mps:v100:800       gpu:v100:0(IDX:N/A),mps:v100:0(IDX:N/A)                         0        1123240  reserved         up      
+casper01       casper,skylake,mlx5_0                             72   1.39      (null)                        gpu:0,mps:0                                                247808         217182  mixed            up      
+casper02       casper,skylake,mlx5_0                             72   0.62      (null)                        gpu:0,mps:0                                                380044         335151  mixed            up      
+casper03       casper,skylake,mlx5_0                             72   17.92     (null)                        gpu:0,mps:0                                                382534         325258  mixed            up      
+casper04       casper,skylake,mlx5_0                             72   2.29      (null)                        gpu:0,mps:0                                                379904         305334  mixed            up      
+casper05       casper,skylake,mlx5_0                             72   18.23     (null)                        gpu:0,mps:0                                                374784         314173  mixed            up      
+casper06       casper,skylake,mlx5_0,gp100,gpu,x11               72   3.21      gpu:gp100:1                   gpu:gp100:0(IDX:N/A),mps:0                                 355328         337188  mixed            up      
+casper07       casper,skylake,mlx5_0,gp100,gpu,x11               72   3.14      gpu:gp100:1                   gpu:gp100:0(IDX:N/A),mps:0                                 310854         341183  mixed            up      
+casper09       casper,skylake,mlx5_0,4xv100,v100,gpu             72   3.14      gpu:v100:4,mps:v100:400       gpu:v100:4(IDX:0-3),mps:v100:0(IDX:N/A)                    349452         649024  mixed            up      
+casper10       casper,skylake,mlx5_0                             72   5.44      (null)                        gpu:0,mps:0                                                370968         332526  mixed            up      
+casper11       casper,skylake,mlx5_0                             72   3.79      (null)                        gpu:0,mps:0                                                384140         336050  mixed            up      
+casper12       casper,skylake,mlx5_0                             72   3.43      (null)                        gpu:0,mps:0                                                381952         325012  mixed            up      
+casper13       casper,skylake,mlx5_0                             72   3.70      (null)                        gpu:0,mps:0                                                384582         333591  mixed            up      
+casper14       casper,skylake,mlx5_0,gp100,gpu,x11               72   3.27      gpu:gp100:1                   gpu:gp100:0(IDX:N/A),mps:0                                 358982         342191  mixed            up      
+casper15       casper,skylake,mlx5_0,gp100,gpu,x11               72   2.29      gpu:gp100:1                   gpu:gp100:0(IDX:N/A),mps:0                                 307200         341551  mixed            up      
+casper16       casper,skylake,mlx5_0,gp100,gpu,x11               72   1.20      gpu:gp100:1                   gpu:gp100:0(IDX:N/A),mps:0                                 204800         344260  mixed            up      
+casper17       casper,skylake,mlx5_0,gp100,gpu,x11               72   1.28      gpu:gp100:1                   gpu:gp100:0(IDX:N/A),mps:0                                 364544         343480  mixed            up      
+casper18       casper,skylake,mlx5_0                             72   17.04     (null)                        gpu:0,mps:0                                                382608         248991  mixed            up      
+casper19       casper,skylake,mlx5_0                             72   31.76     (null)                        gpu:0,mps:0                                                352150         259655  mixed            up      
+casper22       casper,skylake,mlx5_0,gp100,gpu,x11               72   3.19      gpu:gp100:1                   gpu:gp100:0(IDX:N/A),mps:0                                 310854         336178  mixed            up      
+casper24       casper,skylake,mlx5_0,8xv100,v100,gpu             72   10.09     gpu:v100:8,mps:v100:800       gpu:v100:8(IDX:0-7),mps:v100:0(IDX:N/A)                    256000        1053921  mixed            up      
+casper26       casper,skylake,mlx5_0,gp100,gpu,x11               72   3.68      gpu:gp100:1                   gpu:gp100:0(IDX:N/A),mps:0                                 323142         296209  mixed            up      
+casper27       casper,skylake,mlx5_0,8xv100,v100,gpu             72   0.04      gpu:v100:8,mps:v100:800       gpu:v100:0(IDX:N/A),mps:v100:0(IDX:N/A)                    307200        1115535  mixed            up      
+casper29       casper,cascadelake,mlx5_0,4xv100,v100,gpu         72   0.84      gpu:v100:4,mps:v100:400       gpu:v100:3(IDX:0-2),mps:v100:0(IDX:N/A)                    277062         728882  mixed            up      
+casper30       casper,cascadelake,mlx5_0,8xv100,v100,gpu         72   8.40      gpu:v100:8,mps:v100:800       gpu:v100:8(IDX:0-7),mps:v100:0(IDX:N/A)                     51200        1060850  mixed            up      
+casper31       casper,cascadelake,mlx5_0,8xv100,v100,gpu         72   8.32      gpu:v100:8,mps:v100:800       gpu:v100:8(IDX:0-7),mps:v100:0(IDX:N/A)                     51200        1059902  mixed            up      
+casper36       casper,cascadelake,mlx5_0,4xv100,v100,gpu         72   52.14     gpu:v100:4,mps:v100:400       gpu:v100:2(IDX:0,2),mps:v100:0(IDX:N/A)                    671744         641858  mixed            up      
+casper21       casper,skylake,mlx5_0                             72   20.37     (null)                        gpu:0,mps:0                                                373532         161434  allocated        up      
+casper08       casper,skylake,mlx5_0,8xv100,v100,gpu             72   0.01      gpu:v100:8,mps:v100:800       gpu:v100:0(IDX:N/A),mps:v100:0(IDX:N/A)                         0        1114594  idle             up      
+gladeslurm1    hsi                                               16   11.48     (null)                        gpu:0,mps:0                                                     0          16338  idle             up      
+gladeslurm2    hsi                                               16   14.10     (null)                        gpu:0,mps:0                                                     0          15644  idle             up      
+gladeslurm3    hsi                                               16   5.25      (null)                        gpu:0,mps:0                                                     0          12911  idle             up      
+gladeslurm4    hsi                                               16   4.20      (null)                        gpu:0,mps:0                                                     0          14423  idle             up      
+</pre></div>
+</div>
+</div>
+</div>
+<p>The columns perform the following uses:</p>
+<ul class="simple">
+<li><p>NodeHost: Prints the name of each node.</p></li>
+<li><p>Features: Lists the CPU type (skylake or cascadelake), and the number and type of GPU if any</p></li>
+<li><p>CPUs: Number of CPUs available, which is number of sockets * number of cores * threads per core (only for multithreading)</p></li>
+<li><p>CPUsLoad: How many CPUs are currently being used</p></li>
+<li><p>Gres: Number and type of GPUs</p></li>
+<li><p>GresUsed: How many GPUs are currently allocated on the node</p></li>
+<li><p>AllocMem: How much memory is allocated in MB</p></li>
+<li><p>FreeMem: How much memory is free in MB</p></li>
+<li><p>StateLong: Node usage, which can be idle, mixed, allocated, reserved, or drained</p></li>
+<li><p>Available: up or down</p></li>
+</ul>
+</div>
+</div>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            kernelName: "python3",
+            path: "./."
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+              </div>
+              
+        </div>
+    </div>
+    
+    
+    <div class='prev-next-bottom'>
+        
+    <a class='left-prev' id="prev-link" href="optuna_mariadb.html" title="previous page">(2/26/21) A short primer on using Optuna and ECHO to interact with a sql database</a>
+    <a class='right-next' id="next-link" href="memory.html" title="next page">(12/22/20) Memory profiling python scripts with <em>memory_profiler</em></a>
+
+    </div>
+    <footer class="footer mt-5 mt-md-0">
+    <div class="container">
+      <p>
+        
+          By AIML @ NCAR<br/>
+        
+            &copy; Copyright 2020.<br/>
+      </p>
+    </div>
+  </footer>
+</main>
+
+
+      </div>
+    </div>
+
+    
+  <script src="_static/js/index.3da636dd464baa7582d2.js"></script>
+
+
+    
+  </body>
+</html>

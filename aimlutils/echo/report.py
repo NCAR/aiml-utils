@@ -222,10 +222,10 @@ if __name__ == "__main__":
 
     if len(complete_trials) > 1:
         f_importance = optuna.importance.FanovaImportanceEvaluator(
-            n_trees = 1000, max_depth = 1000).evaluate(study=study)
+            n_trees = n_trees, max_depth = max_depth).evaluate(study=study)
         logging.info(f"fANOVA parameter importance {dict(f_importance)}")
         mdi_importance = optuna.importance.MeanDecreaseImpurityImportanceEvaluator(
-            n_trees = 1000, max_depth = 1000).evaluate(study=study)
+            n_trees = n_trees, max_depth = max_depth).evaluate(study=study)
         logging.info(f"Mean decrease impurity (MDI) parameter importance {dict(mdi_importance)}")
 
     logging.info("Best parameters in the study:")

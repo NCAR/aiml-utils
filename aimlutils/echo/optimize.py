@@ -166,8 +166,8 @@ def fix_broken_study(_study: optuna.study.Study,
     return study_fixed, removed
 
 
-def prepare_launch_script(hyper_config: str, 
-                          model_config: str):
+def prepare_slurm_launch_script(hyper_config: str, 
+                                model_config: str):
     
     slurm_options = ["#!/bin/bash -l"]
     slurm_options += [
@@ -188,6 +188,34 @@ def prepare_launch_script(hyper_config: str,
     )
     slurm_options.append(f"python {aiml_path} {sys.argv[1]} {sys.argv[2]}")
     return slurm_options
+
+
+def prepare_pbs_launch_script(hyper_config: str, 
+                                model_config: str):
+    
+    pbs_options = ["#!/bin/bash -l"]
+    for arg, val in hyper_config["pbs"]["batch"].items():
+        if arg == "l" and type(val) == list:
+            for opt in val:
+                pbs_options.append(f"#PBS -{arg} {opt}")
+        elif len(arg) == 1:
+            pbs_options.append(f"#PBS -{arg} {val}")
+        else:
+            pbs_options.append(f"#PBS --{arg}={val}")     
+    if "bash" in hyper_config["pbs"]:
+        if len(hyper_config["pbs"]["bash"]) > 0:
+            for line in hyper_config["pbs"]["bash"]:
+                pbs_options.append(line)
+    if "kernel" in hyper_config["pbs"]:
+        if hyper_config["pbs"]["kernel"] is not None:
+            pbs_options.append(f'{hyper_config["pbs"]["kernel"]}')
+    import aimlutils.echo as opt
+    aiml_path = os.path.join(
+        os.path.abspath(opt.__file__).strip("__init__.py"), 
+        "run.py"
+    )
+    pbs_options.append(f"python {aiml_path} {sys.argv[1]} {sys.argv[2]}")
+    return pbs_options
 
 
 def configuration_report(_dict: Dict[str, str], 
@@ -394,44 +422,84 @@ if __name__ == "__main__":
     if create_db_only:
         logging.info(f"Created study {study_name} located at {storage}. Exiting.")
         sys.exit()
-                
-    # Prepare slurm script
-    launch_script = prepare_launch_script(hyper_config, model_config)
-    
-    # Save the configured script
-    script_path = hyper_config["optuna"]["save_path"]
-    script_location = os.path.join(script_path, "launch.sh")
-    with open(script_location, "w") as fid:
-        for line in launch_script:
-            fid.write(f"{line}\n")
-            
-    
-    #####
-    #
-    # Torque support coming soon
-    #
-    ####
-
-    # Launch the slurm jobs
-    job_ids = []
-    name_condition = "J" in hyper_config["slurm"]["batch"]
-    slurm_job_name = hyper_config["slurm"]["batch"]["J"] if name_condition else "hyper_opt"
-    n_workers = hyper_config["slurm"]["jobs"]
-    for worker in range(n_workers):
-        w = subprocess.Popen(
-            f"sbatch -J {slurm_job_name}_{worker} {script_location}",
-            shell=True,
-            stdout = subprocess.PIPE,
-            stderr = subprocess.PIPE
-        ).communicate()
-        job_ids.append(
-            w[0].decode("utf-8").strip("\n").split(" ")[-1]
-        )
-        logging.info(
-            f"Submitted batch job {worker + 1}/{n_workers} with id {job_ids[-1]}"
-        )
         
-    # Write the job ids to file for reference
-    with open(os.path.join(script_path, "job_ids.txt"), "w") as fid:
-        for line in job_ids:
-            fid.write(f"{line}\n")
+    ###############
+    #
+    # SLURM SUPPORT
+    #
+    ###############
+                
+    # Prepare launch script
+    if "slurm" in hyper_config:
+        launch_script = prepare_slurm_launch_script(hyper_config, model_config)
+    
+        # Save the configured script
+        script_path = hyper_config["optuna"]["save_path"]
+        script_location = os.path.join(script_path, "launch_slurm.sh")
+        with open(script_location, "w") as fid:
+            for line in launch_script:
+                fid.write(f"{line}\n")
+
+        # Launch the slurm jobs
+        job_ids = []
+        name_condition = "J" in hyper_config["slurm"]["batch"]
+        slurm_job_name = hyper_config["slurm"]["batch"]["J"] if name_condition else "echo_trial"
+        n_workers = hyper_config["slurm"]["jobs"]
+        for worker in range(n_workers):
+            w = subprocess.Popen(
+                f"sbatch -J {slurm_job_name}_{worker} {script_location}",
+                shell=True,
+                stdout = subprocess.PIPE,
+                stderr = subprocess.PIPE
+            ).communicate()
+            job_ids.append(
+                w[0].decode("utf-8").strip("\n").split(" ")[-1]
+            )
+            logging.info(
+                f"Submitted slurm batch job {worker + 1}/{n_workers} with id {job_ids[-1]}"
+            )
+
+        # Write the job ids to file for reference
+        with open(os.path.join(script_path, "slurm_job_ids.txt"), "w") as fid:
+            for line in job_ids:
+                fid.write(f"{line}\n")
+            
+    ###############
+    #
+    # PBS SUPPORT
+    #
+    ###############
+            
+    if "pbs" in hyper_config:
+        launch_script = prepare_pbs_launch_script(hyper_config, model_config)
+        
+        # Save the configured script
+        script_path = hyper_config["optuna"]["save_path"]
+        script_location = os.path.join(script_path, "launch_pbs.sh")
+        with open(script_location, "w") as fid:
+            for line in launch_script:
+                fid.write(f"{line}\n")
+
+        # Launch the slurm jobs
+        job_ids = []
+        name_condition = "J" in hyper_config["pbs"]["batch"]
+        slurm_job_name = hyper_config["pbs"]["batch"]["N"] if name_condition else "echo_trial"
+        n_workers = hyper_config["pbs"]["jobs"]
+        for worker in range(n_workers):
+            w = subprocess.Popen(
+                f"qsub -N {slurm_job_name}_{worker} {script_location}",
+                shell=True,
+                stdout = subprocess.PIPE,
+                stderr = subprocess.PIPE
+            ).communicate()
+            job_ids.append(
+                w[0].decode("utf-8").strip("\n")
+            )
+            logging.info(
+                f"Submitted pbs batch job {worker + 1}/{n_workers} with id {job_ids[-1]}"
+            )
+
+        # Write the job ids to file for reference
+        with open(os.path.join(script_path, "pbs_job_ids.txt"), "w") as fid:
+            for line in job_ids:
+                fid.write(f"{line}\n")

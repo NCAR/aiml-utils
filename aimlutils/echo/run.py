@@ -30,7 +30,7 @@ def get_sec(time_str):
 
 if len(sys.argv) != 3:
     print(
-        "Usage: python main.py hyperparameter.yml model.yml"
+        "Usage: python run.py hyperparameter.yml model.yml"
     )
     sys.exit()
 

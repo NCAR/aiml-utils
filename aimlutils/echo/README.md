@@ -66,8 +66,20 @@ Finally, if using Keras, you need to include the (customized) KerasPruningCallba
 There are three main fields, log, slurm, and optuna, and variable subfields within each field. The log field allows us to save a file for printing messages and warnings that are placed in areas throughout the package. The slurm field allows the user to specify how many GPU nodes should be used, and supports any slurm setting. qsub support is coming soon. The optuna field allows the user to configure the optimization procedure, including specifying which parameters will be used, as well as the performance metric. For example, consider the configuration settings:
 
 ```yaml
+
+pbs:
+  jobs: 10
+  kernel: "ncar_pylib /glade/work/schreck/py37"
+  bash: ["module load ncarenv/1.3 gnu/8.3.0 openmpi/3.1.4 python/3.7.5 cuda/10.1"]
+  batch:
+    l: ["select=1:ncpus=8:ngpus=1:mem=128GB", "walltime=12:00:00"]
+    A: "NAML0001"
+    q: "casper"
+    N: "echo_trial"
+    o: "echo_trial.out"
+    e: "echo_trial.err"
 slurm:
-  jobs: 20
+  jobs: 15
   kernel: "ncar_pylib /glade/work/schreck/py37"
   bash: ["module load ncarenv/1.3 gnu/8.3.0 openmpi/3.1.4 python/3.7.5 cuda/10.1"]
   batch:
@@ -76,9 +88,9 @@ slurm:
     mem: "128G"
     n: 8
     t: "12:00:00"
-    J: "hyper_opt"
-    o: "hyper_opt.out"
-    e: "hyper_opt.err"
+    J: "echo_trial"
+    o: "echo_trial.out"
+    e: "echo_trial.err"
 optuna:
   study_name: "holodec_optimization"
   storage: "sqlite:///path/to/data/storage.db
@@ -120,7 +132,7 @@ log [optional]:
   save_path: "path/to/data/log.txt"
 ```
 
-The subfields within "slurm" should mostly be familiar to you. The kernel field is optional and can be any call(s) to activate a conda/python/ncar_pylib/etc environment. Additional snippets that you might need in your launch script can be added to the list in the "bash" field. For example, as in the example above, loading modules before training a model is required. Note that the bash options will be run in order, and before the kernel field. Remove or leave the kernel field blank if you do not need it.
+The subfields within "pbs" and slurm" should mostly be familiar to you. In this example there would be 10 jobs submitted to pbs queue and 15 jobs to the slurm queue. The kernel field is optional and can be any call(s) to activate a conda/python/ncar_pylib/etc environment. Additional snippets that you might need in your launch script can be added to the list in the "bash" field. For example, as in the example above, loading modules before training a model is required. Note that the bash options will be run in order, and before the kernel field. Remove or leave the kernel field blank if you do not need it.
 
 The subfields within the "optuna" field have the following functionality:
 

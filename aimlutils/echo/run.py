@@ -57,10 +57,16 @@ else:
     )
     
 # Check if the wall-time exists
-if "t" not in hyper_config["slurm"]["batch"]:
-    raise OSError(
-        "You must supply a wall time in the hyperparameter config at slurm:batch:t"
-    )
+if "slurm" in hyper_config:
+    if "t" not in hyper_config["slurm"]["batch"]:
+        raise OSError(
+            "You must supply a wall time in the hyperparameter config at slurm:batch:t"
+        )
+if "pbs" in hyper_config:
+    if not any([("walltime" in x) for x in hyper_config["pbs"]["batch"]["l"]]):
+        raise OSError(
+            "You must supply a wall time in the hyperparameter config at pbs:bash:l"
+        )
         
 # Check if model config file exists
 if os.path.isfile(sys.argv[2]):
@@ -207,7 +213,17 @@ logging.info(
 )
     
 # Get the cluster job wall-time
-wall_time = hyper_config["slurm"]["batch"]["t"]
+if "slurm" in hyper_config:
+    wall_time = hyper_config["slurm"]["batch"]["t"]
+elif "pbs" in hyper_config:
+    wall_time = False
+    for option in hyper_config["pbs"]["batch"]["l"]:
+        if "walltime" in option:
+            wall_time = option.split("walltime=")[-1]
+            break
+    if wall_time is False:
+        logging.warning("Could not process the walltime for run.py. Assuming 12 hours.")
+        wall_time = "12:00:00"
 wall_time_secs = get_sec(wall_time)
 
 logging.info(
